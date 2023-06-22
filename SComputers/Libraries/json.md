@@ -10,5 +10,3 @@ sidebar-label: 'json'
 #### methods
 * json.encode(table)
 * json.decode(jsonstring)
-
-##### note that in safe-mode computers, sm.json is an alias for this library

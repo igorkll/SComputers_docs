@@ -22,8 +22,14 @@ global lua changes, now the number of iterations is unlimited, but the execution
 you can configure how much the computer can "delay" the game-tick in the "Permission Tool" (by default: 2 ticks)
 ::::
 
+### sm library in safe-mode
+* sm.game.getCurrentTick / sm.game.getServerTick - added recently (because you still have os.time/os.clock)
+* uuid - full, added by SComputers
+* vec3 / util / quat / noise / color - full(with additional checks to avoid crashes)
+* sm.json.parseJsonString / sm.json.writeJsonString - standard json implementation with additional checks
+
 ### small changes
-* in safe-mode, the implementation of sm.json has changed to the json library available via require. since the use of sm.json can cause problems as well as game crashes
+* in safe-mode, additional checks have been added to some methods of the SM library (in order to avoid crashes) (previously, only json implementation switched to the built-in json mod library, there were still ways to call bugsplat, and this library has significant differences, so sm.json in safe-mode is now sm again.json but with additional checks)
 * when using clientInvoke(available only in unsafe-mode), ENV will be saved, however, the code is loaded anew every time
 * clientInvoke(str, ...) supports arguments
 * get exceptions "path .. underflow" when using the filesystem has become impossible, instead superfluous ".." just ignore
@@ -127,8 +133,8 @@ the creative engine method will always return true
 * disk.getMaxSize():number - returns the maximum amount of data that can be written to disk in bytes
 
 ### display features
-* display.reset() - resets all screen settings, list:
-maxClicks, rotation, framecheck, skipAtNotSight, utf8support, renderAtDistance, skipAtLags
+* display.reset() - resets all screen settings, list of resettable data:
+maxClicks, rotation, framecheck, skipAtNotSight, utf8support, renderAtDistance, skipAtLags, clickData(click list), clicksAllowed
 * display.forceFlush() - 
 it works like a regular flush, but updates the picture with 100% probability,
 ignoring setFrameCheck/setSkipAtNotSight/setSkipAtLags
@@ -186,7 +192,7 @@ the font is a lua format table:
 * to import an image, use the disk menu, to do this, press the E button on it
 * to open this menu on a PC with a built-in disk, use the button in its gui
 * when importing, old files are not erased, in order to erase them, click clear
-* you can import your generated image($CONTENT_DATA/USER/importer/disk.json), or a ready-made OS (scraps)
+* you can import your generated image($CONTENT_DATA/USER/importer/disk.json), or a ready-made OS (scrapOS)
 
 
 :::info note
