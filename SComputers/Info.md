@@ -114,6 +114,13 @@ you can write your values there
 * drawDepth(display, baseColor, noCollideColor)
 * drawColorWithDepth(display, noCollideColor, terrainColor)
 
+### antenna features
+* the antenna now has its own API which you can view in the components section
+
+### network-port features
+* port.getUniqueId() - get a unique port ID
+* port.sendTo(id, package:string) - transmits a packet to a specific port
+
 ### motor features
 * motor.getAvailableBatteries - the number of batteries available to the motor will be reduced, the creative motor will return math.huge
 * motor.getCharge - returns the charge of the motor, if it reaches 0, the motor will try to take the battery and add 200-000 to the charge
