@@ -21,6 +21,16 @@ sidebar-label: 'midi'
 * player:setNoteAlignment(mode:number) - sets the action to be performed with notes that are not included in the range (0 - skip, 1 - search for the nearest) (default: 1)
 * player:setNoteShift(shift:number) - sets the shift of notes relative to midi (default -50)
 * player:setSpeed(number) - sets the playback speed multiplier (default is 1)
+* player.instrumentTable - contains the names of the musical instrument and the values for the robot's head, if there is no exact match, then look for the nearest one (if you delete this table, the standard musical instrument will always be used).
+the first two instruments have a volume multiplier (which should have been 2, but this caused bugs in the sound)
+default: instrumentTable = {
+    square = {8, 1},
+    guitar = {9, 1},
+    piano = 4,
+    synth = 3,
+    bass = 5,
+    drum = 2
+},
 
 ### gui example
 #### to use the example, import standard midi files to disk
