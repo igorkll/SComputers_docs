@@ -10,7 +10,8 @@ sidebar-label: 'utils'
 * utils.map(value, low, high, low2, high2) - changes the range of the number
 * utils.roundTo(number, numbers(default 3)) - rounds the number to a certain number of digits after "."
 * utils.split(tool(utf8/string), string, separators):tbl - separates a string, separators can consist of several characters and you can specify several pieces, also, if the separator is at the beginning/end, it will separate the string from the void
-* utils.splitByMaxSize(tool(utf8/string), string, maxsize):tbl - divides string into segments, and you can specify the maximum length of the segment, the last segment can be smaller than the specified size, but not one can be larger
+* utils.splitByMaxSize(str, maxsize):tbl - divides string into segments, and you can specify the maximum length of the segment, the last segment can be smaller than the specified size, but not one can be larger
+* utils.splitByMaxSizeWithTool(tool(utf8/string), str, maxsize):tbl - divides string into segments, and you can specify the maximum length of the segment, the last segment can be smaller than the specified size, but not one can be larger
 * utils.deepcopy(tbl):tbl - clones a table, understands nesting and types such as Color, Vec3, Quat
 
 ##### utils.split example
@@ -32,6 +33,15 @@ function callback_loop() end
 ```lua
 local utils = require("utils")
 for k, v in pairs(utils.splitByMaxSize("12345", 2)) do --{"12", "34", "5"}
+    print(k, v) 
+end
+function callback_loop() end
+```
+
+##### utils.splitByMaxSizeWithTool example
+```lua
+local utils = require("utils")
+for k, v in pairs(utils.splitByMaxSizeWithTool(utf8, "anyUtf8String", 2)) do --{"an", "yU", "tf", "8S", "tr", "in", "g"}
     print(k, v) 
 end
 function callback_loop() end
