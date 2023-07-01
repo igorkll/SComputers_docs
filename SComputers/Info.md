@@ -32,7 +32,7 @@ you can configure how much the computer can "delay" the game-tick in the "Permis
 * in safe-mode, additional checks have been added to some methods of the SM library (in order to avoid crashes) (previously, only json implementation switched to the built-in json mod library, there were still ways to call bugsplat, and this library has significant differences, so sm.json in safe-mode is now sm again.json but with additional checks)
 * when using clientInvoke(available only in unsafe-mode), ENV will be saved, however, the code is loaded anew every time
 * clientInvoke(str, ...) supports arguments
-* get exceptions "path .. underflow" when using the filesystem has become impossible, instead superfluous ".." just ignore
+* exceptions "path .. underflow" cannot be retrieved. the extra ".." is simply ignored
 
 ### this mod contains new components such as:
 * sound synthesizer
