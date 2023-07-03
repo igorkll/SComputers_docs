@@ -110,9 +110,9 @@ you can write your values there
 
 ### raycast-camera features
 * now methods can accept additional colors
-* drawColor(display, noCollideColor, terrainColor)
-* drawDepth(display, noCollideColor, baseColor)
 * drawColorWithDepth(display, noCollideColor, terrainColor)
+* drawColor(display, noCollideColor, terrainColor)
+* drawDepth(display, baseColor, noCollideColor)
 
 ### antenna features
 * the antenna now has its own API which you can view in the components section
