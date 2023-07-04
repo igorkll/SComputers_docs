@@ -14,7 +14,7 @@ sidebar-label: 'gui'
 * guiinstance:tick() - processing clicks, etc
 * guiinstance:draw() - draw a current scene, redrawing is optional only if necessary
 * guiinstance:drawForce() - draw a current scene, redrawing always happens
-* guiinstance:createScene(autoclearcolor:smcolor):sceneinstance - create a new scene, you can transfer the color so that when you select a scene, the screen is cleared automatically
+* guiinstance:createScene(autoclearcolor:smcolor,function(sceneinstance) ):sceneinstance - create a new scene, you can transfer the color so that when you select a scene, the screen is cleared automatically(you can pass a cleaning function instead of a color, for example, to draw a picture on the background)
 * guiinstance:setGameLight(gamelight:number(0-1)) - sets the game lighting for the gui (it only applies to elements that do not transmit color manually(at the moment, only with pictures))
 * guiinstance:getGameLight():number(0-1) - gets the game lighting for the gui
 * guiinstance:needFlush():boolean - returns true if at least one element has been updated, if you make updates only when necessary, then you should turn off framecheck
@@ -27,7 +27,7 @@ sidebar-label: 'gui'
 the label looks like a button
 * sceneinstance:createImage(x, y, img):gimage - creates a picture, the size is set by the size of the picture
 * sceneinstance:createText(x, y, text, color):gtext - creates text
-
+* sceneinstance:update() - forced redrawing of the scene will occur at the next gui.draw call
 
 ### any object
 * gobj:destroy():boolean - removes an object from the list
