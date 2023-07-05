@@ -70,7 +70,7 @@ you can configure how much the computer can "delay" the game-tick in the "Permis
 
 ### sandbox features
 * if you declare the function "callback_error(str)" then it will be called in cases of an error in the computer
-before the computer crashes (but it will crash anyway if you delete the crash information from crashstate on callback_error function)
+before the computer crashes (but it will crash anyway if you not delete the crash information from "crashstate" on callback_error function)
 at the same time, it will be called before the crash and you will be able to "cancel" the crash
 using the "getCurrentComputer" method and interacting with the crashstate table
 if an exception occurs in this function, it can be caught only in the game logs/debug console
