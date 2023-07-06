@@ -22,7 +22,6 @@ function exampleComponent:server_onCreate()
             type = exampleComponent.componentType,
             api = {
                 test = function()
-                    sc.checkComponent(self)
                     return "ok"
                 end
             }

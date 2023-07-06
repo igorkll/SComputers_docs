@@ -33,6 +33,8 @@ you can configure how much the computer can "delay" the game-tick in the "Permis
 * when using clientInvoke(available only in unsafe-mode), ENV will be saved, however, the code is loaded anew every time
 * clientInvoke(str, ...) supports arguments
 * exceptions "path .. underflow" cannot be retrieved. the extra ".." is simply ignored
+* the combination of characters "\n" (two separate characters and not a new line) can be displayed in the gui as "¦n" this is due to the fact that mygui (which uses scrapmechanic) turns "\n" into a new line (at the same time, "¦n" works like normal "\n")
+* now, when disabling a component/removing a component, it is guaranteed not to be work
 
 ### this mod contains new components such as:
 * sound synthesizer
@@ -40,6 +42,9 @@ you can configure how much the computer can "delay" the game-tick in the "Permis
 * non-square displays
 * holographic projector
 * keyboard
+* gps
+* gpstag
+* ibridge (Internet Bridge)
 
 
 ### lua implementations
