@@ -11,6 +11,7 @@ it weighs a lot and is very expensive to craft
 I cannot be completely sure of the security of this component,
 it is recommended to disable it in the "Permission Tool" on public servers
 it is also not necessary to send requests often, as this causes a noticeable lag
+please note that for some reason unknown to me, DLM may refuse to accept a response from a server without https
 
 ### ibridge component
 * type - ibridge
@@ -20,23 +21,38 @@ it is also not necessary to send requests often, as this causes a noticeable lag
 
 #### example
 ```lua
-function callback_loop() end
+function callback_loop()
+    if _endtick then
+        display.clear()
+        display.forceFlush()
+    end
+end
+
+function callback_error()
+    reboot()
+end
 
 image = require("image")
 
 ibridge = getComponents("ibridge")[1]
 display = getComponents("display")[1]
+display.reset()
 
 if not ibridge.isAllow() then
     display.clear()
-    display.drawText(1, 1, "bridge error")
+    display.drawText(1, 1, "bridge")
+    display.drawText(1, 9, "error")
     display.forceFlush()
     return
 end
 
-url = "http://1logic.ru/rom/test.bmp"
+url = "https://raw.githubusercontent.com/igorkll/SComputers_docs/main/ROM/test.bmp"
 response = ibridge.get(url, {})
 
+debug(response[2])
 img = image.decodeBmp(response[2])
+
+display.clear()
 img:draw(display)
+display.forceFlush()
 ```

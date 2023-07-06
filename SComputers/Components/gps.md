@@ -20,13 +20,18 @@ to detect gps tag, you need to know its frequency (which is randomly selected wh
 
 #### example
 ```lua
+utils = require("utils")
 gps = getComponents("gps")[1]
 
 function callback_loop()
     local gpsdata = gps.getSelfGpsData()
-    print("self", gpsdata.position.x, gpsdata.position.y, gpsdata.position.z)
+
+    print("------------------------------------------------")
+    print("self position", utils.roundTo(gpsdata.position.x), utils.roundTo(gpsdata.position.y), utils.roundTo(gpsdata.position.z))
+    print("self rotation", utils.roundTo(gpsdata.rotation.x), utils.roundTo(gpsdata.rotation.y), utils.roundTo(gpsdata.rotation.z), utils.roundTo(gpsdata.rotation.w))
     for i, v in ipairs(gps.getTagsGpsData(0)) do
-        print("tag:" .. tostring(i), v.position.x, v.position.y, v.position.z)
+        print("tag:" .. tostring(i), "position", utils.roundTo(v.position.x), utils.roundTo(v.position.y), utils.roundTo(v.position.z))
+        print("tag:" .. tostring(i), "rotation", utils.roundTo(v.rotation.x), utils.roundTo(v.rotation.y), utils.roundTo(v.rotation.z), utils.roundTo(v.rotation.w))
     end
 end
 ```
