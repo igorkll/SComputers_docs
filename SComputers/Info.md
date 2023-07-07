@@ -36,6 +36,9 @@ you can configure how much the computer can "delay" the game-tick in the "Permis
 * the combination of characters "\n" (two separate characters and not a new line) can be displayed in the gui as "¦n" this is due to the fact that mygui (which uses scrapmechanic) turns "\n" into a new line (at the same time, "¦n" works like normal "\n")
 * now, when disabling a component/removing a component, it is guaranteed not to be work
 
+### recommendations
+* if the antenna on your device works only for receiving then you can put an NFC antenna, the antenna radius affects only the transmission
+
 ### this mod contains new components such as:
 * sound synthesizer
 * address led
