@@ -150,6 +150,7 @@ the creative engine method will always return true
 ### display features
 * display.reset() - resets all screen settings, list of resettable data:
 maxClicks, rotation, framecheck, skipAtNotSight, utf8support, renderAtDistance, skipAtLags, clickData(click list), clicksAllowed
+and resets the font
 * display.isAllow():boolean - returns true if this display is enabled, returns false if displays with this resolution are disabled in the mod configuration
 * display.forceFlush() - 
 it works like a regular flush, but updates the picture with 100% probability,
