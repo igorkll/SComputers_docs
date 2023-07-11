@@ -5,6 +5,7 @@ hide_title: true
 sidebar-label: 'example3'
 ---
 
+ATTENTION: this bug has been fixed, and is not contained in the remade version of luaInLua in SComputers
 this example shows how lua-in-lua does not handle "..." correctly
 
 ```lua

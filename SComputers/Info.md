@@ -18,6 +18,11 @@ this fork is compatible with the code of the original Scriptable Computers and w
 however, programs written for this mod will not work on the original Scriptable Computers
 
 :::info note
+in the original "ScriptableComputer" luaInLua worked terribly and contained a bunch of bugs,
+in SComputers most of the luaInLua bugs were fixed
+:::
+
+:::info note
 global lua changes, now the number of iterations is unlimited, but the execution time of one tick is limited, if the computer does not have time to execute the code in time, an error will pop up
 you can configure how much the computer can "delay" the game-tick in the "Permission Tool" (by default: 2 ticks)
 ::::
@@ -51,17 +56,16 @@ you can configure how much the computer can "delay" the game-tick in the "Permis
 
 
 ### lua implementations
-* lua-in-lua   (there are bugs)
-* scrapVM      (the best option - however, it also contains bugs)
+* lua-in-lua   (most of the bugs have been fixed, but the debugging process of the program can be difficult)
+* scrapVM      (very bad interpreter, support is over)
 * dlm          (the best option at the moment)
 * full lua env (dangerous)
 
 
 ### Permission Tool
-* Script Mode: Safe/Unsafe (creative tool only)
-* LuaVM: luaInLua/scrapVM/fullLuaEnv
 * allow chat/alert/debug messages: false/true (creative tool only)
-
+* Script Mode: Safe/Unsafe (creative tool only)
+* LuaVM: luaInLua/dlm/fullLuaEnv
 
 ### Internal Libs
 ##### to get the internal libraries, use the require method(require not required for utf8 and coroutine)

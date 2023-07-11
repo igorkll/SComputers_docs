@@ -5,6 +5,7 @@ hide_title: true
 sidebar-label: 'example1'
 ---
 
+ATTENTION: this bug has been fixed, and is not contained in the remade version of luaInLua in SComputers
 here you can see how the priority of variables is incorrectly implemented in lua-in-lua
 
 ```lua
