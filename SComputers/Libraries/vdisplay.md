@@ -45,31 +45,38 @@ width, height = 32, 32
 function clear(color)
     lastClearColor = color or "000000"
     buffer = {}
-    for y = 0, height - 1 do
-        buffer[y] = {}
-    end
 end
 function set(x, y, color)
     holo.addVoxel(x - (width / 2), (((height - 1) - y) - (height / 2)) + 20, 0, color, 1)
 end
+function flush()
+    holo.clear()
+    for x = 0, width - 1 do
+        for y = 0, height - 1 do
+            local ytbl = buffer[y]
+            if ytbl then
+                set(x, y, ytbl[x] or lastClearColor)
+            else
+                set(x, y, lastClearColor)
+            end
+        end
+    end
+    holo.flush()
+end
 
 clear()
+flush()
 
 dsp_callbacks = {
     set = function (self, x, y, color)
+        if not buffer[y] then buffer[y] = {} end
         buffer[y][x] = color or "ffffff"
     end,
     clear = function (self, color)
         clear(color)
     end,
     flush = function (self, isForce)
-        holo.clear()
-        for x = 0, width - 1 do
-            for y = 0, height - 1 do
-                set(x, y, buffer[y][x] or lastClearColor)
-            end
-        end
-        holo.flush()
+        flush()
     end
 }
 dsp = vdisplay.create(dsp_callbacks, width, height)

@@ -24,7 +24,7 @@ in SComputers most of the luaInLua bugs were fixed
 
 :::info note
 global lua changes, now the number of iterations is unlimited, but the execution time of one tick is limited, if the computer does not have time to execute the code in time, an error will pop up
-you can configure how much the computer can "delay" the game-tick in the "Permission Tool" (by default: 2 ticks)
+you can configure how much the computer can "delay" the game-tick in the "Permission Tool" (by default: 4 ticks)
 ::::
 
 ### sm library in safe-mode

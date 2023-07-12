@@ -44,8 +44,6 @@ if not disk.hasFile("/test2") then
     disk.writeFile("/test2", "test data 2")
 end
 
-
-
 print("files:")
 for i, v in ipairs(disk.getFileList("/")) do
     print(v, ":", disk.readFile(v))
