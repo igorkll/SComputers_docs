@@ -21,17 +21,6 @@ please note that for some reason unknown to me, DLM may refuse to accept a respo
 
 #### example
 ```lua
-function callback_loop()
-    if _endtick then
-        display.clear()
-        display.forceFlush()
-    end
-end
-
-function callback_error()
-    reboot()
-end
-
 image = require("image")
 
 ibridge = getComponents("ibridge")[1]
@@ -46,13 +35,16 @@ if not ibridge.isAllow() then
     return
 end
 
-url = "https://raw.githubusercontent.com/igorkll/SComputers_docs/main/ROM/test.bmp"
-response = ibridge.get(url, {})
-
-debug(response[2])
+response = ibridge.get("https://raw.githubusercontent.com/igorkll/SComputers_docs/main/ROM/test.bmp", {})
 img = image.decodeBmp(response[2])
-
 display.clear()
 img:draw(display)
 display.forceFlush()
+
+function callback_loop()
+    if _endtick then
+        display.clear()
+        display.forceFlush()
+    end
+end
 ```

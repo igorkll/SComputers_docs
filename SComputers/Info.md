@@ -40,6 +40,7 @@ you can configure how much the computer can "delay" the game-tick in the "Permis
 * exceptions "path .. underflow" cannot be retrieved. the extra ".." is simply ignored
 * the combination of characters "\n" (two separate characters and not a new line) can be displayed in the gui as "¦n" this is due to the fact that mygui (which uses scrapmechanic) turns "\n" into a new line (at the same time, "¦n" works like normal "\n")
 * now, when disabling a component/removing a component, it is guaranteed not to be work
+* now the stepper motors do not create any force in the off state
 
 ### recommendations
 * if the antenna on your device works only for receiving then you can put an NFC antenna, the antenna radius affects only the transmission
@@ -134,18 +135,20 @@ you can write your values there
 * port.sendTo(id, package:string) - transmits a packet to a specific port
 
 ### motor features
-* motor.getAvailableBatteries - the number of batteries available to the motor will be reduced, the creative motor will return math.huge
-* motor.getCharge - returns the charge of the motor, if it reaches 0, the motor will try to take the battery and add 200-000 to the charge
-* motor.getChargeAdditions - it will return how much the charge of the motor increases when it "eats" one battery(200-000)
+* motor.getAvailableBatteries() - the number of batteries available to the motor will be reduced, the creative motor will return math.huge
+* motor.getCharge() - returns the charge of the motor, if it reaches 0, the motor will try to take the battery and add 200-000 to the charge
+* motor.getChargeAdditions() - it will return how much the charge of the motor increases when it "eats" one battery(200-000)
 the creative motor always has a math.huge charge, the
 motor loses charge depending on the load, if the bearings are blocked, the engine will quickly drain all the batteries
-* motor.getChargeDelta - it will return how much charge the motor loses in 1 tick (the creative motor has 0)
-* motor.getBearingsCount:number - returns the number of bearings connected to the motor
-* motor.isWorkAvailable:boolean -
+* motor.getChargeDelta() - it will return how much charge the motor loses in 1 tick (the creative motor has 0)
+* motor.getBearingsCount():number - returns the number of bearings connected to the motor
+* motor.isWorkAvailable():boolean -
 returns true if the engine can start working at the moment (if there is a charge or something to replenish it with)
 the creative engine method will always return true
-* motor.maxStrength - will return the maximum power for this engine (creative 10-000, survival 1000)
-* motor.maxVelocity - will return the maximum speed for this engine (creative 10-000, survival 500)
+* motor.maxStrength() - will return the maximum power for this engine (creative/mini-creative 10-000, survival 1000, mini 75)
+* motor.maxVelocity() - will return the maximum speed for this engine (creative/mini-creative 10-000, survival 500, mini 75)
+* motor.setSoundType(type:number) - sets the engine sound type: 0 - off, 1 - standard sound. but new engine sounds will be added soon
+* motor.getSoundType():number - returns the current type of motor sound
 
 ### disk features
 * disk.clear() - clear the disk
