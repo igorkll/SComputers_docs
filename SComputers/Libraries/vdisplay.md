@@ -6,16 +6,15 @@ sidebar-label: 'vdisplay'
 ---
 
 The vdisplay library allows you to create a virtual display that will have an API identical to a regular SComputers display
-please note that if the resolution of the virtual screen is non-square, then the width and height may change places when changing the orientation of the display by the setRotation method
 note that the color is passed to the methods(callbacks) "as is"(it can be both Color, string or nil), that is, how it was passed to the virtual screen method
-Also, the virtual display does not provide any optimizations, it only proxies the display API calls to easy-to-implement functions.
 however, vdisplay implements type and range checks
 if you want to process clicks (from any of your sources), you must replace the getClick method in the virtual display with your own
+please note that performance when using "vdisplay" performance may be lower, because there are fewer optimizations in it
 
 ### methods that are stubs (setters and getters will accept and give the set values, and when reset is called, they will be reset, but these methods are still "dummy"):
 * isAllow - the virtual display can have any resolution, regardless of the maximum available on the server
 * getClick / setMaxClicks / getMaxClicks / clearClicks / setClicksAllowed / getClicksAllowed - the virtual display does not have a touchscreen
-* setRenderAtDistance / getRenderAtDistance / setSkipAtLags / getSkipAtLags / setFrameCheck / getFrameCheck / setSkipAtNotSight / getSkipAtNotSight - all these methods require a physical display
+* setRenderAtDistance / getRenderAtDistance / setSkipAtLags / getSkipAtLags / setSkipAtNotSight / getSkipAtNotSight - all these methods require a physical display
 * optimize
 
 ### library methods
@@ -47,7 +46,7 @@ function clear(color)
     buffer = {}
 end
 function set(x, y, color)
-    holo.addVoxel(x - (width / 2), (((height - 1) - y) - (height / 2)) + 20, 0, color, 1)
+    holo.addVoxel(x - (width / 2), (((height - 1) - y) - (height / 2)) + 20, 0, color, 2)
 end
 function flush()
     holo.clear()
