@@ -41,6 +41,8 @@ you can configure how much the computer can "delay" the game-tick in the "Permis
 * the combination of characters "\n" (two separate characters and not a new line) can be displayed in the gui as "¦n" this is due to the fact that mygui (which uses scrapmechanic) turns "\n" into a new line (at the same time, "¦n" works like normal "\n")
 * now, when disabling a component/removing a component, it is guaranteed not to be work
 * now the stepper motors do not create any force in the off state
+* now the camera is able to see the units in a separate (by you exposed) color(by default, this color is bright white in all rendering modes)
+* The camera's FOV is limited to 90 degrees
 
 ### recommendations
 * if the antenna on your device works only for receiving then you can put an NFC antenna, the antenna radius affects only the transmission
@@ -123,9 +125,9 @@ you can write your values there
 
 ### raycast-camera features
 * now methods can accept additional colors
-* drawColorWithDepth(display, noCollideColor, terrainColor)
-* drawColor(display, noCollideColor, terrainColor)
-* drawDepth(display, baseColor, noCollideColor)
+* drawColorWithDepth(display, noCollideColor, terrainColor, unitsColor)
+* drawColor(display, noCollideColor, terrainColor, unitsColor)
+* drawDepth(display, baseColor, noCollideColor, unitsColor)
 
 ### antenna features
 * the antenna now has its own API which you can view in the components section
