@@ -5,6 +5,8 @@ hide_title: true
 sidebar-label: 'holoprojector'
 ---
 
+please note that the maximum number of voxels that can exist at the same time is 4096!
+
 ### holoprojector api
 * type - holoprojector
 * reset() - resets projector settings such as scale/offset/rotation

@@ -43,6 +43,10 @@ you can configure how much the computer can "delay" the game-tick in the "Permis
 * now the stepper motors do not create any force in the off state
 * now the camera is able to see the units in a separate (by you exposed) color(by default, this color is bright white in all rendering modes)
 * The camera's FOV is limited to 90 degrees
+* The radar.getTargets method can now be used only once per tick on one radar (to avoid noise filtering) if you need to filter the noise then use multiple radars
+* port.nextPacket can now be called even if there are no packets in the buffer without the risk of an error, the method will simply return nil if the packet is not in the buffer
+* port.nextPacket now it returns 2 values, the first is the packet itself, and the second is the ID of the port from which the packet was sent
+* fixed a bug that prevented radars from seeing static objects
 
 ### recommendations
 * if the antenna on your device works only for receiving then you can put an NFC antenna, the antenna radius affects only the transmission
@@ -124,10 +128,15 @@ you can write your values there
 * added small Russian letters
 
 ### raycast-camera features
+* camera.getSkyColor():smcolor - returns the color of the sky (even if the sky is not visible to the camera at the moment) this color is used in advanced rendering
+* camera.rawRay(xAngle:number, yAngle:number, maxdist:number):table, nil - ray shoots from the camera and gives out a table {color = smcolor, distance = distance, fraction = distance/maxdist, uuid = uuid, type = character/shape/harvestable/lift/joint/terrain/asset/limiter}. maxdist is the maximum distance for raycast in meters. please note that the angle can be set from -45 to 45 degrees, it is transmitted in radians. limiter is the wall of the world. please note that not all types of objects have the "color" and "uuid" field. please note that getting the uuid of a block only works if it is no further than 4 meters (16 blocks) from the camera
+* new rendering types
+* camera.drawCustom(display, drawer(xPos:number, yPos:number, raydata:table):smcolor) - custom render, you must pass a function that will receive pixel pos and raydata as input (the same as rawRay outputs) and this function should return the color that you need to paint the pixel
+* camera.drawAdvanced(display) - advanced rendering which is designed to give the most realistic picture possible at the moment
 * now methods can accept additional colors
-* drawColorWithDepth(display, noCollideColor, terrainColor, unitsColor)
-* drawColor(display, noCollideColor, terrainColor, unitsColor)
-* drawDepth(display, baseColor, noCollideColor, unitsColor)
+* camera.drawColorWithDepth(display, noCollideColor, terrainColor, unitsColor)
+* camera.drawColor(display, noCollideColor, terrainColor, unitsColor)
+* camera.drawDepth(display, baseColor, noCollideColor, unitsColor)
 
 ### antenna features
 * the antenna now has its own API which you can view in the components section

@@ -35,6 +35,8 @@ the label looks like a button
 * gobj:update() - forced redrawing of the object will occur at the next gui.draw call
 * gobj:clear(smcolor) - clears the place where the object is located with the selected color, if the color is not passed, the color of the scene will be used (if there is one)
 * gobj:setCustomStyle(function(gobj) ) - sets the function that will be used to draw the object
+* gobj:setDisabled(state:boolean) - pass true so that the object stops being interactive, pass true so that the object becomes interactive again
+* gobj:setInvisible(state:boolean) - pass true so that the object is not drawn, pass false so that the object becomes visible again
 
 ### object button
 * gbutton:setState(boolean) - sets the button state, use for buttons in toggle mode

@@ -6,8 +6,7 @@ sidebar-label: 'vdisplay'
 ---
 
 The vdisplay library allows you to create a virtual display that will have an API identical to a regular SComputers display
-note that the color is passed to the methods(callbacks) "as is"(it can be both Color, string or nil), that is, how it was passed to the virtual screen method
-however, vdisplay implements type and range checks
+vdisplay implements type and range checks
 if you want to process clicks (from any of your sources), you must replace the getClick method in the virtual display with your own
 please note that performance when using "vdisplay" performance may be lower, because there are fewer optimizations in it
 

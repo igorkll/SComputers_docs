@@ -5,4 +5,5 @@ hide_title: true
 sidebar-label: 'coroutine'
 ---
 
-the coroutine api is available without calling require, but only if the host has "full lua env" installed
+this lua api is not in the game, it will be available to the computer only if "full lua env" or a custom DLM (DLM Legacy) with coroutine support is installed
+to use this API, you do not need to use require
