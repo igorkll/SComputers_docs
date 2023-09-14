@@ -11,8 +11,9 @@ please note that the maximum number of voxels that can exist at the same time is
 * type - holoprojector
 * reset() - resets projector settings such as scale/offset/rotation
 * clear() - removes all voxels from the projector's RAM
-* addVoxel(x, y, z, color, voxel_type) - adds a voxel to the projector's RAM, the voxel type is omitted 0,
+* addVoxel(x, y, z, color, voxel_type):voxelID - adds a voxel to the projector's RAM, the voxel type is omitted 0,
 the position relative to the center of the holographic projector
+* delVoxel(voxelID) - deletes a voxel with the specified voxelID
 * flush() - renders voxels added to RAM
 however it is not recommended to make more than 2048 voxels
 * setOffset(x, y, z) / getOffset:x,y,z - sets the offset relative to the center of the holographic projector
