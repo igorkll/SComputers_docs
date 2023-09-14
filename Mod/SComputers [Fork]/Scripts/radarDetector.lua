@@ -1,0 +1,34 @@
+radarDetector = class()
+radarDetector.maxParentCount = 1
+radarDetector.maxChildCount = 0
+radarDetector.connectionInput = sm.interactable.connectionType.composite
+radarDetector.connectionOutput = sm.interactable.connectionType.none
+radarDetector.colorNormal = sm.color.new("#134da9")
+radarDetector.colorHighlight = sm.color.new("#3080ff")
+radarDetector.componentType = "radarDetector"
+
+function radarDetector:server_onCreate()
+    self.interactable.publicData = {
+        sc_component = {
+            type = radarDetector.componentType,
+            api = {
+                getRadars = function()
+                    local radars = {}
+
+                    for _, data in pairs(sc.radarDetectedBodies[self.shape:getBody().id] or {}) do
+                        if data[1] == (sm.game.getCurrentTick() - 1) then
+                            local direction = data[2] - self.shape.worldPosition
+                            local f_at = sm.quat.getUp(self.shape.worldRotation)
+                            local f_up = sm.quat.getAt(self.shape.worldRotation)
+                            table.insert(radars, (sm.quat.lookRotation(f_at, f_up) * direction):normalize())
+                            --table.insert(radars, (self.shape:transformDirection(direction)):normalize())
+                        end
+                    end
+
+                    return radars
+                end
+            }
+        }
+    }
+end
+

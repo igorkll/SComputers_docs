@@ -1,0 +1,206 @@
+{
+   "partList" : [
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "color" : "222222",
+         "physicsMaterial" : "Mechanical",
+         "ratings" : {
+            "buoyancy" : 3,
+            "density" : 2,
+            "durability" : 2,
+            "friction" : 3
+         },
+         "renderable" : "$CONTENT_DATA/Objects/Renderables/small_hdd.rend",
+         "rotationSet" : "PropY",
+         "scripted" : {
+            "classname" : "hdd",
+            "data" : {
+               "size" : 65536
+            },
+            "filename" : "$CONTENT_DATA/Scripts/hdd.lua"
+         },
+         "showInInventory" : true,
+         "stackSize" : 10,
+         "uuid" : "ec9c9673-177a-47ee-9611-be9ec97427bc"
+      },
+      {
+         "box" : {
+            "x" : 3,
+            "y" : 1,
+            "z" : 2
+         },
+         "ratings" : {
+            "buoyancy" : 3,
+            "density" : 2,
+            "durability" : 2,
+            "friction" : 3
+         },
+         "color" : "222222",
+         "physicsMaterial" : "Mechanical",
+         "renderable" : "$CONTENT_DATA/Objects/Renderables/hdd.rend",
+         "rotationSet" : "PropFull",
+         "scripted" : {
+            "classname" : "hdd",
+            "data" : {
+               "size" : 131072
+            },
+            "filename" : "$CONTENT_DATA/Scripts/hdd.lua"
+         },
+         "showInInventory" : true,
+         "stackSize" : 10,
+         "uuid" : "45151dd5-109a-4f0c-83fb-0fd35afd9020"
+      },
+      {
+         "box" : {
+            "x" : 3,
+            "y" : 1,
+            "z" : 2
+         },
+         "ratings" : {
+            "buoyancy" : 3,
+            "density" : 2,
+            "durability" : 2,
+            "friction" : 3
+         },
+         "color" : "f002a8",
+         "physicsMaterial" : "Mechanical",
+         "renderable" : "$CONTENT_DATA/Objects/Renderables/hdd.rend",
+         "rotationSet" : "PropFull",
+         "scripted" : {
+            "classname" : "hdd",
+            "filename" : "$CONTENT_DATA/Scripts/hdd.lua"
+         },
+         "showInInventory" : true,
+         "stackSize" : 10,
+         "uuid" : "b59e44cd-deda-4df4-87c0-e83a1fc80752"
+      },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "color" : "222222",
+         "physicsMaterial" : "Mechanical",
+         "ratings" : {
+            "buoyancy" : 3,
+            "density" : 2,
+            "durability" : 2,
+            "friction" : 3
+         },
+         "renderable" : "$CONTENT_DATA/Objects/Renderables/small_hdd.rend",
+         "rotationSet" : "PropY",
+         "scripted" : {
+            "classname" : "hdd",
+            "data" : {
+               "size" : 65536
+            },
+            "filename" : "$CONTENT_DATA/Scripts/hdd.lua"
+         },
+         "showInInventory" : false,
+         "stackSize" : 10,
+         "uuid" : "abcd9bdb-c3b7-4818-b5b5-09e08ae059a0"
+      },
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "color" : "222222",
+         "physicsMaterial" : "Mechanical",
+         "ratings" : {
+            "buoyancy" : 3,
+            "density" : 2,
+            "durability" : 2,
+            "friction" : 3
+         },
+         "renderable" : "$CONTENT_DATA/Objects/Renderables/small_hdd.rend",
+         "rotationSet" : "PropY",
+         "scripted" : {
+            "classname" : "hdd",
+            "data" : {
+               "size" : 65536
+            },
+            "filename" : "$CONTENT_DATA/Scripts/hdd.lua"
+         },
+         "showInInventory" : false,
+         "stackSize" : 10,
+         "uuid" : "6bf0ba41-8e3d-4abb-9d88-a044ab584f6d"
+      },
+      {
+         "box" : {
+            "x" : 3,
+            "y" : 1,
+            "z" : 2
+         },
+         "ratings" : {
+            "buoyancy" : 3,
+            "density" : 2,
+            "durability" : 2,
+            "friction" : 3
+         },
+         "color" : "222222",
+         "physicsMaterial" : "Mechanical",
+         "renderable" : "$CONTENT_DATA/Objects/Renderables/hdd.rend",
+         "rotationSet" : "PropFull",
+         "scripted" : {
+            "classname" : "hdd",
+            "data" : {
+               "size" : 131072
+            },
+            "filename" : "$CONTENT_DATA/Scripts/hdd.lua"
+         },
+         "showInInventory" : false,
+         "stackSize" : 10,
+         "uuid" : "60966b58-94a2-4730-bddb-6652144a7ea8"
+      },
+      {
+         "box" : {
+            "x" : 3,
+            "y" : 1,
+            "z" : 2
+         },
+         "ratings" : {
+            "buoyancy" : 3,
+            "density" : 2,
+            "durability" : 2,
+            "friction" : 3
+         },
+         "color" : "222222",
+         "physicsMaterial" : "Mechanical",
+         "renderable" : "$CONTENT_DATA/Objects/Renderables/hdd.rend",
+         "rotationSet" : "PropFull",
+         "scripted" : {
+            "classname" : "hdd",
+            "data" : {
+               "size" : 131072
+            },
+            "filename" : "$CONTENT_DATA/Scripts/hdd.lua"
+         },
+         "showInInventory" : false,
+         "stackSize" : 10,
+         "uuid" : "78eb45cd-39e6-46a1-9fc2-9959d9dd1400"
+      }
+   ]
+}

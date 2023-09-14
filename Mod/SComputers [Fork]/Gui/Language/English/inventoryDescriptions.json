@@ -1,0 +1,445 @@
+{
+   "0b3292c1-9f5a-4453-9612-c9446c7aa555" : {
+      "description" : "it is capable of transmitting a signal at an unlimited distance (and even between worlds), but it weighs quite a lot and is expensive to craft",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] World Antenna"
+   },
+   "0cafe1bc-fd95-4b89-97fb-af1da059a4ab" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Big Display (16x16)"
+   },
+   "0e026670-4897-47c2-a129-7061ab8adf84" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Display 3x3 (256x256)"
+   },
+   "10e2710c-eff7-4b03-a5a1-dd849283b997" : {
+      "description" : "Changes what the computers can do and not. This is useful if you have a annoying friend in your world and wan't to lag your world.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Permission Tool"
+   },
+   "12e55219-7478-4e7d-a6e6-b39e5daa160a" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Display 3x3 (64x64)"
+   },
+   "178a9ec6-f5d9-4842-aa5b-5307f6822f46" : {
+      "description" : "screen: 64x64\nssd: 64kb\nyou can carry it in your hand and use it when you need it. executes code like a computer, has a 64 by 64 screen",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Tablet 64"
+   },
+   "17e9e663-501a-46e4-bdfc-40a365910cf4" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Display 4x3 (64x48)"
+   },
+   "18a8e622-2c01-41c0-9b60-c0d8d88c09d8" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Long Display 4x1 (128x32)"
+   },
+   "1a09438d-c8b4-49c5-9d2d-aa12935b2c49" : {
+      "description" : "this computers contains SSD disk on 64KB space",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Scriptable Computer with SSD"
+   },
+   "1b4281c6-4393-4ca7-94b8-8f199eba4668" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Display (128x128)"
+   },
+   "2b6b6b6f-7c7d-4f6a-9c8d-774a084b1cfb" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Big Display (32x32)"
+   },
+   "331fe852-9e4a-48ba-8235-dde17b5de3a4" : {
+      "description" : "allows you to make robot head sounds and horn sounds",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Sound Synthesizer"
+   },
+   "356ecbf5-d4fa-480f-8409-15d9d8add6a5" : {
+      "description" : "This is the main part you will be allways using for Modded Computers. They are basicly the brains of the Computer that controls all the connected interactables.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Scriptable Computer"
+   },
+   "3aa0151f-a3d6-48b1-9a7e-2328aa1bfe36" : {
+      "description" : "screen: 32x32\nssd: none\nyou can carry it in your hand and use it when you need it. executes code like a computer, has a 32 by 32 screen",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Tablet 32S"
+   },
+   "06da2ef1-d444-4e87-aed2-4021b1bfc20f" : {
+      "description" : "allows you to draw holograms.\nmax scale: 0.5\nmax offset: 16\nmax voxel offset: 16\nmax voxels count: 1024",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Holoprojector"
+   },
+   "3d37b254-dbaa-4be2-9a0d-ce1e24315c08" : {
+      "description" : "Changes what the computers can do and not. This is useful if you have a annoying friend in your world and wan't to lag your world.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] #f002a8Creative Pocket Permission Tool#eeeeee"
+   },
+   "4022ae8e-4147-4948-b242-ae99020e761e" : {
+      "description" : "Radius: 128 blocks. A antenna is used if you wan't like internet. Antenna's dosen't need to be connected to another network port or antenna. They are routed by values. Great for projects like creating your own internet.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Small Antenna"
+   },
+   "43f8c2f7-cd4f-47c5-ab3a-cbef548e340b" : {
+      "description" : "Radius: 1000 blocks. A antenna is used if you wan't like internet. Antenna's dosen't need to be connected to another network port or antenna. They are routed by values. Great for projects like creating your own internet.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Antenna"
+   },
+   "45151dd5-109a-4f0c-83fb-0fd35afd9020" : {
+      "description" : "Use a Hard Drive (128 KB) that can be used to store files and folders.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "HDD (128 KB)"
+   },
+   "46271f6f-e61a-4173-b121-e37a1f56a904" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Big Display (64x64)"
+   },
+   "4b7651fe-c958-4836-bcfd-11bddabbda73" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Display 3x3 (16x16)"
+   },
+   "5052380b-83b0-404f-936b-3f40c8c261b3" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Very Very Big Display (16x16)"
+   },
+   "50569acb-7911-4fb5-b738-8e5296a6eadf" : {
+      "description" : "this computers contains HDD disk on 128KB space",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Realistic Computer with HDD"
+   },
+   "5123feac-7a92-45bd-8935-d1342d27cb04" : {
+      "description" : "radar, used to detect objects. it does not see through walls, the measurement accuracy and the minimum mass that the radar sees depend on the size of the radar. so far, the radar does not see static objects",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Big Radar"
+   },
+   "57f5bbeb-3dd1-4c63-bc17-a172b4f1baf6" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Very Very Big Display (64x64)"
+   },
+   "596660f2-1d92-468a-97c6-e7cdb9087095" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Long Display 4x1 (64x16)"
+   },
+   "5c6f9472-d88d-47ad-9cf8-faac8b008480" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Display 3x3 (128x128)"
+   },
+   "60966b58-94a2-4730-bddb-6652144a7ea8" : {
+      "description" : "Use a Hard Drive (128 KB) that can be used to store files and folders",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] HDD (128 KB)"
+   },
+   "623318f9-dbef-4fa4-80c6-f279d0780af1" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Display 4x3 (128x96)"
+   },
+   "65f5fc73-32f7-428f-b0a8-4a99243f4d0d" : {
+      "description" : "Radius: 16 blocks. A antenna is used if you wan't like internet. Antenna's dosen't need to be connected to another network port or antenna. They are routed by values. Great for projects like creating your own internet.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Nfc Antenna"
+   },
+   "66355447-8900-412c-b03c-12c85e0587ef" : {
+      "description" : "max velocity: 10-000\nmax strength: 10-000\nIncase if you wan't advanced robots you can make it using the Stepper Motor!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "#f002a8Creative Stepper Motor#eeeeee"
+   },
+
+
+   "1ba4ace4-fc21-4481-bdca-4bd93c295b14" : {
+      "description" : "allows you to move creation in any direction. requires connection of a container with batteries and fuel. it has the same consumption when switched on, regardless of the load, consumes 1 batteries and 1 gas per second",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Inertial Engine"
+   },
+   "eb60707f-f3b2-4381-bc75-a794a9dc70b8" : {
+      "description" : "allows you to move creation in any direction.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] #f002a8Creative Inertial Engine#eeeeee"
+   },
+
+   "663bab7b-8e5b-4e1d-9843-3679e4961526" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Small Display (16x16)"
+   },
+   "82bddce1-94ae-4559-ab7a-05d8f2b90fec" : {
+      "description" : "allows you to draw holograms.\nmax scale: 0.25\nmax offset: 8\nmax voxel offset: 8\nmax voxels count: 256",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Mini Holoprojector"
+   },
+   "68749ef7-4c99-4e11-8c33-46652bc7ec9d" : {
+      "description" : "allows you to draw holograms. max voxels count: 4096",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] #f002a8Creative Mini Holoprojector#eeeeee"
+   },
+   "3c46e9e5-2875-47b4-8668-005a0768c992" : {
+      "description" : "allows you to draw holograms. max voxels count: 4096",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] #f002a8Creative Holoprojector#eeeeee"
+   },
+   "6b08c951-f207-4280-9470-b7fce56a480a" : {
+      "description" : "allows you to send get/post requests to the real internet!! #ff0000DLM#eeeeee is required to work. it weighs a lot and is very expensive to craft",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Internet Bridge"
+   },
+   "6bf0ba41-8e3d-4abb-9d88-a044ab584f6d" : {
+      "description" : "Use a SSD Drive (64 KB) that can be used to store files and folders",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] SSD (64 KB)"
+   },
+   "6f7bd3f2-1be2-47ad-a778-5be60778cfb2" : {
+      "description" : "used for importing and exporting text",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Realistic keyboard"
+   },
+   "78eb45cd-39e6-46a1-9fc2-9959d9dd1400" : {
+      "description" : "Use a Hard Drive (128 KB) that can be used to store files and folders",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] HDD (128 KB)"
+   },
+   "7936702f-092a-4b02-9794-f51abbb42a9f" : {
+      "description" : "allows you to interact with the computer using the console, does not cause lags, unlike displays",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Terminal"
+   },
+   "7a8ce597-9f4b-4386-a50d-fe26edafe4a3" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Display 3x2 (128x96)"
+   },
+   "7abd8ee7-f1ac-4b32-924c-f8322f58a8e7" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Big Display (128x128)"
+   },
+   "7f3e227c-345a-4c28-8775-f6c011b80127" : {
+      "description" : "allows you to click on the screen with the mouse buttons. it also allows you to interact with screens at a large distance",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Stylus"
+   },
+   "81f9080a-12b1-4fd7-9710-91d9434ef156" : {
+      "description" : "used for importing and exporting text",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Sci-Fi Keyboard"
+   },
+   "84d67c26-5923-49f0-a564-df24eae2f7d5" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Display (16x16)"
+   },
+   "861f514f-5913-4538-852c-fa05aa5e265f" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Small Display (32x32)"
+   },
+   "884284ba-ef36-487d-9e8a-553794c032da" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Display 3x2 (64x48)"
+   },
+   "92877a40-097d-45be-be06-faa30d7846df" : {
+      "description" : "radar, used to detect objects. it does not see through walls, the measurement accuracy and the minimum mass that the radar sees depend on the size of the radar. so far, the radar does not see static objects",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Radar"
+   },
+   "94c8b309-b6fb-40f8-90bb-b5c3ac28bacd" : {
+      "description" : "they can display any color, they are controlled sequentially by the address of the led",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Address Led"
+   },
+   "9604ecbd-abff-4bcd-b77e-ce3421379a4f" : {
+      "description" : "requires the connection of a container with batteries\nmax velocity: 500\nmax strength: 1000\nIncase if you wan't advanced robots you can make it using the Stepper Motor!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Stepper Motor"
+   },
+   "98093804-6af8-4862-91fc-b0fdbb72f3dc" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Very Very Big Display (1024x1024)"
+   },
+   "99195c6c-951a-4f2e-87d4-39708a7334b1" : {
+      "description" : "max velocity: 10-000\nmax strength: 10-000\nIncase if you wan't advanced robots you can make it using the Stepper Motor!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] #f002a8Creative Mini Stepper Motor#eeeeee"
+   },
+   "9f4d34ef-61c8-4cc6-96bc-74aa1ce002ed" : {
+      "description" : "screen: 128x128\nssd: 64kb\nyou can carry it in your hand and use it when you need it. executes code like a computer, has a 128 by 128 screen",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Tablet 128"
+   },
+   "a33417df-19f3-4fef-8595-0efc6ae15e5b" : {
+      "description" : "radar, used to detect objects. it does not see through walls, the measurement accuracy and the minimum mass that the radar sees depend on the size of the radar. so far, the radar does not see static objects",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Extra Big Radar"
+   },
+   "a37ec8a8-1251-40d1-b79a-b7dc166fec52" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Very Very Big Display (256x256)"
+   },
+   "ab2672e2-4f2f-4e7b-8be1-4dcfc4ccb151" : {
+      "description" : "radar, used to detect objects. it does not see through walls, the measurement accuracy and the minimum mass that the radar sees depend on the size of the radar. so far, the radar does not see static objects",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Small Radar"
+   },
+   "abb7eb4d-67d1-400d-a1e6-48e3ae50b0e7" : {
+      "description" : "Changes what the computers can do and not. This is useful if you have a annoying friend in your world and wan't to lag your world.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "#f002a8Creative Permission Tool#eeeeee"
+   },
+   "abcd9bdb-c3b7-4818-b5b5-09e08ae059a0" : {
+      "description" : "Use a SSD Drive (64 KB) that can be used to store files and folders",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] SSD (64 KB)"
+   },
+   "ad8d37df-4d4d-4548-af40-daaca65a301f" : {
+      "description" : "A output that can the computer to give a boolean, string or whatever you want to.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Composite Reader"
+   },
+   "ae6c7083-445b-4458-af07-006b3d4856fb" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Very Very Big Display (128x128)"
+   },
+   "b58ed71c-5758-4e6e-9856-aae43da6baea" : {
+      "description" : "Reads data from a parent.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Composite Writer"
+   },
+   "b59e44cd-deda-4df4-87c0-e83a1fc80752" : {
+      "description" : "#ff0000ATTENTION: THIS DISK DOES NOT SAVE DATA AFTER RE-ENTRY AND ON THE BLUEPRINT#eeeeee\nUse a Hard Drive (1 MB) that can be used to store files and folders.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] #f002a8CREATIVE HDD (1 MB)#eeeeee"
+   },
+   "b5dcd494-3e09-4d4d-ad4a-82fa09afbede" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Big Display (512x512)"
+   },
+   "b5efb918-088d-4a75-a3a1-a652e49d7511" : {
+      "description" : "requires the connection of a container with batteries\nmax velocity: 75\nmax strength: 75\nIncase if you wan't advanced robots you can make it using the Stepper Motor!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Mini Stepper Motor"
+   },
+   "b9a1f72d-4099-4c3a-a97a-7d273fa0780f" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Long Display 16x1 (128x8)"
+   },
+   "c2f7fa83-264f-4f00-8b12-829279ad609d" : {
+      "description" : "allows you to get your position/rotation, and also get the location / rotation of GPS tags at an unlimited distance, but the farther the tag is, the less accuracy in measurements",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] GPS"
+   },
+   "c400e00a-c636-4aa3-8669-23405c527eb6" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Big Display (1024x1024)"
+   },
+   "c76d8f28-0d16-45e0-988c-5ab88506108a" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Very Very Big Display (32x32)"
+   },
+   "c83e0e11-6ac1-48fb-a2c6-256f8128b4a6" : {
+      "description" : "allows you to make robot head sounds and horn sounds",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Big Speaker (Synthesizer)"
+   },
+   "c977cf5d-9ce9-4382-8edf-ea97d22c70d0" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Small Display (64x64)"
+   },
+   "cb0fa796-b709-439f-8c0d-9045e7107dfd" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Display (32x32)"
+   },
+   "cdf96cb3-3582-43e0-9452-86e774e3c75c" : {
+      "description" : "Transfers data from a port to another port!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Network Port"
+   },
+   "d62b97d9-6387-4ec5-8b52-e23b04bade07" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Very Very Big Display 16x12 (128x96)"
+   },
+   "db358391-f914-4e08-af92-5de0c7e32976" : {
+      "description" : "Changes what the computers can do and not. This is useful if you have a annoying friend in your world and wan't to lag your world.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Pocket Permission Tool"
+   },
+   "dcf0971b-58c5-49fd-abae-3f1d173c5a6c" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Very Very Big Display (512x512)"
+   },
+   "e0e439e8-5103-4aa7-b74c-858ce6e1e1d4" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Display (64x64)"
+   },
+   "e99397c7-f055-45a7-92f2-b6850dc6d073" : {
+      "description" : "Its a Raycasting camera. Connect it to the computer and have a display connected. Write the code and then you have a display showing the pov of the camera!\n\nNOTE: Using cameras is not patrical if you want real time. It's method of showing pixels is up to down and slow.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "Camera (Raycasted)"
+   },
+   "ec9c9673-177a-47ee-9611-be9ec97427bc" : {
+      "description" : "Use a SSD Drive (64 KB) that can be used to store files and folders",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] SSD (64 KB)"
+   },
+   "f3a2d5e3-70c9-4d76-bdb5-f5ccd2403a25" : {
+      "description" : "allows you to make robot head sounds and horn sounds",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Speaker (Synthesizer)"
+   },
+   "f54eb0b7-9041-47e4-ba34-3abdad87112e" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Display 3x3 (32x32)"
+   },
+   "f5a29be5-c614-4a2b-8b0a-958248b00a8d" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Very Very Big Display 16x12 (64x48)"
+   },
+   "f9b5c7ac-5a29-4973-ba7f-7b2b5ff66a20" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Big Display (256x256)"
+   },
+   "fb43bd75-7e24-4054-bb65-ce247fb3400b" : {
+      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Realistic Display (128x96)"
+   },
+   "fd678469-4f6a-4c40-96ff-15d156c8a58a" : {
+      "description" : "its location can be determined using GPS, for this you need to know the frequency of the label, which is random by default",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] GPS-TAG"
+   },
+   "d4bf6cb5-17af-491b-abbc-f6492ae5e03c" : {
+      "description" : "allows you to find out if the radars see you, and also allows you to find out the directions for the radars that have detected you",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Radar Detector"
+   },
+   "9d071ead-c24e-42e5-b4ad-67d709e9a4ab" : {
+      "description" : "allows you to get information about the presence of the player in the seat and pressing the WASD buttons",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] WASD Converter"
+   }
+}

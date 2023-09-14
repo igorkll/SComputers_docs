@@ -1,0 +1,2 @@
+--this script allows you to exit the sandbox
+--at the moment it is only in the private version of SComputers

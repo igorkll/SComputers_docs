@@ -1,0 +1,17 @@
+{
+   "lodList" : [
+      {
+         "mesh" : "$SURVIVAL_DATA/Objects/Mesh/interactive/obj_interactive_sensor_off.fbx",
+         "subMeshList" : [
+            {
+               "material" : "DifAsgNor",
+               "textureList" : [
+                  "$SURVIVAL_DATA/Objects/Textures/interactive/obj_interactive_sensor_01_dif.tga",
+                  "$SURVIVAL_DATA/Objects/Textures/interactive/obj_interactive_sensor_01_asg.tga",
+                  "$SURVIVAL_DATA/Objects/Textures/interactive/obj_interactive_sensor_01_nor.tga"
+               ]
+            }
+         ]
+      }
+   ]
+}
