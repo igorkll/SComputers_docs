@@ -8,6 +8,7 @@ display.setFrameCheck(false)
 local rx, ry = display.getWidth(), display.getHeight()
 if rx ~= ry then
     display.setRotation(1)
+    rx, ry = display.getWidth(), display.getHeight()
 end
 
 function math.round(num)
