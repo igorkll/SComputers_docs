@@ -174,6 +174,10 @@ function image.decodeBmp(bmp_content)
 
     local img = {x = resX, y = resY, data = {}}
     local i = startRead
+
+    if resX > 256 then return error("resolution x greater than 256", 2) end
+    if resY > 256 then return error("resolution y greater than 256", 2) end
+    
     for y = resY - 1, 0, -1 do
         for x = 0, resX - 1 do
             local str = bmp_content:sub(i, i + (colorbytes - 1))
@@ -251,7 +255,6 @@ function image.draw(img, display, posX, posY, light)
             sc.yield()
             
             local color = img.data[x + (y * img.x)]
-
             if color.a > 0 then
                 display.drawPixel(posX + x, posY + y, tostring(sm_color_new(color.r, color.g, color.b, light)))
             end
@@ -371,8 +374,8 @@ function image.fromCameraAll(img, camera, methodName, ...)
         end
     }
     while notEnd do
-        camera[methodName](vdisplay, ...)
         sc.yield()
+        camera[methodName](vdisplay, ...)
     end
 end
 

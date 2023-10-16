@@ -1,7 +1,9 @@
 local jsonlib = {}
 local json = json
+local jsonEncodeInputCheck = jsonEncodeInputCheck
 
 function jsonlib.encode(tbl)
+    jsonEncodeInputCheck(tbl, 0)
     return json.encode(tbl)
 end
 

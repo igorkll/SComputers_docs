@@ -15,6 +15,58 @@ local table_concat = table.concat
 local ipairs = ipairs
 local pairs = pairs
 
+local jsonEncodeInputCheck
+function jsonEncodeInputCheck(tbl, level, itemsCount)
+	itemsCount = itemsCount or 0
+
+	if level >= 8 then
+		error("too many nested tables. max 8", level + 3)
+	end
+
+	local isStringKey = false
+	local isNumberKey = false
+	for key, value in pairs(tbl) do
+		local keytype = type(key)
+		local valuetype = type(value)
+
+		------ check count
+		if itemsCount > 100 then
+			error("your table cannot contain more than 100 items", level + 3)
+		end
+		itemsCount = itemsCount + 1
+
+		------ key check
+		if keytype == "string" then
+			isStringKey = true
+		elseif keytype == "number" then
+			isNumberKey = true
+		else
+			error("keys in json can only be string or number", level + 3)
+		end
+		if isStringKey and isNumberKey then
+			error("keys in json cannot be both string and number in the same subtable", level + 3)
+		end
+		
+		------ value check
+		if
+		valuetype ~= "nil" and
+		valuetype ~= "boolean" and
+		valuetype ~= "table" and
+		valuetype ~= "number" and
+		valuetype ~= "string" and
+		valuetype ~= "table" then
+			error("unsupported type \"" .. valuetype .. "\" in json", level + 3)
+		end
+		
+		if valuetype == "table" then
+			itemsCount = jsonEncodeInputCheck(value, level + 1, itemsCount)
+		end
+	end
+	
+	return itemsCount
+end
+_G.jsonEncodeInputCheck = jsonEncodeInputCheck
+
 function NormalizeQuaternion(quaternion)
     local magnitude = math_sqrt(quaternion.x^2 + quaternion.y^2 + quaternion.z^2 + quaternion.w^2)
     if magnitude ~= 0 then

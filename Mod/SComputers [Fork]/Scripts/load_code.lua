@@ -13,6 +13,8 @@ function injectService(self, code, env) --спизженно с: https://github.
     local setmetatable = sc.getApi("setmetatable")
     local getmetatable = sc.getApi("getmetatable")
     if setmetatable and getmetatable then
+        setmetatable(env, nil)
+        env.__internal_yield = nil
         setmetatable(env,
             {
                 __index = {
@@ -190,8 +192,8 @@ function safe_load_code(self, chunk, chunkname, mode, env)
     checkArg(4, env,       "table",  "nil")
 
     env = env or {}
-
     mode = mode or "bt"
+
     if mode == "bt" then
         mode = "t"
     elseif mode == "t" then
@@ -202,7 +204,7 @@ function safe_load_code(self, chunk, chunkname, mode, env)
         return nil, "this load mode is unsupported"
     end
 
-    local preloadOk, preloadErr = load_code(self, chunk, nil, "t", {}) --syntax errors check
+    local preloadOk, preloadErr = load_code(self, chunk, chunkname, mode, {}) --syntax errors check
     if not preloadOk then
         return nil, preloadErr
     end

@@ -33,6 +33,7 @@ local function makeMsg(...)
     --printResult = string.gsub(printResult, "\n", "%[NL%]")
     return printResult
 end
+local jsonEncodeInputCheck = jsonEncodeInputCheck
 
 
 function createSafeEnv(self, settings)
@@ -163,46 +164,7 @@ function createSafeEnv(self, settings)
                 end,
                 writeJsonString = function (obj)
                     checkArg(1, obj, "table")
-                    local function bugsplatPrevention(tbl, level)
-                        if level >= 8 then
-                            error("too many nested tables. max 8", level + 3)
-                        end
-
-                        local isStringKey = false
-                        local isNumberKey = false
-                        for key, value in pairs(tbl) do
-                            local keytype = type(key)
-                            local valuetype = type(value)
-
-                            ------ key check
-                            if keytype == "string" then
-                                isStringKey = true
-                            elseif keytype == "number" then
-                                isNumberKey = true
-                            else
-                                error("keys in json can only be string or number", level + 3)
-                            end
-                            if isStringKey and isNumberKey then
-                                error("keys in json cannot be both string and number in the same subtable", level + 3)
-                            end
-                            
-                            ------ value check
-                            if
-                            valuetype ~= "nil" and
-                            valuetype ~= "boolean" and
-                            valuetype ~= "table" and
-                            valuetype ~= "number" and
-                            valuetype ~= "string" and
-                            valuetype ~= "table" then
-                                error("unsupported type \"" .. valuetype .. "\" in json", level + 3)
-                            end
-                            
-                            if valuetype == "table" then
-                                bugsplatPrevention(value, level + 1)
-                            end
-                        end
-                    end
-                    bugsplatPrevention(obj, 0)
+                    jsonEncodeInputCheck(obj, 0)
                     return sm.json.writeJsonString(obj)
                 end,
             },
@@ -368,6 +330,7 @@ function createSafeEnv(self, settings)
                 error("the maximum amount of code is 32 KB", 2)
             end
             self.new_code = code
+            sc.addLagScore(5)
         end,
         getCode = function ()
             return self.storageData.script or ""
@@ -382,6 +345,7 @@ function createSafeEnv(self, settings)
             end
             self.storageData.userdata = base64.encode(data)
             self.storageData.userdata_bs64 = true
+            sc.addLagScore(5)
         end,
         getData = function ()
             if self.storageData.userdata then
@@ -397,7 +361,7 @@ function createSafeEnv(self, settings)
         
 
 
-        setInvisible = function (state, permanent)
+        setInvisible = function (state, permanent) --make computer invisible for other computers
             checkArg(1, state, "boolean", "nil")
             checkArg(2, permanent, "boolean", "nil")
             state = not not state
@@ -443,10 +407,16 @@ function createSafeEnv(self, settings)
         
         reboot = function ()
             --self:sv_reboot(true, true)
-            if self.real_crashstate and
-            self.real_crashstate.exceptionMsg == ScriptableComputer.oftenLongOperationMsg then
+
+            local noSoftwareReboot = {
+                [ScriptableComputer.oftenLongOperationMsg] = true,
+                [ScriptableComputer.lagMsg] = true
+            }
+
+            if self.real_crashstate and noSoftwareReboot[self.real_crashstate.exceptionMsg] then
                 error("this computer cannot be restarted programmatically", 2)
             end
+            
             self.reboot_flag = true
         end,
         getCurrentComputer = function ()
@@ -464,6 +434,12 @@ function createSafeEnv(self, settings)
         getDeltaTime = function ()
             return sc.deltaTime or 0
         end,
+        getSkippedTicks = function ()
+            return self.skipped
+        end,
+        getLagsScore = function ()
+            return self.lagScore
+        end,
 
         --limitations of the amount of RAM in development
         getUsedRam = function ()
@@ -474,10 +450,16 @@ function createSafeEnv(self, settings)
         end
 	}
 
+    ---------------- dlm
+
     local coroutine = sc.getApi("coroutine")
     if coroutine then
         env.coroutine = sc.deepcopy(coroutine)
     end
+
+    ---------------- links
+
+    env.table.unpack = env.unpack
 
     env._G = env
     env._ENV = env
@@ -627,4 +609,8 @@ function removeServerMethods(env) --called before execution clientInvoke
     env.getKeyboards = nil
     env.setComponentApi = nil
     env.getComponentApi = nil
+    env.getMaxAvailableCpuTime = nil
+    env.getDeltaTime = nil
+    env.getUsedRam = nil
+    env.getTotalRam = nil
 end

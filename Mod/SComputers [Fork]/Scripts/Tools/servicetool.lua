@@ -51,6 +51,9 @@ function servicetool:sv_print_vulnerabilities()
     if sc.restrictions.disCompCheck then
         table.insert(vulnerabilities, "component connectivity check is disabled")
     end
+    if sc.restrictions.disableCallLimit then
+        table.insert(vulnerabilities, "call limits are disabled, this allows you to burden some SComputers mechanics")
+    end
 
     self.network:sendToClients("cl_print_vulnerabilities", vulnerabilities)
 end
@@ -83,6 +86,10 @@ function servicetool:sv_safe(data)
     else
         self.network:sendToClient(data.player, "cl_noPermission")
     end
+end
+
+function servicetool:sv_version(data)
+    self.network:sendToClient(data.player, "cl_version")
 end
 
 ------------------------------------------------------------------
@@ -222,6 +229,10 @@ function servicetool:cl_cheat()
     end
 end
 
+function servicetool:cl_version()
+    sm.gui.displayAlertText("version: " .. tostring(sc.version))
+end
+
 ------------------------------------------------------------------
 
 if not commandsBind then
@@ -234,6 +245,7 @@ if not commandsBind then
                 oldBindCommand("/computers", {}, "cl_onChatCommand", "opens the SComputers configuration menu")
             end
             oldBindCommand("/cl_scomputers_cheat", {}, "cl_onChatCommand", "enables/disables cheat-buttons in the \"Creative Permission-tool\"")
+            oldBindCommand("/cl_scomputers_version", {}, "cl_onChatCommand", "show scomputers version")
             oldBindCommand("/sv_scomputers_safe", {}, "cl_onChatCommand", "returns SComputers parameters to safe")
 
             added = true
@@ -254,6 +266,9 @@ if not commandsBind then
                 return
             elseif params[1] == "/sv_scomputers_safe" then
                 sm.event.sendToTool(servicetool.instance.tool, "sv_safe", {player = params.player})
+                return
+            elseif params[1] == "/cl_scomputers_version" then
+                sm.event.sendToTool(servicetool.instance.tool, "sv_version", {player = params.player})
                 return
             end
         end

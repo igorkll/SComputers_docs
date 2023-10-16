@@ -102,6 +102,8 @@ function PermissionTool.client_onCreate(self)
 	self.gui:setButtonCallback("ibridge", "client_onIbridgePress")
 	self.gui:setButtonCallback("adrop", "client_onAdropPress")
 	self.gui:setButtonCallback("acreative", "client_onACreativePress")
+	self.gui:setButtonCallback("disableCallLimit", "client_disableCallLimit")
+	self.gui:setButtonCallback("lagDetector", "client_lagDetector")
 	self.gui:setVisible("admin", false)
 	--self.gui:setButtonCallback("DisplaysAtLagsButton", "client_onDisplayAtLagsButtonPressed")
 
@@ -167,7 +169,12 @@ function PermissionTool.cl_guiUpdateButtons(self)
 	self.gui:setText("ibridge", "Allow Internet-Bridge: " .. tostring(self.currentSettings.ibridge))
 	self.gui:setText("adrop", "drop freq at lags: " .. tostring(self.currentSettings.adrop))
 	self.gui:setText("acreative", "Allow Creative-Components: " .. tostring(self.currentSettings.acreative))
-	
+	self.gui:setText("disableCallLimit", "disable call limit: " .. tostring(self.currentSettings.disableCallLimit))
+	if type(self.currentSettings.lagDetector) == "number" then
+		self.gui:setText("lagDetector", "anti-lag: " .. tostring(round(self.currentSettings.lagDetector, 3)))
+	else
+		self.gui:setText("lagDetector", "anti-lag: false")
+	end
 
 	if self.currentSettings.vm == "luaInLua" then
 		self.gui:setText("lua", "LuaVM: LuaInLua (remade)")
@@ -320,6 +327,30 @@ function PermissionTool:client_onAllowDist()
 	self.currentSettings.allowDist = not self.currentSettings.allowDist
 end
 
+function PermissionTool:client_disableCallLimit()
+	if not self:client_canChangeSettings() then return end
+	if not self:client_cheatAllow() and not self.currentSettings.disableCallLimit then
+		sm.gui.chatMessage(noCheatMessage)
+		return
+	end
+
+	self.currentSettings.disableCallLimit = not self.currentSettings.disableCallLimit
+end
+
+function PermissionTool:client_lagDetector()
+	if not self:client_canChangeSettings() then return end
+
+	if type(self.currentSettings.lagDetector) ~= "number" then
+		self.currentSettings.lagDetector = 0
+	end
+	self.currentSettings.lagDetector = round(self.currentSettings.lagDetector, 3)
+
+	self.currentSettings.lagDetector = self.currentSettings.lagDetector + 0.1
+	if self.currentSettings.lagDetector > 3 then
+		self.currentSettings.lagDetector = false
+	end
+end
+
 function PermissionTool.client_onLuaVmPress(self)
 	if not self:client_canChangeSettings() then return end
 
@@ -375,7 +406,7 @@ function PermissionTool:client_onOptSPress()
 	end
 end
 
-local function setSettings(self, settings)
+local function setSettings(self, settings) --вроде не юзаеться
 	if not self:client_canChangeSettings() then return end
 
 	self.rebootAll_cl_flag = true
@@ -389,11 +420,15 @@ local function setSettings(self, settings)
 end
 
 function PermissionTool:client_onSrvPress()
-	setSettings(self, sc.forServerRestrictions)
+	if not self:client_canChangeSettings() then return end
+	--setSettings(self, sc.forServerRestrictions)
+	self.currentSettings = sc.deepcopy(sc.forServerRestrictions)
 end
 
 function PermissionTool:client_onRstPress()
-	setSettings(self, sc.defaultRestrictions)
+	if not self:client_canChangeSettings() then return end
+	--setSettings(self, sc.defaultRestrictions)
+	self.currentSettings = sc.deepcopy(sc.defaultRestrictions)
 end
 
 function PermissionTool:client_onRaysPress()

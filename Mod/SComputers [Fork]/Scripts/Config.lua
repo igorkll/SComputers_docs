@@ -55,7 +55,10 @@ sc = {
 	keyboardDatas = {}
 }
 
+sc.version = "2.0a"
+
 sc.deltaTime = 0
+sc.clockLagMul = 250
 sc.radarDetectedBodies = {}
 
 sc.display = {}
@@ -237,6 +240,8 @@ sc.defaultRestrictions = { --DEFAULT
 	saving = 10,
 	maxDisplays = 128,
 	ibridge = true,
+	disableCallLimit = false,
+	lagDetector = 1
 }
 
 sc.forServerRestrictions = { --FOR SERVERS
@@ -256,6 +261,8 @@ sc.forServerRestrictions = { --FOR SERVERS
 	saving = 80,
 	maxDisplays = 64,
 	ibridge = false,
+	disableCallLimit = false,
+	lagDetector = 2
 }
 
 sc.restrictions = nil
@@ -310,6 +317,12 @@ end
 
 
 
+
+function sc.addLagScore(score)
+	if sc.lastComputer and type(sc.restrictions.lagDetector) == "number" then
+		sc.lastComputer.lagScore = sc.lastComputer.lagScore + (score * sc.restrictions.lagDetector)
+	end
+end
 
 function sc.init()
 	if sc._INIT then return end
@@ -621,7 +634,10 @@ end
 
 sm.sc = sc --для интеграций
 sm.sc_g = _G
+function sc.customVersion(char)
+	sc.version = sc.version:sub(1, #sc.version - 1) .. char
+end
 
 dofile("$CONTENT_DATA/Scripts/font.lua")
 dofile("$CONTENT_DATA/Scripts/basegraphic.lua")
-print("SC Configuration has been loaded")
+print("SComputers Configuration has been loaded. version " .. tostring(sc.version))

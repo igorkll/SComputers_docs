@@ -26,9 +26,11 @@
          "showInInventory" : true,
          "uuid" : "7f3e227c-345a-4c28-8775-f6c011b80127"
       },
+
+
+
       {
-         "name" : "tablet 32s",
-         //"previewRenderable" : "$CONTENT_DATA/Tools/Renderables/tablet.rend",
+         "name" : "tablet 32S",
          "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
          "script" : {
             "class" : "tablet",
@@ -43,7 +45,6 @@
       },
       {
          "name" : "tablet 64",
-         //"previewRenderable" : "$CONTENT_DATA/Tools/Renderables/tablet.rend",
          "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
          "script" : {
             "class" : "tablet",
@@ -59,7 +60,6 @@
       },
       {
          "name" : "tablet 128",
-         //"previewRenderable" : "$CONTENT_DATA/Tools/Renderables/tablet.rend",
          "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
          "script" : {
             "class" : "tablet",

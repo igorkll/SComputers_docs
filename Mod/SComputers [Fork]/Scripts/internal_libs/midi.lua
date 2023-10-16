@@ -9,6 +9,7 @@ local function parseMIDI(f)
         local mask = bit32.rshift(0xFF, 8 - bits)
         local num = 0
         for i = 1, s:len() do
+            sc.yield()
             num = num + bit32.lshift(bit32.band(s:byte(i), mask), (s:len() - i) * bits)
         end
         return num
@@ -71,6 +72,8 @@ local function parseMIDI(f)
     local tracks = {}
     local interations = 0
     while true do
+        sc.yield()
+
         local id, size = readChunkInfo()
         if not id or id == "" then
             break
@@ -93,6 +96,7 @@ local function parseMIDI(f)
             local function readVariableLength()
                 local total = ""
                 for i = 1, math.huge do
+                    sc.yield()
                     local part = read()
                     total = total .. part
                     if bit32.band(0x80, part:byte(1)) == 0 then
@@ -108,6 +112,8 @@ local function parseMIDI(f)
             end
 
             while offset < size do
+                sc.yield()
+                
                 cursor = cursor + readVariableLength()
                 totalLength = math.max(totalLength, cursor)
                 local test = parseVarInt(read())
@@ -326,6 +332,8 @@ function midi:start()
     self.state.cnotes = {}
 
     for i in ipairs(self.synthesizers) do
+        sc.yield()
+
         self.state.cnotes[i] = {}
         self.state.cbeeps[i] = {}
     end
@@ -334,6 +342,8 @@ end
 function midi:stop()
     self.state = nil
     for _, synthesizer in ipairs(self.synthesizers) do
+        sc.yield()
+
         synthesizer.stop()
     end
 end
@@ -366,21 +376,23 @@ function midi:_flush()
     if not self.state.flushflag then return end
 
     for synthesizerId in pairs(self.state.stopflag) do
+        sc.yield()
         local synthesizer = self.synthesizers[synthesizerId]
         self.state.cbeeps[synthesizerId] = {}
         synthesizer.stop()
     end
 
     for _, synthesizer in ipairs(self.synthesizers) do
+        sc.yield()
         synthesizer.clear()
     end
     
     for synthesizerId, notes in pairs(self.state.cnotes) do
+        sc.yield()
         for note, data in pairs(notes) do
+            sc.yield()
             local synthesizer = self.synthesizers[synthesizerId]
-
             local note = toteToPitch(note)
-
             local volume = self.volume
             local instrumentTable = self.instrumentTable
             local instrument = self.instrument
@@ -393,6 +405,7 @@ function midi:_flush()
                         instrument = idx
                     else
                         for key, value in pairs(self.instrumentTable) do
+                            sc.yield()
                             if trackname:find(key:lower()) then
                                 if type(value) == "table" then
                                     instrument = value[1]
@@ -409,6 +422,7 @@ function midi:_flush()
 
             local finded
             for _, tbl in ipairs(self.state.cbeeps[synthesizerId]) do
+                sc.yield()
                 if tbl[1] == instrument and tbl[2] == note and tbl[3] == volume then
                     finded = true
                     break
@@ -431,9 +445,10 @@ function midi:tick()
     if not self.state then return end
 
     for i = 1, math.floor((((1000000 / self.state.mid.time.tick()) / 40) * self.speed) + 0.5) do
+        sc.yield()
         for trackid, track in ipairs(self.state.mid.tracks) do
             --print(track.name)
-
+            sc.yield()
             local event = track[self.state.tick]
             if event then
                 if type(event) == "number" then
@@ -452,12 +467,15 @@ function midi:tick()
 
                             local activeCount = 0
                             for note in pairs(self.state.cnotes[synthesizerId]) do
+                                sc.yield()
                                 activeCount = activeCount + 1
                             end
                             if activeCount > 0 then
                                 for id in ipairs(self.synthesizers) do
+                                    sc.yield()
                                     local activeCount2 = 0
                                     for note in pairs(self.state.cnotes[id]) do
+                                        sc.yield()
                                         activeCount2 = activeCount2 + 1
                                     end
                                     if activeCount2 == 0 then
@@ -476,6 +494,7 @@ function midi:tick()
                             local swaps = {}
                             if self.state.swapTable then   
                                 for i = #self.state.swapTable, 1, -1 do
+                                    sc.yield()
                                     local tbl = self.state.swapTable[i]
                                     if tbl and tbl[1] == note and tbl[2] == synthesizerId then
                                         table.insert(swaps, tbl[3])
@@ -486,6 +505,7 @@ function midi:tick()
 
                             if #swaps > 0 then
                                 for _, swap in ipairs(swaps) do
+                                    sc.yield()
                                     self.state.cnotes[swap][note] = nil
                                     self.state.stopflag[swap] = true
                                 end
@@ -504,6 +524,7 @@ function midi:tick()
         self.state.tick = self.state.tick + 1
         if self.state.tick > self.state.mid.totalLength then
             for _, synthesizer in ipairs(self.synthesizers) do
+                sc.yield()
                 synthesizer.stop()
             end
             self.state = nil

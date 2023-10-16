@@ -27,6 +27,14 @@ function Antenna.writeToBuffer(self, packets, buffer)
 	end
 end
 
+function Antenna:selfID()
+	if self.interactable then
+		return self.interactable.id
+	else
+		return self.tool.id
+	end
+end
+
 function Antenna.receivePackets(self, packets) --вызываеться с отправляюшей антенны
 	if self.activeState then
 		self:writeToBuffer(packets, self.receivePacketBuffer)
@@ -72,7 +80,7 @@ function Antenna.sendPackets(self) --отправка пакетов по рал
 end
 
 function Antenna.transmitPackets(self) --передает... что то... код антен нада переписывать
-	if self.activeState then
+	if self.activeState and self.interactable then
 		local parents = self.interactable:getParents(sm.interactable.connectionType.networking) or {}
 
 		for index, parent in ipairs(parents) do
@@ -94,25 +102,20 @@ function Antenna.propagatePackets(self, packets)
 end
 
 function Antenna.server_onCreate(self)
-	local id = self.interactable:getId()
+	local id = self:selfID()
 
 	self.data = self.data or {}
 
 	self.radius = self.data.radius
 	self.sendPacketBuffer = {}
 	self.receivePacketBuffer = {}
+	self.activeState = true
 	
 	local data = self.storage:load()
 	if data ~= nil then
-		self.channel = data.channel
-		self.activeState = data.activeState
-
-		if self.activeState == nil then
-			self.activeState = true
-		end
+		self.channel = data.channel or 0
 	else
 		self.channel = 0
-		self.activeState = true
 	end
 
 	sc.antennasRefs[id] = self
@@ -148,7 +151,7 @@ function Antenna.server_onCreate(self)
 end
 
 function Antenna.server_onDestroy(self)
-	local id = self.interactable:getId()
+	local id = self:selfID()
 	sc.antennasRefs[id] = nil
 	sc.networking[id] = nil
 	sc.antennasApis[id] = nil
@@ -176,8 +179,7 @@ end
 
 function Antenna:sv_save()
 	self.storage:save({
-		channel = self.channel,
-		activeState = self.activeState
+		channel = self.channel
 	})
 end
 
@@ -261,7 +263,7 @@ function Antenna.client_guiClose(self)
 end
 
 function Antenna:client_onFixedUpdate()
-	if self.blink_time then
+	if self.interactable and self.blink_time then
 		self.blink_time = self.blink_time - 1
 		if self.blink_time == 0 then
 			self.interactable:setUvFrameIndex(self.isNfc and 1 or 0)
@@ -271,11 +273,13 @@ function Antenna:client_onFixedUpdate()
 end
 
 function Antenna:cl_blink(data)
-	if data then
-		self.isNfc = data
-		self.interactable:setUvFrameIndex(1)
-	else
-		self.interactable:setUvFrameIndex(self.isNfc and 7 or 6)
-		self.blink_time = 3
+	if self.interactable then
+		if data then
+			self.isNfc = data
+			self.interactable:setUvFrameIndex(1)
+		else
+			self.interactable:setUvFrameIndex(self.isNfc and 7 or 6)
+			self.blink_time = 3
+		end
 	end
 end

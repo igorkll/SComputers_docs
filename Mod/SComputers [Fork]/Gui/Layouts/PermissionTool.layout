@@ -132,6 +132,16 @@
             <Property key="FontName" value="SM_Button"/>
             <Property key="TextAlign" value="Center"/>
         </Widget>
+        <Widget type="Button" skin="PrimaryButton" position_real="0.34972677595628415 0.25180722891566265 0.31693989071038253 0.066265060240963861" name="disableCallLimit">
+            <Property key="Caption" value="disable call limit"/>
+            <Property key="FontName" value="SM_Button"/>
+            <Property key="TextAlign" value="Center"/>
+        </Widget>
+        <Widget type="Button" skin="PrimaryButton" position_real="0.0054644808743169399 0.25301204819277107 0.31693989071038253 0.066265060240963861" name="lagDetector">
+            <Property key="Caption" value="lag detector"/>
+            <Property key="TextAlign" value="Center"/>
+            <Property key="FontName" value="SM_Button"/>
+        </Widget>
     </Widget>
     <CodeGeneratorSettings/>
 </MyGUI>

@@ -105,6 +105,7 @@ function RaycastCamera:server_rays(displayData)
 	local fov = self.fov
 
 	local rays = {}
+	local raysI = 0
 	for i = 0, stepM do
 		local pixel = currentPixel + i
 		local x = floor(pixel / resolutionY) % resolutionX
@@ -115,13 +116,15 @@ function RaycastCamera:server_rays(displayData)
 
 		local direction = rotation * vec3_new( -u, -v, 1 )
 
-		insert(rays, {
+		raysI = raysI + 1
+		rays[raysI] = {
 			type = "ray",
 			startPoint = position,
 			endPoint = position + direction * distance,
-		})
+		}
 	end
 
+	sc.addLagScore(raysI / 1024)
 	return rc_multicast(rays)
 end
 

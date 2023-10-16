@@ -13,8 +13,13 @@ function radarDetector:server_onCreate()
             type = radarDetector.componentType,
             api = {
                 getRadars = function()
-                    local radars = {}
+                    local tick = sm.game.getCurrentTick()
+                    if tick == self.old_tick and not sc.restrictions.disableCallLimit then
+                        error("getRadars can only be used 1 time per tick on one radar", 2)
+                    end
+                    self.old_tick = tick
 
+                    local radars = {}
                     for _, data in pairs(sc.radarDetectedBodies[self.shape:getBody().id] or {}) do
                         if data[1] == (sm.game.getCurrentTick() - 1) then
                             local direction = data[2] - self.shape.worldPosition
@@ -24,7 +29,6 @@ function radarDetector:server_onCreate()
                             --table.insert(radars, (self.shape:transformDirection(direction)):normalize())
                         end
                     end
-
                     return radars
                 end
             }

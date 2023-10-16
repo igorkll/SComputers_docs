@@ -17,6 +17,7 @@ ScriptableComputer.UV_HAS_DISABLED = 9
 ScriptableComputer.maxcodesize = 32 * 1024
 ScriptableComputer.longOperationMsg = "the computer has been performing the operation for too long"
 ScriptableComputer.oftenLongOperationMsg = "the computer exceeded the CPU time limit too often"
+ScriptableComputer.lagMsg = "this computer caused too many lags, please optimize your code"
 
 ----------------------- yield -----------------------
 
@@ -176,6 +177,8 @@ function ScriptableComputer:server_onCreate(constData)
 
 	self.sv_max_patience = 2
 	self.sv_patience = self.sv_max_patience
+	self.lagScore = 0
+	self.skipped = 0
 
 	self:sv_reset()
 	self:sv_reboot()
@@ -288,7 +291,7 @@ function ScriptableComputer:server_onFixedUpdate()
 
 	if not self.storageData.crashstate.hasException and work then
 		if not activeNow and self.isActive then
-			self:sv_execute(true) --последняя интерация после отключения входа, чтобы отлавить выключения
+			self:sv_execute(true) --последняя итерация после отключения входа, чтобы отлавить выключения
 			self:sv_disableComponentApi()
 		end
 		
@@ -296,19 +299,25 @@ function ScriptableComputer:server_onFixedUpdate()
 			self:sv_reboot()
 		end
 
-		local val = 0
-		if sc.restrictions.adrop then
-			if sc.deltaTime >= (1 / 15) then
-				val = 8
-			elseif sc.deltaTime >= (1 / 25) then
-				val = 4
-			elseif sc.deltaTime >= (1 / 30) then
-				val = 2
+		if activeNow then
+			local dropFreq = 0
+			if sc.restrictions.adrop then
+				if sc.deltaTime >= (1 / 15) then
+					dropFreq = 8
+				elseif sc.deltaTime >= (1 / 25) then
+					dropFreq = 4
+				elseif sc.deltaTime >= (1 / 30) then
+					dropFreq = 2
+				end
 			end
-		end
-
-		if activeNow and (val == 0 or sm.game.getCurrentTick() % val == 0) then
-			self:sv_execute()
+			dropFreq = dropFreq + math.floor(self.lagScore / 10)
+			if dropFreq == 1 then dropFreq = 2 end
+			if dropFreq == 0 or sm.game.getCurrentTick() % dropFreq == 0 then
+				self:sv_execute()
+				self.skipped = 0
+			else
+				self.skipped = self.skipped + 1
+			end
 		end
 	end
 	self.isActive = activeNow
@@ -348,6 +357,13 @@ function ScriptableComputer:server_onFixedUpdate()
 
 			self.saveContent = nil
 			self.old_sum = sum
+		end
+	end
+
+	if self.lagScore > 0 then
+		self.lagScore = self.lagScore - 1
+		if self.lagScore < 0 then
+			self.lagScore = 0
 		end
 	end
 end
@@ -456,7 +472,7 @@ function ScriptableComputer:sv_reboot(force, not_execute)
 	self.oldexceptionMsg = nil
 
 	if self.isActive and not not_execute and not fromException then
-		self:sv_execute(true) --последняя интерация после отключения входа, чтобы отлавить выключения
+		self:sv_execute(true) --последняя итерация после отключения входа, чтобы отлавить выключения
 	end
 
 	----------------------------
@@ -483,6 +499,8 @@ end
 function ScriptableComputer:sv_execute(endtick)
 	sc.lastComputer = self
 	if self.scriptFunc and _G.computersAllow then
+		local startExecTime = os.clock()
+
 		if not self.env then
 			self.storageData.crashstate.hasException = true
 			self.storageData.crashstate.exceptionMsg = "unknown error"
@@ -508,7 +526,7 @@ function ScriptableComputer:sv_execute(endtick)
 		self:sv_init_yield()
 		local ran, err = pcall(func)
 		do
-			local lok, lerr = pcall(function(self) self:sv_yield() end, self)
+			local lok, lerr = pcall(function(self) self:sv_yield() end, self) --касыль с лямбдой НУЖЕН для правильного разположения ошибки
 			if not lok and not err then
 				self.storageData.crashstate.hasException = true
 				self.storageData.crashstate.exceptionMsg = lerr
@@ -520,6 +538,13 @@ function ScriptableComputer:sv_execute(endtick)
 			return
 		end
 
+		if ran and self.lagScore > 100 then
+			self.lagScore = 0
+			self.storageData.crashstate.hasException = true
+			self.storageData.crashstate.exceptionMsg = ScriptableComputer.lagMsg
+			self:sv_crash_to_real()
+		end
+		
 		if not ran then
 			if sc.restrictions.vm == "luaInLua" then
 				err = ll_shorterr(err)
@@ -537,7 +562,10 @@ function ScriptableComputer:sv_execute(endtick)
 				end
 			end
 		end
+
+		sc.addLagScore((os.clock() - startExecTime) * sc.clockLagMul)
 	end
+	sc.lastComputer = nil
 end
 
 function ScriptableComputer:sv_updateData(data)

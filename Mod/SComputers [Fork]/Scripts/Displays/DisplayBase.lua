@@ -1291,6 +1291,7 @@ function sc.display.server_createData(self)
 			return isAllow(self)
 		end,
 		reset = function ()
+			sc.addLagScore(4)
 			reset(self)
 			self.api.setFont()
 		end,
@@ -1309,6 +1310,7 @@ function sc.display.server_createData(self)
 			end
 		end,
 		clear = function (color)
+			sc.addLagScore(0.1)
 			self.isStackCheckEnable = nil
 			self.renderingStack = {}
 			self.rnd_idx = 1
@@ -1320,6 +1322,7 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		drawPixel = function (x, y, color)
+			sc.addLagScore(0.01)
 			self.renderingStack[self.rnd_idx] = {
 				1,
 				color or "ffffffff",
@@ -1329,6 +1332,7 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		drawRect = function (x, y, w, h, c)
+			sc.addLagScore(0.1)
 			self.renderingStack[self.rnd_idx] = {
 				2,
 				c or "ffffffff",
@@ -1340,6 +1344,7 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		fillRect = function (x, y, w, h, c)
+			sc.addLagScore(0.1)
 			self.renderingStack[self.rnd_idx] = {
 				3,
 				c or "ffffffff",
@@ -1351,6 +1356,7 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		drawCircle = function (x, y, r, c)
+			sc.addLagScore(0.2)
 			self.renderingStack[self.rnd_idx] = {
 				4,
 				c or "ffffffff",
@@ -1361,6 +1367,7 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		fillCircle = function (x, y, r, c)
+			sc.addLagScore(0.2)
 			self.renderingStack[self.rnd_idx] = {
 				5,
 				c or "ffffffff",
@@ -1371,6 +1378,7 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		drawLine = function (x, y, x1, y1, c)
+			sc.addLagScore(0.1)
 			self.renderingStack[self.rnd_idx] = {
 				6,
 				c or "ffffffff",
@@ -1382,6 +1390,7 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		drawText = function (x, y, text, c)
+			sc.addLagScore(#text / 50)
 			if not debug_disabletext then
 				self.isStackCheckEnable = true
 				self.renderingStack[self.rnd_idx] = {
@@ -1400,8 +1409,18 @@ function sc.display.server_createData(self)
 			}
 			self.rnd_idx = self.rnd_idx + 1
 		end,
-		update = function () self.needUpdate = true end, --для совместимости с SCI
-		flush = function () self.needUpdate = true end,
+		update = function () --для совместимости с SCI
+			if not self.needUpdate then
+				sc.addLagScore(0.1)
+			end
+			self.needUpdate = true
+		end,
+		flush = function ()
+			if not self.needUpdate then
+				sc.addLagScore(0.1)
+			end
+			self.needUpdate = true
+		end,
 
 		forceFlush = function()
 			self.force_update = true
@@ -1428,6 +1447,7 @@ function sc.display.server_createData(self)
 
 		setFont = function (font)
 			checkArg(1, font, "table", "nil")
+			sc.addLagScore(4)
 			--if font == self.saved_customFont then return end --а вдруг я изменю таблицу я захочу отправить ее заного?
 			if font then
 				if not font.chars or not font.width or not font.height then
@@ -2515,7 +2535,7 @@ local drawActions = {
 	[sc_display_drawType.optimize] = function (self) self.optimize_flag = true end,
 }
 
-function sc.display.client_drawStack(self, sendstack)
+function sc.display.client_drawStack(self, sendstack)	
 	sendstack = sendstack or self.scriptableObject.sendData
 	if sendstack then
 		if self.quadTree.splashEffect and sm_exists(self.quadTree.splashEffect) then

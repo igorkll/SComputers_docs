@@ -48,10 +48,12 @@ function sc.radar.createData(self)
 	return {
 		getTargets = function () --> {hangle, vangle, distance}
 			local tick = sm.game.getCurrentTick()
-			if tick == self.old_tick then
+			if tick == self.old_tick and not sc.restrictions.disableCallLimit then
 				error("getTargets can only be used 1 time per tick on one radar", 2)
 			end
 			self.old_tick = tick
+
+			sc.addLagScore(0.3)
 
 			return sc.radar.server_makeCasts(self)
 		end,

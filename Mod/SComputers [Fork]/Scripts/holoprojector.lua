@@ -68,6 +68,8 @@ function holoprojector:server_onCreate()
         end,
 
         addVoxel = function(x, y, z, color, voxel_type)
+            sc.addLagScore(0.05)
+
             if not self.voxels then self.voxels = {} end
             local maxvoxels = (self.data.maxvoxels or 4096)
             if self.voxelsCount >= maxvoxels then error("voxel limit exceeded (" .. tostring(maxvoxels) .. ")", 2) end
@@ -341,41 +343,39 @@ local hideOffset = sm_vec3_new(10000000, 10000000, 10000000)
 local sc_getEffectName = sc.getEffectName
 function holoprojector:cl_upload(datas)
     datas = datas or self.sendData
-
     local gotos = {}
 
-    --if datas.clear then
-        for _, edata in ipairs(self.effects) do
-            if sm_exists(edata[1]) then
-                --effect_setOffsetPosition(edata[1], hideOffset)
-                gotos[edata[1]] = hideOffset
-                table_insert(self.bufeffects[edata[2].voxel_type], edata[1])
-            end
+    for _, edata in ipairs(self.effects) do
+        if sm_exists(edata[1]) then
+            gotos[edata[1]] = hideOffset
+            table_insert(self.bufeffects[edata[2].voxel_type], edata[1])
         end
-        self.effects = {}
-        self.effectsI = 1
-    --end
+    end
+    self.effects = {}
+    self.effectsI = 1
 
-    for i = 1, datas.len do
-        local data = datas[i]
-        if data then
-            if not holoprojector.blocks[data.voxel_type] then data.voxel_type = 1 end
+    if datas.len then
+        for i = 1, datas.len do
+            local data = datas[i]
+            if data then
+                if not holoprojector.blocks[data.voxel_type] then data.voxel_type = 1 end
 
-            local effect
-            if #self.bufeffects[data.voxel_type] > 0 then
-                effect = table_remove(self.bufeffects[data.voxel_type])
-            else
-                effect = sm_effect_createEffect(sc_getEffectName(), self.interactable)
-                effect_setParameter(effect, "uuid", holoprojector.blocks[data.voxel_type])
-                effect_start(effect)
+                local effect
+                if #self.bufeffects[data.voxel_type] > 0 then
+                    effect = table_remove(self.bufeffects[data.voxel_type])
+                else
+                    effect = sm_effect_createEffect(sc_getEffectName(), self.interactable)
+                    effect_setParameter(effect, "uuid", holoprojector.blocks[data.voxel_type])
+                    effect_start(effect)
+                end
+                
+                effect_setParameter(effect, "color", data.color)
+        
+                local ldata = {effect, data}
+                gotos[effect] = cl_doEffect(self, ldata)
+                self.effects[self.effectsI] = ldata
+                self.effectsI = self.effectsI + 1
             end
-            
-            effect_setParameter(effect, "color", data.color)
-    
-            local ldata = {effect, data}
-            gotos[effect] = cl_doEffect(self, ldata)
-            self.effects[self.effectsI] = ldata
-            self.effectsI = self.effectsI + 1
         end
     end
 

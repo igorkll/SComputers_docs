@@ -55,7 +55,7 @@ function gps:server_onCreate()
                 end,
                 getSelfGpsData = function ()
                     local tick = sm.game.getCurrentTick()
-                    if tick == self.old_tick then
+                    if tick == self.old_tick and not sc.restrictions.disableCallLimit then
                         error("getSelfGpsData can only be used 1 time per tick on one GPS-Module", 2)
                     end
                     self.old_tick = tick
@@ -66,7 +66,7 @@ function gps:server_onCreate()
                     checkArg(1, freq, "number")
 
                     local tick = sm.game.getCurrentTick()
-                    if tick == self.old_tick2 then
+                    if tick == self.old_tick2 and not sc.restrictions.disableCallLimit then
                         error("getTagsGpsData can only be used 1 time per tick on one GPS-Module", 2)
                     end
                     self.old_tick2 = tick
