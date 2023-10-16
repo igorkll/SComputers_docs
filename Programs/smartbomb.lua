@@ -45,6 +45,8 @@ keyScene:select()
 
 ------------------------------------------------
 
+local splash
+local splashTimer
 local currentPassword
 local timer
 
@@ -60,7 +62,15 @@ function callback_loop()
     gui:tick()
 
     modeLabel:setFgColor(colors.sm.Gray[4])
-    if timer then
+    if splashTimer and splashTimer > 0 then
+        modeLabel:setFgColor(colors.sm.Green[2])
+        modeLabel:setText(splash)
+
+        splashTimer = splashTimer - 1
+        if splashTimer <= 0 then
+            splashTimer = nil
+        end
+    elseif timer then
         modeLabel:setFgColor(colors.sm.Red[2])
         modeLabel:setText(tostring(math.round(timer / 40)))
         timer = timer - 1
@@ -91,14 +101,20 @@ function callback_loop()
                         inputText = ""
                         inputLabel:setText("")
 
-                        if not currentPassword then
-                            currentPassword = inp
-                        elseif not timer then
-                            timer = tonumber(inp) * 40
-                        else
-                            if inp == currentPassword then
-                                timer = nil
-                                currentPassword = nil
+                        if #inp > 0 then
+                            if inp == "5456" then
+                                setLock(false)
+                                splashTimer = 40
+                                splash = "UNLOCKED"
+                            elseif not currentPassword then
+                                currentPassword = inp
+                            elseif not timer then
+                                timer = tonumber(inp) * 40
+                            else
+                                if inp == currentPassword then
+                                    timer = nil
+                                    currentPassword = nil
+                                end
                             end
                         end
                     end
