@@ -24,7 +24,7 @@ local keys = {
     {"<", "0", "#"},
 }
 
-local input = ""
+local inputText = ""
 
 local buttonSize = 8
 local buttonSize2 = buttonSize + 1
@@ -56,7 +56,13 @@ function callback_loop()
                 if button:isPress() then
                     local str = tonumber(button.text)
                     if str then
-                        input = input .. str
+                        inputText = inputText .. str
+                        inputLabel.text = inputText
+                        inputLabel:update()
+                    elseif button.text == "<" then
+                        inputText = inputText:sub(1, #inputText - 1)
+                        inputLabel.text = inputText
+                        inputLabel:update()
                     end
                 end
             end
