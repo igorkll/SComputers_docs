@@ -41,7 +41,12 @@ keyScene:select()
 
 ------------------------------------------------
 
+local currentPassword
+local timer
+
 function callback_loop()
+    out(0)
+
     if _endtick then
         display.clear()
         display.flush()
@@ -49,6 +54,20 @@ function callback_loop()
     end
 
     gui:tick()
+
+    if timer then
+        modeLabel:setText(tostring(math.round(timer / 40)))
+        timer = timer - 1
+        if timer <= 0 then
+            out(1)
+            timer = nil
+            currentPassword = nil
+        end
+    elseif currentPassword then
+        modeLabel:setText("set timer")
+    else
+        modeLabel:setText("set pswd")
+    end
     
     if keyScene:isSelected() then
         for y, line in ipairs(keys) do
@@ -56,13 +75,32 @@ function callback_loop()
                 if button:isPress() then
                     local str = tonumber(button.text)
                     if str then
-                        inputText = inputText .. str
-                        inputLabel.text = inputText
-                        inputLabel:update()
+                        if #inputText < 4 then
+                            inputText = inputText .. str
+                        end
                     elseif button.text == "<" then
                         inputText = inputText:sub(1, #inputText - 1)
-                        inputLabel.text = inputText
-                        inputLabel:update()
+                    elseif button.text == "#" then
+                        local inp = inputText
+                        inputText = ""
+                        inputLabel:setText("")
+
+                        if not currentPassword then
+                            currentPassword = inp
+                        elseif not timer then
+                            timer = tonumber(inp) * 40
+                        else
+                            if inp == currentPassword then
+                                timer = nil
+                                currentPassword = nil
+                            end
+                        end
+                    end
+
+                    if currentPassword and not timer then
+                        inputLabel:setText(inputText)
+                    else
+                        inputLabel:setText(string.rep("*", #inputText))
                     end
                 end
             end
