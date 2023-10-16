@@ -5,8 +5,10 @@ display.clearClicks()
 display.setSkipAtLags(false)
 display.setClicksAllowed(true)
 display.setFrameCheck(false)
-display.setRotation(1)
 local rx, ry = display.getWidth(), display.getHeight()
+if rx ~= ry then
+    display.setRotation(1)
+end
 
 function math.round(num)
     return math.floor(num + 0.5)
@@ -26,16 +28,18 @@ local keys = {
 
 local inputText = ""
 
-local buttonSize = 8
+local buttonSize = 10
+local labelSize = 7
 local buttonSize2 = buttonSize + 1
-local offsetX, offsetY = math.round((rx / 2) - ((#keys[1] * buttonSize2) / 2)), math.round(((ry / 2) - ((#keys * buttonSize2) / 2)) + (buttonSize2 / 2))
+local offsetX, offsetY = math.round((rx / 2) - ((#keys[1] * buttonSize2) / 2)), math.round(((ry / 2) - ((#keys * buttonSize2) / 2)) + 7)
 for y, line in ipairs(keys) do
     for x, char in ipairs(line) do
         line[x] = keyScene:createButton(((x - 1) * buttonSize2) + offsetX, ((y - 1) * buttonSize2) + offsetY, buttonSize, buttonSize, false, char, tonumber(char) and colors.sm.Red[2] or colors.sm.Orange[2])
     end
 end
-local modeLabel = keyScene:createLabel(1, 1, rx - 2, buttonSize, nil, colors.sm.Gray[3], colors.sm.Gray[4])
-local inputLabel = keyScene:createLabel(1, buttonSize + 2, rx - 2, buttonSize, nil, colors.sm.Gray[3], colors.sm.Gray[4])
+
+local modeLabel = keyScene:createLabel(1, 1, rx - 2, labelSize, nil, colors.sm.Gray[3], colors.sm.Gray[4])
+local inputLabel = keyScene:createLabel(1, labelSize + 2, rx - 2, labelSize, nil, colors.sm.Gray[3], colors.sm.Gray[4])
 
 keyScene:select()
 
