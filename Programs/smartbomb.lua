@@ -55,7 +55,9 @@ function callback_loop()
 
     gui:tick()
 
+    modeLabel:setFgColor(colors.sm.Gray[4])
     if timer then
+        modeLabel:setFgColor(colors.sm.Red[2])
         modeLabel:setText(tostring(math.round(timer / 40)))
         timer = timer - 1
         if timer <= 0 then
