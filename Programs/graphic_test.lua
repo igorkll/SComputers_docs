@@ -1,3 +1,5 @@
+local utils = require("utils")
+
 local display = getDisplays()[1]
 local mode = 0
 
@@ -26,7 +28,7 @@ function callback_loop()
         return
     end
 
-    if getUptime() % (40 * 4) == 0 then
+    if math.random(0, 40) == 0 then
         mode = mode + 1
         if mode > 6 then
             mode = 0
@@ -35,7 +37,9 @@ function callback_loop()
     end
 
     if mode == 0 then
-        display.drawPixel(rPos(), rPos(), rCol())
+        for i = 1, 128 do
+            display.drawPixel(rPos(), rPos(), rCol())
+        end
     elseif mode == 1 then
         display.drawRect(rPos(), rPos(), rVal(), rVal(), rCol())
     elseif mode == 2 then
@@ -50,6 +54,12 @@ function callback_loop()
         local text = tostring(sm.uuid.generateRandom())
         display.drawText(rPos() - ((#text * fw) / 2), rPos() - (fh / 2), text, rCol())
     end
+
+    display.fillRect(0, 0, 32, 7, "ff0000")
+    display.drawText(1, 1, utils.roundTo(getLagsScore()))
+
+    display.fillRect(0, 7, 32, 7, "0000ff")
+    display.drawText(1, 8, math.floor(getSkippedTicks()))
 
     display.flush()
 end
