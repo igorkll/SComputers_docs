@@ -2,7 +2,10 @@ local display = getDisplays()[1]
 local mode = 0
 
 display.reset()
+display.clear()
+display.flush()
 local w, h = display.getWidth(), display.getHeight()
+local fw, fh = display.getFontWidth(), display.getFontHeight()
 
 local function rPos()
     return math.random(1, w)
@@ -17,12 +20,18 @@ local function rVal()
 end
 
 function callback_loop()
-    if getUptime() % 40 == 0 then
+    if _endtick then
+        display.clear()
+        display.forceFlush()
+        return
+    end
+
+    if getUptime() % (40 * 4) == 0 then
         mode = mode + 1
-        if mode > 5 then
+        if mode > 6 then
             mode = 0
-            display.clear()
         end
+        display.clear()
     end
 
     if mode == 0 then
@@ -37,6 +46,9 @@ function callback_loop()
         display.fillCircle(rPos(), rPos(), rVal(), rCol())
     elseif mode == 5 then
         display.drawLine(rPos(), rPos(), rPos(), rPos(), rCol())
+    elseif mode == 6 then
+        local text = tostring(sm.uuid.generateRandom())
+        display.drawText(rPos() - ((#text * fw) / 2), rPos() - (fh / 2), text, rCol())
     end
 
     display.flush()

@@ -455,6 +455,9 @@ function createSafeEnv(self, settings)
         getLagsScore = function ()
             return self.lagScore
         end,
+        getUptime = function ()
+            return self.uptime
+        end,
 
         --limitations of the amount of RAM in development
         getUsedRam = function ()
@@ -629,4 +632,5 @@ function removeServerMethods(env) --called before execution clientInvoke
     env.getDeltaTime = nil
     env.getUsedRam = nil
     env.getTotalRam = nil
+    env.getUptime = nil
 end

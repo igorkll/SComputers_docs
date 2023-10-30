@@ -180,6 +180,7 @@ function ScriptableComputer:server_onCreate(constData)
 	self.sv_patience = self.sv_max_patience
 	self.lagScore = 0
 	self.skipped = 0
+	self.uptime = 0
 
 	self:sv_reset()
 	self:sv_reboot()
@@ -297,11 +298,13 @@ function ScriptableComputer:server_onFixedUpdate()
 
 	if not self.storageData.crashstate.hasException and work then
 		if not activeNow and self.isActive then
+			self.uptime = 0
 			self:sv_execute(true) --последняя итерация после отключения входа, чтобы отлавить выключения
 			self:sv_disableComponentApi()
 		end
 		
 		if activeNow and not self.isActive then
+			self.uptime = 0
 			self:sv_reboot()
 		end
 
@@ -324,6 +327,7 @@ function ScriptableComputer:server_onFixedUpdate()
 			else
 				self.skipped = self.skipped + 1
 			end
+			self.uptime = self.uptime + 1
 		end
 	end
 	self.isActive = activeNow
