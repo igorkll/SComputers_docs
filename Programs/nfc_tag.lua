@@ -22,7 +22,7 @@ local function checkPassword(password, admin)
         return true
     end
 
-    return utils.md5bin(tostring(pass)) == utils.md5bin(tostring(password))
+    return tostring(pass) == tostring(password)
 end
 
 local function only(admin, packetData, sender, func)
@@ -30,13 +30,13 @@ local function only(admin, packetData, sender, func)
         if checkPassword(packetData.password, true) then
             func()
         else
-            port.sendTo(sender, "invalid admin password")
+            port.sendTo(sender, "0:invalid admin password")
         end
     else
         if checkPassword(packetData.password) or checkPassword(packetData.password, true) then
             func()
         else
-            port.sendTo(sender, "invalid password")
+            port.sendTo(sender, "0:invalid password")
         end
     end
 end
@@ -44,6 +44,7 @@ end
 ---------------------------------------------------
 
 if not data.uuid then
+    data.adminPassword = utils.md5bin("0000")
     data.uuid = tostring(sm.uuid.generateRandom())
     save()
 end
@@ -66,25 +67,56 @@ function callback_loop()
                     data.unlock = true
                     save()
                     updateLock()
+                    port.sendTo(sender, "1:tag unlocked")
                 end)
             elseif packetData.command == "lock" then
                 only(true, packetData, sender, function ()
                     data.unlock = false
                     save()
                     updateLock()
+                    port.sendTo(sender, "1:tag locked")
                 end)
             elseif packetData.command == "destroy" then
                 only(true, packetData, sender, function ()
-                    pcall(setCode, "")
+                    pcall(setCode, "THE TAG WAS DESTROYED")
                     pcall(setData, "")
                     pcall(setLock, true, true)
                     pcall(setInvisible, true, true)
+                    port.sendTo(sender, "1:tag destroyed")
                     reboot()
                 end)
             elseif packetData.command == "echo" then
-                port.sendTo(sender, tostring(packetData.echo))
+                port.sendTo(sender, "1:" .. tostring(packetData.echo))
+            elseif packetData.command == "uuid" then
+                only(false, packetData, sender, function ()
+                    port.sendTo(sender, "1:" .. tostring(data.uuid))
+                end)
+            elseif packetData.command == "set_password" then
+                only(true, packetData, sender, function ()
+                    data.password = tostring(packetData.pass)
+                    save()
+                    port.sendTo(sender, "1:password setted")
+                end)
+            elseif packetData.command == "set_admin_password" then
+                only(true, packetData, sender, function ()
+                    data.adminPassword = tostring(packetData.pass)
+                    save()
+                    port.sendTo(sender, "1:admin password setted")
+                end)
+            elseif packetData.command == "clear_password" then
+                only(true, packetData, sender, function ()
+                    data.password = nil
+                    save()
+                    port.sendTo(sender, "1:password cleared")
+                end)
+            elseif packetData.command == "clear_admin_password" then
+                only(true, packetData, sender, function ()
+                    data.adminPassword = nil
+                    save()
+                    port.sendTo(sender, "1:admin password cleared")
+                end)
             else
-                port.sendTo(sender, "unsupported command")
+                port.sendTo(sender, "0:unsupported command")
             end
         end
     end
