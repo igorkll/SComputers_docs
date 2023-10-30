@@ -1,3 +1,5 @@
+local utils = require("utils")
+
 local port = getComponents("port")[1]
 
 local raw_data = getData()
@@ -11,7 +13,10 @@ local function save()
 end
 
 local function checkPassword(password)
-    if not data.password 
+    if not data.password then
+        return true
+    end
+    return utils.md5bin(tostring(data.password)) == utils.md5bin(tostring(password))
 end
 
 ---------------------------------------------------
@@ -29,8 +34,13 @@ function callback_loop()
         local result = {pcall(sm.json.parseJsonString(packet))}
         if result[1] then
             local packetData = result[2]
-            if not data.password or 
-            if packetData.command == ""
+            if checkPassword(packetData.password) then
+                if packetData.command == "" then
+                    
+                end
+            else
+                port.sendTo(sender, "invalid password")
+            end
         end
     end
 end
