@@ -320,6 +320,9 @@ function ScriptableComputer:server_onFixedUpdate()
 				end
 			end
 			dropFreq = dropFreq + math.floor(self.lagScore / 10)
+			if self.lagScore >= 50 then
+				dropFreq = dropFreq * 2
+			end
 			if dropFreq == 1 then dropFreq = 2 end
 			if dropFreq == 0 or self.cdata.unsafe or sm.game.getCurrentTick() % dropFreq == 0 then
 				self:sv_execute()

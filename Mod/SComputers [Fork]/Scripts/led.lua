@@ -12,6 +12,7 @@ ledsDatas = ledsDatas or {}
 
 function led:server_onCreate()
     self.sv_glow = 1
+    self.lastChilds = {}
 
     self.interactable.publicData = {
         sc_component = {
@@ -22,13 +23,21 @@ function led:server_onCreate()
 
                     if index <= 0 then
                         if self.shape.color ~= color then
-                            self.shape:setColor(color)
+                            if self.allow_update then
+                                self.shape:setColor(color)
+                                self.allow_update = nil
+                            else
+                                self.savedColor = color
+                            end
                         end
                         return
                     end
+
                     index = index - 1
-                    for _, child in ipairs(self.interactable:getChildren()) do
-                        ledsDatas[child.id].setColor(index, color)
+                    for _, child in ipairs(self.lastChilds) do
+                        if ledsDatas[child.id] then
+                            ledsDatas[child.id].setColor(index, color)
+                        end
                     end
                 end,
                 setGlow = function (index, multiplier)
@@ -46,8 +55,10 @@ function led:server_onCreate()
                     end
 
                     index = index - 1
-                    for _, child in ipairs(self.interactable:getChildren()) do
-                        ledsDatas[child.id].setGlow(index, multiplier)
+                    for _, child in ipairs(self.lastChilds) do
+                        if ledsDatas[child.id] then
+                            ledsDatas[child.id].setGlow(index, multiplier)
+                        end
                     end
                 end
             }
@@ -57,6 +68,22 @@ function led:server_onCreate()
 end
 
 function led:server_onFixedUpdate()
+    local ctick = sm.game.getCurrentTick()
+	if ctick % sc.restrictions.screenRate == 0 then self.allow_update = true end
+    
+    if ctick % 20 == 0 then
+        self.lastChilds = self.interactable:getChildren()
+    end
+
+    if self.allow_update and self.savedColor then
+        if self.shape.color ~= self.savedColor then
+            self.shape:setColor(self.savedColor)
+        end
+
+        self.allow_update = nil
+        self.savedColor = nil
+    end
+
     if self.sendData then
         self:sv_sendData()
         self.sendData = nil
