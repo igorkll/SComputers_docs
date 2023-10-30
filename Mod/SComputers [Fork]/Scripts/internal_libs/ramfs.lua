@@ -36,3 +36,4 @@ function ramfs:isChange()
 end
 
 sc.reg_internal_lib("ramfs", ramfs)
+return ramfs

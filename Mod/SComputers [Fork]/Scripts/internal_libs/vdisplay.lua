@@ -539,3 +539,4 @@ function vdisplay.create(callbacks, width, height)
 end
 
 sc.reg_internal_lib("vdisplay", vdisplay)
+return vdisplay

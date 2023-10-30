@@ -15,6 +15,50 @@ local table_concat = table.concat
 local ipairs = ipairs
 local pairs = pairs
 
+local maxrep = 1024 * 1024
+local orep = string.rep
+function customRep(s, n, sep)
+    checkArg(1, s, "string")
+    checkArg(2, n, "number")
+    checkArg(3, sep, "string", "nil")
+
+    if n <= 0 then
+        return ""
+    end
+
+    local allocations = n * #s
+    if sep then
+        local seplen = #sep
+        allocations = allocations + ((n * seplen) - seplen)
+    end
+    if allocations > maxrep then
+        error("the maximum amount of allocations via string.rep is 1024kb", 2)
+    end
+
+    local result = {pcall(orep, s, n, sep)}
+    if result[1] then
+        return result[2]
+    else
+        error(tostring(result[2]), 2)
+    end
+end
+
+function tweaks()
+	local getmetatable = sc.getApi("getmetatable")
+	if getmetatable then
+		local string_mt = getmetatable("")
+		string_mt.__index.rep = customRep
+	end
+end
+
+function unTweaks()
+	local getmetatable = sc.getApi("getmetatable")
+	if getmetatable then
+		local string_mt = getmetatable("")
+		string_mt.__index.rep = orep
+	end
+end
+
 local jsonEncodeInputCheck
 function jsonEncodeInputCheck(tbl, level, itemsCount)
 	itemsCount = itemsCount or 0

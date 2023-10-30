@@ -66,10 +66,25 @@ function createSafeEnv(self, settings)
             sc.coroutineCheck()
             if name:find("%.") or name:find("%/") or name:find("%\\") then error("the library name cannot contain the characters: \"/.\\\"", 2) end
             if self.libcache[name] then return self.libcache[name] end
-            if not _G.internal_libs[name] then dofile("$CONTENT_DATA/Scripts/internal_libs/" .. name .. ".lua") end
-            if not _G.internal_libs[name] then error("the \"" .. name .. "\" library was not found", 2) end
-            self.libcache[name] = sc.advDeepcopy(_G.internal_libs[name])
-            return self.libcache[name]
+            if dlm and dlm.loadfile then
+                local code, err = dlm.loadfile("$CONTENT_3aeb81c2-71b9-45a1-9479-1f48f1e8ff21/Scripts/internal_libs/" .. name .. ".lua", _G)
+                if type(code) ~= "function" then
+                    error("load error: " .. tostring(err or "unknown"), 2)
+                end
+
+                local result = {pcall(code)}
+                if not result[1] or type(result[2]) ~= "table" then
+                    error("exec error: " .. tostring(result[2] or "unknown"), 2)
+                end
+
+                self.libcache[name] = result[2]
+            else
+                if not _G.internal_libs[name] then
+                    pcall(dofile, "$CONTENT_DATA/Scripts/internal_libs/" .. name .. ".lua")
+                end
+                self.libcache[name] = sc.advDeepcopy(_G.internal_libs[name])
+            end
+            return self.libcache[name] or error("the \"" .. name .. "\" library was not found", 2)
         end,
 
         checkArg = checkArg, --это не стандартный метод lua он был взят из opencomputers(machine.lua) и определен в methods.lua
@@ -330,7 +345,7 @@ function createSafeEnv(self, settings)
                 error("the maximum amount of code is 32 KB", 2)
             end
             self.new_code = code
-            sc.addLagScore(5)
+            sc.addLagScore(4)
         end,
         getCode = function ()
             return self.storageData.script or ""
@@ -345,7 +360,7 @@ function createSafeEnv(self, settings)
             end
             self.storageData.userdata = base64.encode(data)
             self.storageData.userdata_bs64 = true
-            sc.addLagScore(5)
+            sc.addLagScore(4)
         end,
         getData = function ()
             if self.storageData.userdata then
@@ -544,6 +559,7 @@ function createSafeEnv(self, settings)
     end
 
     env.math.randomseed = nil --this method is not in the game, but if it is added, it STILL should not be in SComputers
+    env.string.rep = customRep --in the case of ("str").rep(), the "tweaks" method in the methods.lua file will work
 
 	return env
 end

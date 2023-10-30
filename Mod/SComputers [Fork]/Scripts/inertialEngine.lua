@@ -118,11 +118,12 @@ end
 
 function inertialEngine:sv_reset()
     self.targetPosition = self.shape.worldPosition
+    self.targetPosition.z = self.targetPosition.z + 2
+
     self.targetRotation = self:getSelfRotation()
     self.targetRotation.x = 0
     self.targetRotation.y = 0
-    self.targetPosition.z = self.targetPosition.z + 2
-
+    
     self.mPidX = createPID(0.3, 0, 500)
     self.mPidY = createPID(0.3, 0, 500)
     self.mPidZ = createPID(0.3, 0, 500)

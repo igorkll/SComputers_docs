@@ -115,6 +115,7 @@ you can write your values there
 * ninput / input / out
 * clientInvoke / clientInvokeTo
 * setComponentApi / getComponentApi
+* getMaxAvailableCpuTime / getDeltaTime / getUsedRam / getTotalRam / getUptime
 
 ### tablet features
 * The renderAtDistance screen function on the tablet will display the screen even if the tablet is not in your hand

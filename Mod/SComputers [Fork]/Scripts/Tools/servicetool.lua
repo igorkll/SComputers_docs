@@ -83,6 +83,7 @@ function servicetool:sv_safe(data)
 
         sc.saveRestrictions()
         sc.rebootAll = true
+        self.network:sendToClient(data.player, "cl_safe")
     else
         self.network:sendToClient(data.player, "cl_noPermission")
     end
@@ -116,7 +117,7 @@ function servicetool:client_onFixedUpdate()
         self.gui:open()
     end
 
-    if _G.tcCache and sm.game.getCurrentTick() % 80 == 0 then
+    if _G.tcCache and sm.game.getCurrentTick() % (40 * 16) == 0 then
         local size = 0
         local types = {}
         for dat in pairs(_G.tcCache) do
@@ -126,7 +127,7 @@ function servicetool:client_onFixedUpdate()
             types[t] = types[t] + 1
         end
 
-        if size > 512 then
+        if size > 1024 * 4 then
             print("clearing tableChecksum cache...")
             print("current size", size)
             print("types:")
@@ -213,6 +214,10 @@ end
 
 function servicetool:cl_noPermission()
     sm.gui.chatMessage("#ff0000you don't have rights to use this command")
+end
+
+function servicetool:cl_safe()
+    sm.gui.chatMessage("#00ff00SComputers settings are now safe to use")
 end
 
 function servicetool:cl_cheat()

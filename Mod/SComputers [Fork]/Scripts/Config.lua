@@ -9,6 +9,7 @@ dofile("examples.lua")
 dofile("base64.lua")
 dofile("utf8.lua")
 dofile("json.lua")
+dofile("md5.lua")
 
 ---- main
 dofile "$CONTENT_DATA/Scripts/methods.lua"
@@ -55,9 +56,10 @@ sc = {
 	keyboardDatas = {}
 }
 
-sc.version = "2.0a"
+sc.version = "2.2a"
 
 sc.deltaTime = 0
+sc.maxcodelen = 32 * 1024
 sc.clockLagMul = 250
 sc.radarDetectedBodies = {}
 
@@ -236,12 +238,13 @@ sc.defaultRestrictions = { --DEFAULT
 	rays = 0,
 	skipFps = 20,
 	rend = 15,
-	cpu = (1 / 40) * 4, --two ticks
+	cpu = (1 / 40) * 4, --max 4 ticks
 	saving = 10,
 	maxDisplays = 128,
 	ibridge = true,
 	disableCallLimit = false,
-	lagDetector = 1
+	lagDetector = 1,
+	screenRate = 2
 }
 
 sc.forServerRestrictions = { --FOR SERVERS
@@ -262,7 +265,8 @@ sc.forServerRestrictions = { --FOR SERVERS
 	maxDisplays = 64,
 	ibridge = false,
 	disableCallLimit = false,
-	lagDetector = 2
+	lagDetector = 2,
+	screenRate = 4
 }
 
 sc.restrictions = nil
@@ -279,7 +283,7 @@ function sc.saveRestrictions()
 end
 
 function sc.setRestrictions(restrictions)
-	sc.restrictions = restrictions
+	sc.restrictions = sc.advDeepcopy(restrictions)
 	for key, value in pairs(sc.defaultRestrictions) do
 		if sc.restrictions[key] == nil then
 			sc.restrictions[key] = value
@@ -316,10 +320,8 @@ function sc.loadRestrictions()
 end
 
 
-
-
 function sc.addLagScore(score)
-	if sc.lastComputer and type(sc.restrictions.lagDetector) == "number" then
+	if sc.lastComputer and not sc.lastComputer.cdata.unsafe and type(sc.restrictions.lagDetector) == "number" then
 		sc.lastComputer.lagScore = sc.lastComputer.lagScore + (score * sc.restrictions.lagDetector)
 	end
 end
@@ -621,6 +623,10 @@ function sc.getComponents(self, name, settings)
 		end
 	end
 	return components
+end
+
+if dlm and dlm.setupContentPath then
+	print("SComputers dlm.setupContentPath: ", pcall(dlm.setupContentPath, "SComputers [Fork]", sm.uuid.new("3aeb81c2-71b9-45a1-9479-1f48f1e8ff21"), 2949350596))
 end
 
 -------------------------------------------------------

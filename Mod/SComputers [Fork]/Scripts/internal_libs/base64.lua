@@ -19,3 +19,4 @@ function base64lib.decode(data)
 end
 
 sc.reg_internal_lib("base64", base64lib)
+return base64lib

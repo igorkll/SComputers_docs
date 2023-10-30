@@ -7,10 +7,18 @@ utils.split = strSplit
 utils.splitByMaxSize = splitByMaxSize
 utils.deepcopy = sc.advDeepcopy
 utils.md5 = function (str)
+    sc.addLagScore(3)
     if #str > (1024 * 1) then
         error("you cannot calculate md5-sum if the input string exceeds 1kb", 2)
     end
-    return sm.lgc.md5(str)
+    return md5.sumhexa(str)
+end
+utils.md5bin = function (str)
+    sc.addLagScore(3)
+    if #str > (1024 * 1) then
+        error("you cannot calculate md5-sum if the input string exceeds 1kb", 2)
+    end
+    return md5.sum(str)
 end
 utils.dist = mathDist
 
@@ -36,3 +44,4 @@ function utils.splitByMaxSizeWithTool(tool, str, max)
 end
 
 sc.reg_internal_lib("utils", utils)
+return utils

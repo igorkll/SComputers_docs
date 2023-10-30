@@ -12,3 +12,4 @@ function jsonlib.decode(jsonstring)
 end
 
 sc.reg_internal_lib("json", jsonlib)
+return jsonlib

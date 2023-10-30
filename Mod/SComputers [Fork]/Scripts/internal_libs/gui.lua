@@ -432,3 +432,4 @@ end
 -----------------------------------
 
 sc.reg_internal_lib("gui", gui)
+return gui

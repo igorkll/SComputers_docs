@@ -17,7 +17,7 @@ ScriptableComputer.UV_HAS_DISABLED = 9
 ScriptableComputer.maxcodesize = 32 * 1024
 ScriptableComputer.longOperationMsg = "the computer has been performing the operation for too long"
 ScriptableComputer.oftenLongOperationMsg = "the computer exceeded the CPU time limit too often"
-ScriptableComputer.lagMsg = "this computer caused too many lags, please optimize your code"
+ScriptableComputer.lagMsg = "this computer caused lags, please optimize your code or disable 'anti-lag' in 'Permission Tool'"
 
 ----------------------- yield -----------------------
 
@@ -150,6 +150,10 @@ function ScriptableComputer:server_onCreate(constData)
 			gsubFix = true,
 			codeInBase64 = true
 		}
+
+		if self.cdata.unsafe then
+			self.storageData.invisible = true
+		end	
 	end
 	
 	------env settings
@@ -170,10 +174,7 @@ function ScriptableComputer:server_onCreate(constData)
 
 	------init
 
-	if self.cdata.unsafe then
-		self.storageData.invisible = true
-		self.hostonly = true
-	end
+	self.hostonly = not not self.cdata.unsafe
 
 	self.sv_max_patience = 2
 	self.sv_patience = self.sv_max_patience
@@ -191,6 +192,11 @@ function ScriptableComputer:sv_crash_to_real()
 		hasException = self.storageData.crashstate.hasException,
 		exceptionMsg = self.storageData.crashstate.exceptionMsg
 	}
+end
+
+function ScriptableComputer:sv_formatException()
+	self.storageData.crashstate.hasException = not not self.storageData.crashstate.hasException
+	self.storageData.crashstate.exceptionMsg = tostring(self.storageData.crashstate.exceptionMsg or "Unknown error"):sub(1, 1024)
 end
 
 function ScriptableComputer:server_onDestroy()
@@ -312,7 +318,7 @@ function ScriptableComputer:server_onFixedUpdate()
 			end
 			dropFreq = dropFreq + math.floor(self.lagScore / 10)
 			if dropFreq == 1 then dropFreq = 2 end
-			if dropFreq == 0 or sm.game.getCurrentTick() % dropFreq == 0 then
+			if dropFreq == 0 or self.cdata.unsafe or sm.game.getCurrentTick() % dropFreq == 0 then
 				self:sv_execute()
 				self.skipped = 0
 			else
@@ -333,6 +339,7 @@ function ScriptableComputer:server_onFixedUpdate()
 	end
 	]]
 
+	self:sv_formatException()
 	if self.storageData.crashstate.hasException ~= self.oldhasException or
 	self.storageData.crashstate.exceptionMsg ~= self.oldexceptionMsg then
 		self.oldhasException = self.storageData.crashstate.hasException
@@ -487,7 +494,7 @@ end
 function ScriptableComputer:sv_sendException()
 	if self.storageData.crashstate.hasException then
 		self:sv_disableComponentApi()
-		self.storageData.crashstate.exceptionMsg = self.storageData.crashstate.exceptionMsg or "unknown error"
+		self.storageData.crashstate.exceptionMsg = self.storageData.crashstate.exceptionMsg or "Unknown error"
 		self:sv_crash_to_real()
 		print("computer crashed", self.storageData.crashstate.exceptionMsg)
 		self.network:sendToClients("cl_onComputerException", self.storageData.crashstate.exceptionMsg)
@@ -497,13 +504,15 @@ function ScriptableComputer:sv_sendException()
 end
 
 function ScriptableComputer:sv_execute(endtick)
+	tweaks()
 	sc.lastComputer = self
+
 	if self.scriptFunc and _G.computersAllow then
 		local startExecTime = os.clock()
 
 		if not self.env then
 			self.storageData.crashstate.hasException = true
-			self.storageData.crashstate.exceptionMsg = "unknown error"
+			self.storageData.crashstate.exceptionMsg = "Unknown error"
 			self:sv_crash_to_real()
 			return
 		end
@@ -565,6 +574,8 @@ function ScriptableComputer:sv_execute(endtick)
 
 		sc.addLagScore((os.clock() - startExecTime) * sc.clockLagMul)
 	end
+
+	unTweaks()
 	sc.lastComputer = nil
 end
 
@@ -645,6 +656,8 @@ function ScriptableComputer.client_onCreate(self)
 end
 
 function ScriptableComputer.client_onFixedUpdate(self, dt)
+	if not self.cStorageData then return end
+
 	if not sm.isHost and self.cStorageData.hostonly and self.interact then
 		self:cl_internal_alertMessage("#ff0000only the host can open unsafe-computer")
 		self.interact = nil
@@ -660,7 +673,7 @@ function ScriptableComputer.client_onFixedUpdate(self, dt)
 			uvpos = ScriptableComputer.UV_NON_ACTIVE
 		end
 
-		if self.cStorageData and (self.cStorageData.hasException or not self.cStorageData.computersAllow) then
+		if self.cStorageData.hasException or not self.cStorageData.computersAllow then
 			local uv = ScriptableComputer.UV_HAS_ERROR
 			if not self.cStorageData.computersAllow then
 				uv = ScriptableComputer.UV_HAS_DISABLED
@@ -671,7 +684,7 @@ function ScriptableComputer.client_onFixedUpdate(self, dt)
 		end
 	end
 
-	if self.cStorageData and self.gui and self.tmpData then
+	if self.gui and self.tmpData then
 		if not self.gui:isActive() and self.tmpDataUpdated then
 			self.cStorageData.__lock = self.tmpData.__lock
 			self.cStorageData.__permanent_lock_state = self.tmpData.__permanent_lock_state
@@ -861,14 +874,14 @@ function ScriptableComputer:cl_invokeScript(tbl)
 
 	local code, err = safe_load_code(self, script, "=client_invoke", "t", env)
 	if not code then
-		print("client invoke syntax error: " .. (err or "unknown error"))
+		print("client invoke syntax error: " .. (err or "Unknown error"))
 		return
 	end
 
 	self:cl_init_yield()
 	local ran, err = pcall(code, unpack(args))
 	if not ran then
-		print("client invoke error: " .. (err or "unknown error"))
+		print("client invoke error: " .. (err or "Unknown error"))
 	end
 end
 

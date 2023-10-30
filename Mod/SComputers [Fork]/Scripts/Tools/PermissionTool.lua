@@ -104,6 +104,7 @@ function PermissionTool.client_onCreate(self)
 	self.gui:setButtonCallback("acreative", "client_onACreativePress")
 	self.gui:setButtonCallback("disableCallLimit", "client_disableCallLimit")
 	self.gui:setButtonCallback("lagDetector", "client_lagDetector")
+	self.gui:setButtonCallback("screenRate", "client_screenRate")
 	self.gui:setVisible("admin", false)
 	--self.gui:setButtonCallback("DisplaysAtLagsButton", "client_onDisplayAtLagsButtonPressed")
 
@@ -175,6 +176,18 @@ function PermissionTool.cl_guiUpdateButtons(self)
 	else
 		self.gui:setText("lagDetector", "anti-lag: false")
 	end
+	if self.currentSettings.screenRate == 1 then
+		self.gui:setText("screenRate", "screen rate: full")
+	elseif self.currentSettings.screenRate == 2 then
+		self.gui:setText("screenRate", "screen rate: half")
+	elseif self.currentSettings.screenRate == 4 then
+		self.gui:setText("screenRate", "screen rate: quatre")
+	elseif self.currentSettings.screenRate == 8 then
+		self.gui:setText("screenRate", "screen rate: eighth")
+	else
+		self.gui:setText("screenRate", "screen rate: " .. tostring(self.currentSettings.screenRate))
+	end
+	
 
 	if self.currentSettings.vm == "luaInLua" then
 		self.gui:setText("lua", "LuaVM: LuaInLua (remade)")
@@ -302,6 +315,20 @@ function PermissionTool:client_onSavingPress()
 	end
 end
 
+function PermissionTool:client_screenRate()
+	if not self:client_canChangeSettings() then return end
+
+	if self.currentSettings.screenRate == 1 then
+		self.currentSettings.screenRate = 2
+	elseif self.currentSettings.screenRate == 2 then
+		self.currentSettings.screenRate = 4
+	elseif self.currentSettings.screenRate == 4 then
+		self.currentSettings.screenRate = 8
+	else
+		self.currentSettings.screenRate = 1
+	end
+end
+
 function PermissionTool:client_onMaxDisplaysPress()
 	if not self:client_canChangeSettings() then return end
 
@@ -406,29 +433,22 @@ function PermissionTool:client_onOptSPress()
 	end
 end
 
-local function setSettings(self, settings) --вроде не юзаеться
+local function setSettings(self, settings)
 	if not self:client_canChangeSettings() then return end
 
 	self.rebootAll_cl_flag = true
-
-	--local adminOnly = self.currentSettings.adminOnly
-	--self.currentSettings = sc.deepcopy(settings)
-	--self.currentSettings.adminOnly = adminOnly
-
+	local oldSettings = sc.restrictions
 	sc.setRestrictions(settings)
 	self.currentSettings = sc.restrictions
+	sc.restrictions = oldSettings
 end
 
 function PermissionTool:client_onSrvPress()
-	if not self:client_canChangeSettings() then return end
-	--setSettings(self, sc.forServerRestrictions)
-	self.currentSettings = sc.deepcopy(sc.forServerRestrictions)
+	setSettings(self, sc.forServerRestrictions)
 end
 
 function PermissionTool:client_onRstPress()
-	if not self:client_canChangeSettings() then return end
-	--setSettings(self, sc.defaultRestrictions)
-	self.currentSettings = sc.deepcopy(sc.defaultRestrictions)
+	setSettings(self, sc.defaultRestrictions)
 end
 
 function PermissionTool:client_onRaysPress()

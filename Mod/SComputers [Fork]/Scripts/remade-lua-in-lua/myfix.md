@@ -1,7 +1,6 @@
-I will fix critical lua-in-lua bugs
+## I will fix critical lua-in-lua bugs
+### these tests did not pass the original lua-in-lua
 
-
-why?:
 ```lua
 if not start then
     notPassedArgument = true

@@ -378,7 +378,7 @@ display.clear("0076a1")
 display.drawText(textPos, 1, text, "05a4dc")
 display.flush()
 
-textPos = textPos - 1
+textPos = textPos - 1 - getSkippedTicks()
 if textPos < -(#text * (display.getFontWidth() + 1)) then
     textPos = startPos
 end]]

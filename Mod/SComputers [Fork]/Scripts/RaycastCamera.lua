@@ -124,7 +124,6 @@ function RaycastCamera:server_rays(displayData)
 		}
 	end
 
-	sc.addLagScore(raysI / 1024)
 	return rc_multicast(rays)
 end
 

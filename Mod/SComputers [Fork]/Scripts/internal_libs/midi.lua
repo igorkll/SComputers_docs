@@ -572,3 +572,4 @@ function midi.create()
 end
 
 sc.reg_internal_lib("midi", midi)
+return midi

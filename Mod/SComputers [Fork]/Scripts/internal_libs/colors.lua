@@ -64,3 +64,4 @@ function colors.hsvToRgb(h, s, v)
 end
 
 sc.reg_internal_lib("colors", colors)
+return colors

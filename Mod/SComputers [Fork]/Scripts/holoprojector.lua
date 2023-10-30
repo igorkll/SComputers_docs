@@ -53,6 +53,18 @@ function holoprojector:server_onCreate()
     self.creative = not self.data
     self.data = self.data or {}
 
+    local function tableInsert(tbl, dat)
+        for i = 1, math.huge do
+            if not tbl[i] then
+                tbl[i] = dat
+                if i > self.maxVoxelId then
+                    self.maxVoxelId = i
+                end
+                return i
+            end
+        end
+    end
+
     sc.holoDatas[self.interactable.id] = {
         reset = function ()
             self.offsetX = 0
@@ -68,8 +80,6 @@ function holoprojector:server_onCreate()
         end,
 
         addVoxel = function(x, y, z, color, voxel_type)
-            sc.addLagScore(0.05)
-
             if not self.voxels then self.voxels = {} end
             local maxvoxels = (self.data.maxvoxels or 4096)
             if self.voxelsCount >= maxvoxels then error("voxel limit exceeded (" .. tostring(maxvoxels) .. ")", 2) end
@@ -82,18 +92,6 @@ function holoprojector:server_onCreate()
             if x < -maxvoxeloffset or x > maxvoxeloffset then err(x) end
             if y < -maxvoxeloffset or y > maxvoxeloffset then err(y) end
             if z < -maxvoxeloffset or z > maxvoxeloffset then err(z) end
-
-            local function tableInsert(tbl, dat)
-                for i = 1, math.huge do
-                    if not tbl[i] then
-                        tbl[i] = dat
-                        if i > self.maxVoxelId then
-                            self.maxVoxelId = i
-                        end
-                        return i
-                    end
-                end
-            end
 
             return tableInsert(self.voxels, {
                 position = sm_vec3_new(x / 4, y / 4, z / 4),
@@ -193,82 +191,91 @@ function holoprojector:server_onCreate()
 end
 
 function holoprojector:server_onFixedUpdate()
-    if self.updateData then
-        self.network:sendToClients("cl_updateData", {
-            scaleX = self.scaleX,
-            scaleY = self.scaleY,
-            scaleZ = self.scaleZ,
+    local ctick = sm.game.getCurrentTick()
+	if ctick % sc.restrictions.screenRate == 0 then self.allow_update = true end
 
-            rotateX = self.rotateX,
-            rotateY = self.rotateY,
-            rotateZ = self.rotateZ,
+    if self.allow_update and (self.updateData or self.flushFlag) then
+        self.allow_update = nil
 
-            offsetX = self.offsetX,
-            offsetY = self.offsetY,
-            offsetZ = self.offsetZ,
-        })
-        self.updateData = nil
-    end
+        if self.updateData then
+            self.network:sendToClients("cl_updateData", {
+                scaleX = self.scaleX,
+                scaleY = self.scaleY,
+                scaleZ = self.scaleZ,
 
-    if self.flushFlag then
-        if self.voxels then
-            local currentChecksum = tableChecksum(self.voxels)
-            if currentChecksum ~= self.old_currentChecksum then
-                self.old_currentChecksum = currentChecksum
+                rotateX = self.rotateX,
+                rotateY = self.rotateY,
+                rotateZ = self.rotateZ,
 
-                --[[
-                for i = self.voxelsCount, 1, -1 do
-                    if not self.voxels[i] then
-                        table.remove(self.voxels, i)
+                offsetX = self.offsetX,
+                offsetY = self.offsetY,
+                offsetZ = self.offsetZ,
+            })
+            sc.addLagScore(0.1)
+            self.updateData = nil
+        end
+
+        if self.flushFlag then
+            if self.voxels then
+                local currentChecksum = tableChecksum(self.voxels)
+                if currentChecksum ~= self.old_currentChecksum then
+                    self.old_currentChecksum = currentChecksum
+
+                    --[[
+                    for i = self.voxelsCount, 1, -1 do
+                        if not self.voxels[i] then
+                            table.remove(self.voxels, i)
+                        end
                     end
-                end
-                ]]
-                --if self.clearFlag then
-                --    self.voxels.clear = true
-                --end
-                self.voxels.len = self.maxVoxelId
-                if pcall(vnetwork.sendToClients, self, "cl_upload", self.voxels) then
-                --    self.clearFlag = nil
-                else
-                    local index = 1
-                    local count = 1024
+                    ]]
+                    --if self.clearFlag then
+                    --    self.voxels.clear = true
+                    --end
+                    sc.addLagScore(self.maxVoxelId / 100)
+                    self.voxels.len = self.maxVoxelId
+                    if pcall(vnetwork.sendToClients, self, "cl_upload", self.voxels) then
+                    --    self.clearFlag = nil
+                    else
+                        local index = 1
+                        local count = 1024
 
-                    local datapack
-                    while true do
-                        --datapack = {unpack(self.voxels, index, index + (count - 1))}
-                        datapack = {unpack(self.voxels, index, index + (count - 1))}
-                        --if self.clearFlag then
-                        --    datapack.clear = true
-                        --end
+                        local datapack
+                        while true do
+                            --datapack = {unpack(self.voxels, index, index + (count - 1))}
+                            datapack = {unpack(self.voxels, index, index + (count - 1))}
+                            --if self.clearFlag then
+                            --    datapack.clear = true
+                            --end
 
-                        index = index + count
-                        if datapack[#datapack] == self.voxels[#self.voxels] then
-                            datapack.endPack = true
-                            if pcall(vnetwork.sendToClients, self, "cl_upload", datapack) then
+                            index = index + count
+                            if datapack[#datapack] == self.voxels[#self.voxels] then
+                                datapack.endPack = true
+                                if pcall(vnetwork.sendToClients, self, "cl_upload", datapack) then
+                                    --self.clearFlag = nil
+                                    break
+                                else
+                                    index = index - count
+                                    count = math_floor((count / 2) + 0.5)
+                                end
+                            elseif pcall(vnetwork.sendToClients, self, "cl_upload", datapack) then
                                 --self.clearFlag = nil
-                                break
                             else
                                 index = index - count
                                 count = math_floor((count / 2) + 0.5)
                             end
-                        elseif pcall(vnetwork.sendToClients, self, "cl_upload", datapack) then
-                            --self.clearFlag = nil
-                        else
-                            index = index - count
-                            count = math_floor((count / 2) + 0.5)
                         end
                     end
                 end
+            else
+                --self.network:sendToClients("cl_upload", {clear = self.clearFlag})
+                self.network:sendToClients("cl_upload", {})
+                --self.clearFlag = nil
+                self.old_currentChecksum = nil
             end
-        else
-            --self.network:sendToClients("cl_upload", {clear = self.clearFlag})
-            self.network:sendToClients("cl_upload", {})
-            --self.clearFlag = nil
-            self.old_currentChecksum = nil
-        end
 
-        --self.voxels = nil
-        self.flushFlag = nil
+            --self.voxels = nil
+            self.flushFlag = nil
+        end
     end
 
     sc.creativeCheck(self, self.creative)

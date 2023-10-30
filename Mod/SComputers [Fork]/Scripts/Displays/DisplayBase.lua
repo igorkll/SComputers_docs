@@ -7,11 +7,12 @@ debug_disableoptimize = false
 debug_raycast = false
 debug_offset = false
 debug_disableEffectsBuffer = false
-
+debug_disableDBuff = false
 
 --settings
 mul_ray_fov = 2
 
+--code
 if __displayBaseLoaded then return end
 __displayBaseLoaded = true
 
@@ -1070,13 +1071,15 @@ function sc.display.createDisplay(scriptableObject, width, height, pixelScale)
 		dragging = {interact=false, tinker=false, interactLastPos={x=-1, y=-1}, tinkerLastPos={x=-1, y=-1}},
 	}
 	reset(display)
+
 	display.force_update = true --первая отрисовка всегда форсированая
+	display.allow_update = true
 
 	return display
 end
 
 function sc.display.server_init(self)
-	self.old_this_display_block = false
+	self.old_this_display_blocked = false
 
 	if self.scriptableObject.interactable then
 		sc.displaysDatas[self.scriptableObject.interactable.id] = sc.display.server_createData(self)
@@ -1107,22 +1110,31 @@ local function isAllow(self)
 end
 
 function sc.display.server_update(self)
-	if self.needUpdate and self.this_display_block then
+	local ctick = sm.game.getCurrentTick()
+	if ctick % sc.restrictions.screenRate == 0 then self.allow_update = true end
+	if ctick % (40 * 2) == 0 then
+		self.force_update = true
+		self.allow_update = true
+	end
+
+
+
+	if self.needUpdate and self.this_display_blocked then
 		self.rnd_idx = 1
 		self.renderingStack = {}
-		self.isStackCheckEnable = nil
+		--self.isStackCheckEnable = nil
 		self.needUpdate = false
 	end
 
-	self.this_display_block = not isAllow(self)
-	if self.this_display_block ~= self.old_this_display_block then
+	self.this_display_blocked = not isAllow(self)
+	if self.this_display_blocked ~= self.old_this_display_blocked then
 		self.api.reset()
 		self.api.clear()
 		self.api.forceFlush()
-		if self.this_display_block then
+		if self.this_display_blocked then
 			self.renderingStack.oops = true
 		end
-		self.old_this_display_block = self.this_display_block
+		self.old_this_display_blocked = self.this_display_blocked
 	end
 
 	if self.needSendData then
@@ -1133,18 +1145,10 @@ function sc.display.server_update(self)
 		self.needSendData = false
 	end
 
-	if sm.game.getCurrentTick() % (40 * 2) == 0 then
-		self.force_update = true
-	end
 
-	if self.needUpdate then
+
+	if self.needUpdate and self.allow_update then
 		--debug_print("self.needUpdate")
-		local force
-		if self.force_update then
-			force = true
-			self.force_update = nil
-		end
-
 		local dbuffcode
 		if self.framecheck --[[and self.isStackCheckEnable]] and not debug_disablecheck then
 			dbuffcode = tableChecksum(self.renderingStack)
@@ -1165,7 +1169,7 @@ function sc.display.server_update(self)
 		]]
 
 		--sending
-		if force or
+		if self.force_update or
 		not dbuffcode or
 		not self.dbuffcode or
 		self.dbuffcode ~= dbuffcode then
@@ -1185,8 +1189,17 @@ function sc.display.server_update(self)
 				end
 			end
 			]]
+			if self.lastComputer and not self.lastComputer.cdata.unsafe and type(sc.restrictions.lagDetector) == "number" then
+				for i, v in ipairs(self.renderingStack) do
+					local score = 0.01
+					if v[1] == 7 then
+						score = score * #v[5]
+					end
+					self.lastComputer.lagScore = self.lastComputer.lagScore + (score * sc.restrictions.lagDetector)
+				end
+			end
 
-			self.renderingStack.force = force
+			self.renderingStack.force = self.force_update
 			self.renderingStack.endPack = true
 			--[[
 			local dist = RENDER_DISTANCE
@@ -1201,7 +1214,7 @@ function sc.display.server_update(self)
 				whitelist = {[self.player.id] = true}
 			end
 			local maxDist
-			if self.skipAtNotSight and not force then
+			if self.skipAtNotSight and not self.force_update then
 				maxDist = sc.restrictions.rend
 			end
 
@@ -1240,15 +1253,16 @@ function sc.display.server_update(self)
 				end
 				debug_print("self.needUpdate-sending end")
 			end
-			
 			self.dbuffcode = dbuffcode
-		end
 		
-		self.rnd_idx = 1
-		self.renderingStack = {}
-		self.isStackCheckEnable = nil
+			self.rnd_idx = 1
+			self.renderingStack = {}
+			--self.isStackCheckEnable = nil
 
-		self.needUpdate = false
+			self.needUpdate = false
+			self.force_update = false
+			self.allow_update = false
+		end
 	end
 end
 
@@ -1291,7 +1305,6 @@ function sc.display.server_createData(self)
 			return isAllow(self)
 		end,
 		reset = function ()
-			sc.addLagScore(4)
 			reset(self)
 			self.api.setFont()
 		end,
@@ -1310,8 +1323,7 @@ function sc.display.server_createData(self)
 			end
 		end,
 		clear = function (color)
-			sc.addLagScore(0.1)
-			self.isStackCheckEnable = nil
+			--self.isStackCheckEnable = nil
 			self.renderingStack = {}
 			self.rnd_idx = 1
 
@@ -1322,7 +1334,6 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		drawPixel = function (x, y, color)
-			sc.addLagScore(0.01)
 			self.renderingStack[self.rnd_idx] = {
 				1,
 				color or "ffffffff",
@@ -1332,7 +1343,6 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		drawRect = function (x, y, w, h, c)
-			sc.addLagScore(0.1)
 			self.renderingStack[self.rnd_idx] = {
 				2,
 				c or "ffffffff",
@@ -1344,7 +1354,6 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		fillRect = function (x, y, w, h, c)
-			sc.addLagScore(0.1)
 			self.renderingStack[self.rnd_idx] = {
 				3,
 				c or "ffffffff",
@@ -1356,7 +1365,6 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		drawCircle = function (x, y, r, c)
-			sc.addLagScore(0.2)
 			self.renderingStack[self.rnd_idx] = {
 				4,
 				c or "ffffffff",
@@ -1367,7 +1375,6 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		fillCircle = function (x, y, r, c)
-			sc.addLagScore(0.2)
 			self.renderingStack[self.rnd_idx] = {
 				5,
 				c or "ffffffff",
@@ -1378,7 +1385,6 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		drawLine = function (x, y, x1, y1, c)
-			sc.addLagScore(0.1)
 			self.renderingStack[self.rnd_idx] = {
 				6,
 				c or "ffffffff",
@@ -1390,9 +1396,9 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		drawText = function (x, y, text, c)
-			sc.addLagScore(#text / 50)
 			if not debug_disabletext then
-				self.isStackCheckEnable = true
+				text = tostring(text)
+				--self.isStackCheckEnable = true
 				self.renderingStack[self.rnd_idx] = {
 					7,
 					c or "ffffffff",
@@ -1410,15 +1416,11 @@ function sc.display.server_createData(self)
 			self.rnd_idx = self.rnd_idx + 1
 		end,
 		update = function () --для совместимости с SCI
-			if not self.needUpdate then
-				sc.addLagScore(0.1)
-			end
+			self.lastComputer = sc.lastComputer
 			self.needUpdate = true
 		end,
 		flush = function ()
-			if not self.needUpdate then
-				sc.addLagScore(0.1)
-			end
+			self.lastComputer = sc.lastComputer
 			self.needUpdate = true
 		end,
 
@@ -1447,7 +1449,6 @@ function sc.display.server_createData(self)
 
 		setFont = function (font)
 			checkArg(1, font, "table", "nil")
-			sc.addLagScore(4)
 			--if font == self.saved_customFont then return end --а вдруг я изменю таблицу я захочу отправить ее заного?
 			if font then
 				if not font.chars or not font.width or not font.height then
@@ -1665,7 +1666,7 @@ function sc_display_client_drawPixelForce(self, x, y, color)
 	local width = getWidth(self)
 	local currentColor = self.dbuffPixels[x + (y * width)] or self.dbuffPixelsAll
 
-	if currentColor and currentColor == color then
+	if currentColor and currentColor == color and not debug_disableDBuff then
 		return true --если нехрена не поменялось
 	end
 
@@ -1714,7 +1715,6 @@ function sc_display_client_drawRect(self, x, y, w, h, color)
 	for i = lx,lx+lw-1 do
 		sc_display_client_drawPixelForce(self, i, ey, color)
 	end
-
 end
 
 function sc_display_client_fillRect(self, x, y, w, h, color)
@@ -1722,10 +1722,11 @@ function sc_display_client_fillRect(self, x, y, w, h, color)
 	--self.dbuffPixelsAll = nil
 
 	quad_treeFillRect(self.quadTree, math_floor(x), math_floor(y), math_floor(w), math_floor(h), color)
+	local mw, mh = getWidth(self), getHeight(self)
 	for cx = x, x + (w - 1) do
 		for cy = y, y + (h - 1) do
-			if cx >= 0 and cy >= 0 and cx < self.width and cy < self.height then
-				self.dbuffPixels[cx + (cy * self.width)] = color
+			if cx >= 0 and cy >= 0 and cx < mw and cy < mh then
+				self.dbuffPixels[cx + (cy * mw)] = color
 			end
 		end
 	end

@@ -382,3 +382,4 @@ end
 -----------------------------------
 
 sc.reg_internal_lib("image", image)
+return image

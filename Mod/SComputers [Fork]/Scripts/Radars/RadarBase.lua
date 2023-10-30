@@ -53,8 +53,6 @@ function sc.radar.createData(self)
 			end
 			self.old_tick = tick
 
-			sc.addLagScore(0.3)
-
 			return sc.radar.server_makeCasts(self)
 		end,
 
