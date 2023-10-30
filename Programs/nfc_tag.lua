@@ -62,25 +62,29 @@ function callback_loop()
         if result[1] then
             local packetData = result[2]
             if packetData.command == "unlock" then
-                only(packetData, sender, function ()
+                only(true, packetData, sender, function ()
                     data.unlock = true
                     save()
                     updateLock()
                 end)
             elseif packetData.command == "lock" then
-                only(packetData, sender, function ()
+                only(true, packetData, sender, function ()
                     data.unlock = false
                     save()
                     updateLock()
                 end)
             elseif packetData.command == "destroy" then
-                only(packetData, sender, function ()
+                only(true, packetData, sender, function ()
                     pcall(setCode, "")
                     pcall(setData, "")
                     pcall(setLock, true, true)
                     pcall(setInvisible, true, true)
                     reboot()
                 end)
+            elseif packetData.command == "echo" then
+                port.sendTo(sender, tostring(packetData.echo))
+            else
+                port.sendTo(sender, "unsupported command")
             end
         end
     end
