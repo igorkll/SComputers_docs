@@ -1215,7 +1215,8 @@ function sc.display.server_update(self)
 						end
 					end
 					self.lastComputer.lagScore = self.lastComputer.lagScore + (score * sc.restrictions.lagDetector)
-					if self.lastComputer.lagScore > 100 then
+					if self.lastComputer.lagScore > 120 then
+						debug_print_force("lagScore > 120!!")
 						cancel = true
 						break
 					end
@@ -1451,6 +1452,7 @@ function sc.display.server_createData(self)
 		end,
 
 		forceFlush = function()
+			self.lastComputer = sc.lastComputer
 			self.force_update = true
 			self.needUpdate = true
 		end,
