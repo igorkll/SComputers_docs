@@ -26,6 +26,13 @@ if not data.uuid then
     save()
 end
 
+pcall(setLock, not data.unlock)
+pcall(setIn, not data.unlock)
+
+if not  then
+    
+end
+
 ---------------------------------------------------
 
 function callback_loop()
@@ -35,7 +42,7 @@ function callback_loop()
         if result[1] then
             local packetData = result[2]
             if checkPassword(packetData.password) then
-                if packetData.command == "" then
+                if packetData.command == "unlock" then
                     
                 end
             else
