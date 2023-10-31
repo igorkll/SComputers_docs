@@ -452,7 +452,7 @@ function createSafeEnv(self, settings)
         getSkippedTicks = function ()
             return self.skipped
         end,
-        getLagsScore = function ()
+        getLagScore = function ()
             return self.lagScore
         end,
         getUptime = function ()
@@ -530,6 +530,8 @@ function createSafeEnv(self, settings)
     env.getConnectedDisplaysData = env.getDisplays
     env.getConnectedMotorsData = env.getMotors
     env.getConnectedRadarsData = env.getRadars
+
+    env.getLagsScore = env.getLagScore
 
     ---------------- safety
 
