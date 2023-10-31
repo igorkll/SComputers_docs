@@ -10,7 +10,7 @@ function ll_fix(code) --тут фикситься несколько багов
     local fmain = randname()
     local farg = randname()
 
-    return fmain .. " = " .. fmain .. " or function(...) " .. code .. " end return " .. fmain .. "(" .. farg .. "())", farg
+    return fmain .. " = " .. fmain .. " or function(...) " .. code .. "\n end return " .. fmain .. "(" .. farg .. "())", farg
 end
 
 function ll_shorterr(err)
