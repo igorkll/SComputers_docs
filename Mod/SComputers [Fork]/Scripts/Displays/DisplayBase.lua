@@ -95,6 +95,7 @@ local unpack = unpack
 local getCurrentTick = sm.game.getCurrentTick
 local sm_localPlayer = sm.localPlayer
 local sm_localPlayer_getPlayer = sm_localPlayer.getPlayer
+local os_clock = os.clock
 
 local sm_vec3 = sm.vec3
 local util_clamp = sm.util.clamp
@@ -1193,6 +1194,7 @@ function sc.display.server_update(self)
 
 			local cancel
 			if self.lastComputer and not self.lastComputer.cdata.unsafe and type(sc.restrictions.lagDetector) == "number" then
+				local oldLagScore = self.lastComputer.lagScore
 				for i, v in ipairs(self.renderingStack) do
 					local score = 0.005
 					local id = v[1]
@@ -1218,6 +1220,7 @@ function sc.display.server_update(self)
 						break
 					end
 				end
+				debug_print("lag score delta", self.lastComputer.lagScore - oldLagScore)
 			end
 
 			if not cancel then
@@ -2577,7 +2580,7 @@ local drawActions = {
 }
 
 function sc.display.client_drawStack(self, sendstack)
-	local startExecTime = os.clock()
+	local startExecTimeStart = os_clock()
 
 	sendstack = sendstack or self.scriptableObject.sendData
 	if sendstack then
@@ -2635,12 +2638,19 @@ function sc.display.client_drawStack(self, sendstack)
 		if self.skipAtLags and sc.restrictions and sc.deltaTime >= (1 / sc.restrictions.skipFps) then return end
 	end
 
+	self.localLag = self.localLag + ((os_clock() - startExecTimeStart) * sc.clockLagMul)
+	if self.localLag > 120 then
+		debug_print_force("localLag > 120!!")
+	end
+
 	local isEndClear = false
 	local clearColor
 	self.newEffects = {}
 	local isEffect --если от всего стека был хоть какой-то смысл
 	local isClear
 	for _, v in ipairs(stack) do
+		local startExecTime = os_clock()
+
 		isClear = v[1] == 0
 		v[2] = formatColor(v[2], isClear)
 		--v[2] = sm_color_new(v[2])
@@ -2658,8 +2668,16 @@ function sc.display.client_drawStack(self, sendstack)
 		if not drawActions[v[1]](self, v) and v[1] ~= 8 then
 			isEffect = true
 		end
+
+		self.localLag = self.localLag + ((os_clock() - startExecTime) * sc.clockLagMul)
+		if self.localLag > 120 then
+			debug_print_force("localLag > 120!!")
+			break
+		end
 	end
 	
+	local startExecTimeEnd = os_clock()
+
 	if isEffect then
 		debug_print("isEffect!!")
 
@@ -2678,7 +2696,10 @@ function sc.display.client_drawStack(self, sendstack)
 	end
 	self.newEffects = nil
 
-	self.localLag = self.localLag + ((os.clock() - startExecTime) * sc.clockLagMul)
+	self.localLag = self.localLag + ((os_clock() - startExecTimeEnd) * sc.clockLagMul)
+	if self.localLag > 120 then
+		debug_print_force("localLag > 120!!")
+	end
 end
 
 

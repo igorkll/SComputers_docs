@@ -60,7 +60,7 @@ sc.version = "2.2a"
 
 sc.deltaTime = 0
 sc.maxcodelen = 32 * 1024
-sc.clockLagMul = 250
+sc.clockLagMul = 150
 sc.radarDetectedBodies = {}
 
 sc.display = {}
