@@ -1,5 +1,5 @@
 -- debug
-debug_out = false
+debug_out = true
 debug_printeffects = false
 debug_disablecheck = false
 debug_disabletext = false
@@ -1065,6 +1065,7 @@ function sc.display.createDisplay(scriptableObject, width, height, pixelScale)
 		needUpdate = false,
 
 		-- client
+		localLag = 0,
 		rnd = math_random(0, 40 * 5),
 		dbuffPixels = {},
 		quadTree = nil,
@@ -1196,23 +1197,19 @@ function sc.display.server_update(self)
 					local score = 0.005
 					local id = v[1]
 					if id == 7 then
-						score = score * #v[5] * 5
+						score = score * #v[5]
 					elseif id == 6 then
-						score = score * 16
+						score = score * 4
 					elseif id == 5 or id == 4 then
 						local r = v[5]
 						if r <  1 then r = 1 end
 						if r > 32 then r = 32 end
-						score = score * 8 * r
+						score = score * 2 * r
 					elseif id == 2 or id == 3 then
 						local w, h = v[5], v[6]
 						if w <= 0 then w = 1 end
 						if h <= 0 then h = 1 end
-						if id == 2 then
-							score = (score * w * h) / 8
-						else
-							score = (score * w * h) / 4
-						end
+						score = (score * w * h) / 16
 					end
 					self.lastComputer.lagScore = self.lastComputer.lagScore + (score * sc.restrictions.lagDetector)
 					if self.lastComputer.lagScore > 120 then
@@ -1614,9 +1611,17 @@ function sc.display.server_onDataRequired(self, client)
 end
 
 function sc.display.server_recvPress(self, p)
-	local d = self.clickData
-	if #d <= self.maxClicks then
-		table_insert(d, p)
+	if type(p) == "number" then
+		if self.lastComputer and not self.lastComputer.cdata.unsafe and type(sc.restrictions.lagDetector) == "number" then
+			local add = p * sc.restrictions.lagDetector
+			self.lastComputer.lagScore = self.lastComputer.lagScore + add
+			debug_print("get lag score", add)
+		end
+	else
+		local d = self.clickData
+		if #d <= self.maxClicks then
+			table_insert(d, p)
+		end
 	end
 end
 
@@ -2511,6 +2516,13 @@ function sc.display.client_update(self, dt)
 		self.old_stylus_left = _G.stylus_left
 		self.old_stylus_right = _G.stylus_right
 	end
+
+	if ctick % 20 == 0 then
+		if self.localLag > 0 then
+			self.scriptableObject.network:sendToServer("server_recvPress", self.localLag)
+			self.localLag = 0
+		end
+	end
 end
 
 function sc.display.client_onDataResponse(self, data)
@@ -2564,7 +2576,9 @@ local drawActions = {
 	[sc_display_drawType.optimize] = function (self) self.optimize_flag = true end,
 }
 
-function sc.display.client_drawStack(self, sendstack)	
+function sc.display.client_drawStack(self, sendstack)
+	local startExecTime = os.clock()
+
 	sendstack = sendstack or self.scriptableObject.sendData
 	if sendstack then
 		if self.quadTree.splashEffect and sm_exists(self.quadTree.splashEffect) then
@@ -2663,6 +2677,8 @@ function sc.display.client_drawStack(self, sendstack)
 		applyNew(self)
 	end
 	self.newEffects = nil
+
+	self.localLag = self.localLag + ((os.clock() - startExecTime) * sc.clockLagMul)
 end
 
 

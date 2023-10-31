@@ -60,7 +60,7 @@ function createSafeEnv(self, settings)
 	local env
 	env = {
         _VERSION = sc.restrictions.vm,
-
+        
         require = function (name)
             checkArg(1, name, "string")
             sc.coroutineCheck()
