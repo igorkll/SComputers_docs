@@ -1196,7 +1196,7 @@ function sc.display.server_update(self)
 			if self.lastComputer and not self.lastComputer.cdata.unsafe and type(sc.restrictions.lagDetector) == "number" then
 				local oldLagScore = self.lastComputer.lagScore
 				for i, v in ipairs(self.renderingStack) do
-					local score = 0.005
+					local score = 0.002
 					local id = v[1]
 					if id == 7 then
 						score = score * #v[5]

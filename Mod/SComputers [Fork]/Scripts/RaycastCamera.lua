@@ -185,6 +185,7 @@ function RaycastCamera:sv_getRaydata(successful, raydata, maxdist)
 			}
 		elseif lift then
 			return {
+				color = sm.color.new("ebb700"),
 				fraction = raydata.fraction,
 				distance = raydata.fraction * maxdist,
 				type = "lift"

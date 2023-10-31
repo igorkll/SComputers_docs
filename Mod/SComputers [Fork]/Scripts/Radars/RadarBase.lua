@@ -180,7 +180,8 @@ function sc.radar.server_makeCasts(self) --> table[hResol, vResol]
 
 							distance = len,
 							force = massRatio / minDetectionMassRatio,
-							id = id
+							id = id,
+							type = "body"
 						}
 					else
 						if d.distance > len then
@@ -235,7 +236,8 @@ function sc.radar.server_makeCasts(self) --> table[hResol, vResol]
 
 						distance = len,
 						force = massRatio / minDetectionMassRatio,
-						id = id
+						id = id,
+						type = "character"
 					}
 				else
 					if d.distance > len then
@@ -271,7 +273,9 @@ function sc.radar.server_makeCasts(self) --> table[hResol, vResol]
 			vangle,
 
 			distance,
-			force
+			force,
+			
+			v.type
 		})
 	end
 

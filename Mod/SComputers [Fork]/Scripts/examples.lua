@@ -1061,6 +1061,7 @@ local maxdist = 60
 
 --------------------- code
 
+local colors = require("colors")
 local utils = require("utils")
 
 local radar = getComponents("radar")[1]
@@ -1096,7 +1097,7 @@ function callback_loop()
         end
     end
     for index, value in ipairs(radar.getTargets()) do
-        local id, hangle, vangle, dist, force = unpack(value)
+        local id, hangle, vangle, dist, force, ctype = unpack(value)
 
         local s = (dist / maxdist) * crx
 
@@ -1104,7 +1105,11 @@ function callback_loop()
         local y = math.floor(-math.cos(hangle) * s + crx)
 
         if not idColors[id] then
-            idColors[id] = sm.color.new(math.random(), math.random(), math.random())
+            if ctype == "character" then
+                idColors[id] = colors.sm.Gray[1]
+            else
+                idColors[id] = sm.color.new(math.random(), math.random(), math.random())
+            end
         end
         for i = #points, 1, -1 do
             local point = points[i]
@@ -1116,7 +1121,7 @@ function callback_loop()
     end
     for i = #points, 1, -1 do
         local point = points[i]
-        display.drawPixel(point[1], point[2], idColors[point[4] ])
+        display.drawPixel(point[1], point[2], idColors[ point[4] ])
     end
     for ix = -1, 1 do
         for iy = -1, 1 do
