@@ -1,5 +1,5 @@
 -- debug
-debug_out = true
+debug_out = false
 debug_printeffects = false
 debug_disablecheck = false
 debug_disabletext = false
