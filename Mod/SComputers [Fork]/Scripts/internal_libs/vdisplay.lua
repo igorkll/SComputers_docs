@@ -17,7 +17,6 @@ function vdisplay.create(callbacks, width, height)
     local dsp
     local maxClicks
     local rotation
-    local framecheck
     local skipAtNotSight
     local utf8support
     local renderAtDistance
@@ -39,7 +38,6 @@ function vdisplay.create(callbacks, width, height)
     local function reset()
         maxClicks = 16
         rotation = 0
-        framecheck = true
         skipAtNotSight = false
         utf8support = false
         renderAtDistance = false
@@ -53,7 +51,7 @@ function vdisplay.create(callbacks, width, height)
     end
 
     local function flush(isForce)
-        if callbacks.flush and (isForce or needFlush or not framecheck) then
+        if callbacks.flush and (isForce or needFlush) then
             callbacks.flush(dsp, isForce)
             needFlush = false
         end
@@ -269,13 +267,8 @@ function vdisplay.create(callbacks, width, height)
             return skipAtNotSight
         end,
 
-        setFrameCheck = function (state)
-            --checkArg(1, state, "boolean")
-            framecheck = state
-        end,
-        getFrameCheck = function ()
-            return framecheck
-        end,
+        setFrameCheck = function (state) end, --legacy (stub)
+        getFrameCheck = function () return true end, --legacy (stub)
 
         setRenderAtDistance = function (state)
             --checkArg(1, state, "boolean")

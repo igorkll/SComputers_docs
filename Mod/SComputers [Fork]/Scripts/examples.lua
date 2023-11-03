@@ -96,7 +96,6 @@ maxdistance = 512 --metrs, one metr - 4 blocks
 fov = math.rad(70)
 zoomfov = math.rad(5)
 drawingSpeed = 256
-skipAtLags = false
 
 --code
 cameraIndex = 1
@@ -105,8 +104,9 @@ function callback_loop()
     display = getDisplays()[1]
     if not display then return end
     display.reset()
-    display.setSkipAtLags(skipAtLags)
-    display.setSkipAtNotSight(true)
+    --this approach will allow you to cause fewer lags, due to which the mod will reduce the clock frequency of the computer (virtual) less, due to which the rendering will be faster.
+    display.setSkipAtLags(true) --in order for rendering to be skipped if the game is lagging(true by default)
+    display.setSkipAtNotSight(true) --in order for the picture not to be updated for those who do not look at the screen
 
     cameras = getCameras()
 
@@ -361,7 +361,6 @@ if not start then
     display.reset()
     display.setSkipAtLags(true)
     display.setSkipAtNotSight(true)
-    display.setFrameCheck(false)
 
     startPos = display.getWidth()
     textPos = startPos
@@ -430,7 +429,6 @@ display.reset()
 display.clearClicks()
 display.setSkipAtLags(false)
 display.setClicksAllowed(true)
-display.setFrameCheck(false) --display.flush is called only when necessary, it makes no sense to check the frame on the side of the screen
 
 gui = require("gui").new(display)
 image = require("image")
@@ -612,7 +610,6 @@ display = getComponents("display")[1]
 display.reset()
 display.setSkipAtLags(false)
 display.setClicksAllowed(true)
-display.setFrameCheck(false) --display.flush is called only when necessary, it makes no sense to check the frame on the side of the screen
 
 width, height = display.getWidth(), display.getHeight()
 
@@ -1224,6 +1221,9 @@ end
 str = [[
 local display = getComponents("display")[1]
 display.reset()
+--this approach will allow you to cause fewer lags, due to which the mod will reduce the clock frequency of the computer (virtual) less, due to which the rendering will be faster.
+display.setSkipAtLags(true) --in order for rendering to be skipped if the game is lagging(true by default)
+display.setSkipAtNotSight(true) --in order for the picture not to be updated for those who do not look at the screen
 
 local camera = getComponents("camera")[1]
 camera.setFov(math.rad(60))
@@ -1248,6 +1248,9 @@ local colors = require("colors")
 
 local display = getComponents("display")[1]
 display.reset()
+--this approach will allow you to cause fewer lags, due to which the mod will reduce the clock frequency of the computer (virtual) less, due to which the rendering will be faster.
+display.setSkipAtLags(true) --in order for rendering to be skipped if the game is lagging(true by default)
+display.setSkipAtNotSight(true) --in order for the picture not to be updated for those who do not look at the screen
 
 local camera = getComponents("camera")[1]
 camera.setFov(math.rad(60))

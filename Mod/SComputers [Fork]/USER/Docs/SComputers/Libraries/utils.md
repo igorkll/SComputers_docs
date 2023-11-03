@@ -14,6 +14,7 @@ sidebar-label: 'utils'
 * utils.splitByMaxSizeWithTool(tool(utf8/string), str, maxsize):tbl - divides string into segments, and you can specify the maximum length of the segment, the last segment can be smaller than the specified size, but not one can be larger
 * utils.deepcopy(tbl):tbl - clones a table, understands nesting and types such as Color, Vec3, Quat
 * utils.md5(data):md5sum - calculates the md5 amount, please note that this is a complex operation and can cause lags(returns a text md5)
+* utils.md5bin(data):md5sum - returns md5 in binary format
 * utils.dist(pos1:vec3, pos2:vec3):number - calculates the distance between two points in three-dimensional space
 * utils.fromEuler(euler:vec3):quat - custom implementation because the implementation of scrap mechanic does not always work correctly
 * utils.toEuler(quat:quat):vec3 - converts a quaternion to euler

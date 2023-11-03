@@ -1,5 +1,5 @@
 -- debug
-debug_out = false
+debug_out = true
 debug_printeffects = false
 debug_disablecheck = false
 debug_disabletext = false
@@ -1044,7 +1044,6 @@ end
 local function reset(self)
 	self.maxClicks = 16
 	self.rotation = 0
-	self.framecheck = true
 	self.skipAtNotSight = false
 	self.utf8support = false
 	self.renderAtDistance = false
@@ -1064,6 +1063,7 @@ function sc.display.createDisplay(scriptableObject, width, height, pixelScale)
 		pixelScale = pixelScale,
 		scriptableObject = scriptableObject,
 		needUpdate = false,
+		serverCache = {},
 
 		-- client
 		localLag = 0,
@@ -1124,7 +1124,6 @@ function sc.display.server_update(self)
 	if self.needUpdate and self.this_display_blocked then
 		self.rnd_idx = 1
 		self.renderingStack = {}
-		--self.isStackCheckEnable = nil
 		self.needUpdate = false
 	end
 
@@ -1152,7 +1151,7 @@ function sc.display.server_update(self)
 	if self.needUpdate and self.allow_update then
 		--debug_print("self.needUpdate")
 		local dbuffcode
-		if self.framecheck --[[and self.isStackCheckEnable]] and not debug_disablecheck then
+		if not debug_disablecheck then
 			dbuffcode = tableChecksum(self.renderingStack)
 		end
 		--debug_print("dbuffcode", dbuffcode)
@@ -1192,91 +1191,93 @@ function sc.display.server_update(self)
 			end
 			]]
 
-			local cancel
-			if self.lastComputer and not self.lastComputer.cdata.unsafe and type(sc.restrictions.lagDetector) == "number" then
-				local oldLagScore = self.lastComputer.lagScore
-				for i, v in ipairs(self.renderingStack) do
-					local score = 0.002
-					local id = v[1]
-					if id == 7 then
-						score = score * #v[5]
-					elseif id == 6 then
-						score = score * 4
-					elseif id == 5 or id == 4 then
-						local r = v[5]
-						if r <  1 then r = 1 end
-						if r > 32 then r = 32 end
-						score = score * 2 * r
-					elseif id == 2 or id == 3 then
-						local w, h = v[5], v[6]
-						if w <= 0 then w = 1 end
-						if h <= 0 then h = 1 end
-						score = (score * w * h) / 16
-					end
-					self.lastComputer.lagScore = self.lastComputer.lagScore + (score * sc.restrictions.lagDetector)
-					if self.lastComputer.lagScore > 120 then
-						debug_print_force("lagScore > 120!!")
-						cancel = true
-						break
-					end
-				end
-				debug_print("lag score delta", self.lastComputer.lagScore - oldLagScore)
-			end
-
-			if not cancel then
-				self.renderingStack.force = self.force_update
-				self.renderingStack.endPack = true
-				--[[
-				local dist = RENDER_DISTANCE
-				if self.renderAtDistance or self.player then
-					dist = nil
-				end
-				]]
-				--local dist = nil --sending to all players
-
-				local whitelist
-				if self.player then
-					whitelist = {[self.player.id] = true}
-				end
-				local maxDist
-				if self.skipAtNotSight and not self.force_update then
-					maxDist = sc.restrictions.rend
-				end
-
-				if not pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", self.renderingStack, maxDist, whitelist) then
-					self.renderingStack.endPack = false
-					
-					local index = 1
-					local count = 1024
-					local cycles = 0
-
-					local datapack
-					while true do
-						--datapack = {unpack(self.renderingStack, index, index + (count - 1))}
-						datapack = {unpack(self.renderingStack, index, index + (count - 1))}
-
-						index = index + count
-						if datapack[#datapack] == self.renderingStack[#self.renderingStack] then
-							datapack.endPack = true
-							if pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", datapack, maxDist, whitelist) then
-								break
-							else
-								index = index - count
-								count = math_floor((count / 2) + 0.5)
-							end
-						elseif not pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", datapack, maxDist, whitelist) then
-							index = index - count
-							count = math_floor((count / 2) + 0.5)
+			if #self.renderingStack > 0 then
+				local cancel
+				if self.lastComputer and not self.lastComputer.cdata.unsafe and type(sc.restrictions.lagDetector) == "number" then
+					local oldLagScore = self.lastComputer.lagScore
+					for i, v in ipairs(self.renderingStack) do
+						local score = 0.002
+						local id = v[1]
+						if id == 7 then
+							score = score * #v[5]
+						elseif id == 6 then
+							score = score * 4
+						elseif id == 5 or id == 4 then
+							local r = v[5]
+							if r <  1 then r = 1 end
+							if r > 32 then r = 32 end
+							score = score * 2 * r
+						elseif id == 2 or id == 3 then
+							local w, h = v[5], v[6]
+							if w <= 0 then w = 1 end
+							if h <= 0 then h = 1 end
+							score = (score * w * h) / 16
 						end
-
-						cycles = cycles + 1
-						if cycles > 100 then
-							debug_print_force("cycles to many 100", pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", self.renderingStack, maxDist, whitelist))
-							error("cycles to many 100")
+						self.lastComputer.lagScore = self.lastComputer.lagScore + (score * sc.restrictions.lagDetector)
+						if self.lastComputer.lagScore > 120 then
+							debug_print_force("lagScore > 120!!")
+							cancel = true
 							break
 						end
 					end
-					debug_print("self.needUpdate-sending end")
+					debug_print("lag score delta", self.lastComputer.lagScore - oldLagScore)
+				end
+
+				if not cancel then
+					self.renderingStack.force = self.force_update
+					self.renderingStack.endPack = true
+					--[[
+					local dist = RENDER_DISTANCE
+					if self.renderAtDistance or self.player then
+						dist = nil
+					end
+					]]
+					--local dist = nil --sending to all players
+
+					local whitelist
+					if self.player then
+						whitelist = {[self.player.id] = true}
+					end
+					local maxDist
+					if self.skipAtNotSight and not self.force_update then
+						maxDist = sc.restrictions.rend
+					end
+
+					if not pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", self.renderingStack, maxDist, whitelist) then
+						self.renderingStack.endPack = false
+						
+						local index = 1
+						local count = 1024
+						local cycles = 0
+
+						local datapack
+						while true do
+							--datapack = {unpack(self.renderingStack, index, index + (count - 1))}
+							datapack = {unpack(self.renderingStack, index, index + (count - 1))}
+
+							index = index + count
+							if datapack[#datapack] == self.renderingStack[#self.renderingStack] then
+								datapack.endPack = true
+								if pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", datapack, maxDist, whitelist) then
+									break
+								else
+									index = index - count
+									count = math_floor((count / 2) + 0.5)
+								end
+							elseif not pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", datapack, maxDist, whitelist) then
+								index = index - count
+								count = math_floor((count / 2) + 0.5)
+							end
+
+							cycles = cycles + 1
+							if cycles > 100 then
+								debug_print_force("cycles to many 100", pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", self.renderingStack, maxDist, whitelist))
+								error("cycles to many 100")
+								break
+							end
+						end
+						debug_print("self.needUpdate-sending end")
+					end
 				end
 			end
 
@@ -1284,8 +1285,7 @@ function sc.display.server_update(self)
 		
 			self.rnd_idx = 1
 			self.renderingStack = {}
-			--self.isStackCheckEnable = nil
-
+			
 			self.needUpdate = false
 			self.force_update = false
 			self.allow_update = false
@@ -1327,6 +1327,17 @@ function sc.display.server_createData(self)
 	local width = self.width
 	local height = self.height
 
+	local rwidth = width
+	local rheight = height
+
+	local function checkPos(x, y)
+		if x < 0 then x = 0 end
+		if y < 0 then y = 0 end
+		if x >= rwidth then x = rwidth - 1 end
+		if y >= rheight then y = rheight - 1 end
+		return x, y
+	end
+
 	local data = {
 		isAllow = function ()
 			return isAllow(self)
@@ -1336,21 +1347,12 @@ function sc.display.server_createData(self)
 			self.api.setFont()
 		end,
 		getWidth = function ()
-			if self.rotation == 1 or self.rotation == 3 then
-				return height
-			else
-				return width
-			end
+			return rwidth
 		end,
 		getHeight = function ()
-			if self.rotation == 1 or self.rotation == 3 then
-				return width
-			else
-				return height
-			end
+			return rheight
 		end,
 		clear = function (color)
-			--self.isStackCheckEnable = nil
 			self.renderingStack = {}
 			self.rnd_idx = 1
 
@@ -1359,15 +1361,21 @@ function sc.display.server_createData(self)
 				color or "000000ff"
 			}
 			self.rnd_idx = self.rnd_idx + 1
+			self.serverCache = {}
+			self.serverCacheAll = color
 		end,
 		drawPixel = function (x, y, color)
-			self.renderingStack[self.rnd_idx] = {
-				1,
-				color or "ffffffff",
-				nRound(x),
-				nRound(y)
-			}
-			self.rnd_idx = self.rnd_idx + 1
+			x, y = checkPos(x, y)
+			if (self.serverCache[x + (y * rwidth)] or self.serverCacheAll) ~= color then
+				self.renderingStack[self.rnd_idx] = {
+					1,
+					color or "ffffffff",
+					nRound(x),
+					nRound(y)
+				}
+				self.rnd_idx = self.rnd_idx + 1
+				self.serverCache[x + (y * rwidth)] = color
+			end
 		end,
 		drawRect = function (x, y, w, h, c)
 			self.renderingStack[self.rnd_idx] = {
@@ -1379,6 +1387,7 @@ function sc.display.server_createData(self)
 				nRound(h)
 			}
 			self.rnd_idx = self.rnd_idx + 1
+			self.serverCache = {}
 		end,
 		fillRect = function (x, y, w, h, c)
 			self.renderingStack[self.rnd_idx] = {
@@ -1390,6 +1399,7 @@ function sc.display.server_createData(self)
 				nRound(h)
 			}
 			self.rnd_idx = self.rnd_idx + 1
+			self.serverCache = {}
 		end,
 		drawCircle = function (x, y, r, c)
 			self.renderingStack[self.rnd_idx] = {
@@ -1400,6 +1410,7 @@ function sc.display.server_createData(self)
 				nRound(r)
 			}
 			self.rnd_idx = self.rnd_idx + 1
+			self.serverCache = {}
 		end,
 		fillCircle = function (x, y, r, c)
 			self.renderingStack[self.rnd_idx] = {
@@ -1410,6 +1421,7 @@ function sc.display.server_createData(self)
 				nRound(r)
 			}
 			self.rnd_idx = self.rnd_idx + 1
+			self.serverCache = {}
 		end,
 		drawLine = function (x, y, x1, y1, c)
 			self.renderingStack[self.rnd_idx] = {
@@ -1421,11 +1433,11 @@ function sc.display.server_createData(self)
 				nRound(y1)
 			}
 			self.rnd_idx = self.rnd_idx + 1
+			self.serverCache = {}
 		end,
 		drawText = function (x, y, text, c)
 			if not debug_disabletext then
 				text = tostring(text)
-				--self.isStackCheckEnable = true
 				self.renderingStack[self.rnd_idx] = {
 					7,
 					c or "ffffffff",
@@ -1434,8 +1446,11 @@ function sc.display.server_createData(self)
 					text
 				}
 				self.rnd_idx = self.rnd_idx + 1
+				self.serverCache = {}
 			end
 		end,
+
+
 		optimize = function ()
 			self.renderingStack[self.rnd_idx] = {
 				8
@@ -1450,7 +1465,6 @@ function sc.display.server_createData(self)
 			self.lastComputer = sc.lastComputer
 			self.needUpdate = true
 		end,
-
 		forceFlush = function()
 			self.lastComputer = sc.lastComputer
 			self.force_update = true
@@ -1544,6 +1558,14 @@ function sc.display.server_createData(self)
 				if self.rotation ~= rotation then
 					self.rotation = rotation
 					self.needSendData = true
+
+					if self.rotation == 1 or self.rotation == 3 then
+						rwidth = height
+						rheight = width
+					else
+						rwidth = width
+						rheight = height
+					end
 				end
 			else
 				error("integer must be in [0; 3]", 2)
@@ -1551,17 +1573,8 @@ function sc.display.server_createData(self)
 		end,
 		getRotation = function () return self.rotation end,
 
-		setFrameCheck = function (framecheck)
-			if type(framecheck) == "boolean" then
-				if self.framecheck ~= framecheck then
-					self.framecheck = framecheck
-					self.needSendData = true
-				end
-			else
-				error("Type must be boolean", 2)
-			end
-		end,
-		getFrameCheck = function () return self.framecheck end,
+		setFrameCheck = function (framecheck) end, --legacy (stub)
+		getFrameCheck = function () return true end, --legacy (stub)
 
 
 		setSkipAtNotSight = function (skipAtNotSight)
@@ -1599,7 +1612,6 @@ function sc.display.server_createNetworkData(self)
 		clicksAllowed = self.clicksAllowed,
 		skipAtLags = self.skipAtLags,
 		rotation = self.rotation,
-		framecheck = self.framecheck,
 		skipAtNotSight = self.skipAtNotSight,
 		utf8support = self.utf8support
 	}
@@ -1611,6 +1623,9 @@ function sc.display.server_onDataRequired(self, client)
 
 	self.scriptableObject.network:sendToClient(client, "client_onDataResponse", sc.display.server_createNetworkData(self))
 	sendFont(self, client)
+	self.serverCache = {}
+	self.allow_update = true
+	self.force_update = true
 end
 
 function sc.display.server_recvPress(self, p)
@@ -2562,7 +2577,6 @@ function sc.display.client_onDataResponse(self, data)
 	self.renderAtDistance = data.renderAtDistance
 	self.skipAtLags = data.skipAtLags
 	self.skipAtNotSight = data.skipAtNotSight
-	self.framecheck = data.framecheck
 	self.utf8support = data.utf8support
 end
 

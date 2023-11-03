@@ -115,6 +115,7 @@ you can write your values there
 * ninput / input / out
 * clientInvoke / clientInvokeTo
 * setComponentApi / getComponentApi
+* getMaxAvailableCpuTime / getDeltaTime / getUsedRam / getTotalRam / getUptime
 
 ### tablet features
 * The renderAtDistance screen function on the tablet will display the screen even if the tablet is not in your hand
@@ -126,6 +127,9 @@ you can write your values there
 * added small english letters
 * added large Russian letters
 * added small Russian letters
+
+### radar features
+* radar.getTargets() - now returns the object type (character/body) by parameter number 6
 
 ### raycast-camera features
 * camera.getSkyColor():smcolor - returns the color of the sky (even if the sky is not visible to the camera at the moment) this color is used in advanced rendering
@@ -175,7 +179,7 @@ and resets the font
 * display.isAllow():boolean - returns true if this display is enabled, returns false if displays with this resolution are disabled in the mod configuration
 * display.forceFlush() - 
 it works like a regular flush, but updates the picture with 100% probability,
-ignoring setFrameCheck/setSkipAtNotSight/setSkipAtLags
+ignoring setSkipAtNotSight/setSkipAtLags
 * display.setUtf8Support/display.getUtf8Support -
 default: false.
 it is necessary to enable utf8 characters for output, however, it may cause performance degradation when rendering text.
@@ -184,10 +188,6 @@ default: false.
 if set to true, the screen will not be updated for those people who do not look at it.
 this should be set to true if skipping frames will not cause problems.
 if the screen is updated rarely and every frame is important, then you should set false.
-* display.setFrameCheck/display.getFrameCheck -
-default: true.
-if set to true, the display will compare the rendering table, and if they are the same, it will skip the rendering.
-this can optimize a lot of software, but if you do not cause unnecessary renderings, it is better to turn off this option.
 * display.setSkipAtLags/display.getSkipAtLags
 default: true.
 should I skip the rendering if the fps is lower than the one set by the user,
