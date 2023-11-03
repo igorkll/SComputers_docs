@@ -4,7 +4,6 @@ display.reset()
 display.clearClicks()
 display.setSkipAtLags(false)
 display.setClicksAllowed(true)
-display.setFrameCheck(false)
 local rx, ry = display.getWidth(), display.getHeight()
 if rx ~= ry then
     display.setRotation(1)

@@ -71,7 +71,6 @@ display.reset()
 display.clearClicks()
 display.setSkipAtLags(false)
 display.setClicksAllowed(true)
-display.setFrameCheck(false) --display.flush is called only when necessary, it makes no sense to check the frame on the side of the screen
 
 gui = require("gui").new(display)
 image = require("image")

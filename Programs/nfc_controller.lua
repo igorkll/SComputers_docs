@@ -4,7 +4,6 @@ display.reset()
 display.clearClicks()
 display.setSkipAtLags(false)
 display.setClicksAllowed(true)
-display.setFrameCheck(false)
 
 local gui = require("gui").new(display)
 local colors = require("colors")
