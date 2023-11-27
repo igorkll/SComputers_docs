@@ -3,85 +3,122 @@ function loadExample(self, name)
     if name == "eBios" then
         str = 
 [[
---this example is very outdated,
---wait a little and I will make a new bios that supports the latest SComputers technologies
+local colors = require("colors")
+local utils = require("utils")
 
-if bios_stop then
-    if _endtick and bios_screen then
-        pcall(bios_screen.clear, "000000")
-        pcall(bios_screen.flush)
-    end
-    return
+local disk = getComponents("disk")[1]
+local env = utils.deepcopy(_G)
+
+-----------------------------------------
+
+function env.load(chunk, chunkname, mode, lenv)
+    return load(chunk, chunkname, mode, lenv or env)
 end
-if not bios_start then
-    bios_disk = getDisks()[1]
-    bios_screen = getDisplays()[1]
-    bios_bootfile = "/init.lua"
 
-    systemDisk = bios_disk
+function env.loadstring(chunk, lenv)
+    return loadstring(chunk, lenv or env)
+end
 
-    function bios_splash(str, isErr)
-        --if isErr then
-        --    print(str)
-        --end
+function env.execute(chunk, lenv, ...)
+    return execute(chunk, lenv or env, ...)
+end
 
-        if not bios_screen then
-            --if isErr then
-            --    error(str, 0)
-            --end
-            return
-        end
+-----------------------------------------
 
-        local function toParts(str, max)
-            local strs = {}
-            while #str > 0 do
-                table.insert(strs, str:sub(1, max))
-                str = str:sub(#strs[#strs] + 1)
-            end
-            return strs
-        end
-
-        local strs = toParts(str, math.floor(bios_screen.getWidth() / 5))
-        bios_screen.clear("000000")
-        for i, v in ipairs(strs) do
-            bios_screen.drawText(0, (i - 1) * 7, v, "00FF00")
-        end
-        bios_screen.flush()
+local function graphic_clear()
+    for _, display in ipairs(getComponents("display")) do
+        display.reset()
+        display.clear()
+        display.flush()
     end
 
-    
+    for _, terminal in ipairs(getComponents("terminal")) do
+        terminal.clear()
+    end
+end
 
-    if not bios_disk then
-        bios_splash("disk not found", true)
-        bios_stop = true
-        return
-    elseif bios_disk.hasFile(bios_bootfile) then
-        local ok, result = pcall(loadstring, bios_disk.readFile(bios_bootfile))
-        if ok then
-            bios_systemcode = result
-        else
-            bios_systemerror = result
+local function graphic_error(text)
+    local bsodBackground = colors.sm.Blue[2]
+    local bsodForeground = colors.sm.Gray[1]
+    local bsodLabelBackground = colors.sm.Gray[1]
+    local bsodLabelForeground = colors.sm.Blue[2]
+
+    for _, display in ipairs(getComponents("display")) do
+        local sx = display.getWidth()
+        local fsx, fsy = display.getFontWidth() + 1, display.getFontHeight() + 1
+        local strMaxSize = math.floor(sx / fsx)
+
+        local function centerPrint(text, y, color)
+            display.drawText((sx / 2) - ((utf8.len(text) / 2) * fsx), y, text, color)
         end
 
-        if not bios_systemcode then
-            bios_splash("failed to loading: " .. (bios_systemerror or "unknown"), true)
-            bios_stop = true
-            return
+        display.reset()
+        display.clear(bsodBackground)
+        display.fillRect(0, 0, sx, fsy + 1, bsodLabelBackground)
+        centerPrint("ERROR", 1, bsodLabelForeground)
+        local index = 1
+        for _, str in ipairs(utils.split(utf8, tostring(text):upper(), "\n")) do
+            local partsCount = 0
+            for _, lstr in ipairs(utils.splitByMaxSizeWithTool(utf8, str, strMaxSize)) do
+                centerPrint(lstr, (index * fsy) + 2, bsodForeground)
+                index = index + 1
+                partsCount = partsCount + 1
+            end
+            if partsCount == 0 then
+                index = index + 1
+            end
+        end
+        display.forceFlush()
+    end
+
+    for _, terminal in ipairs(getComponents("terminal")) do
+        terminal.clear()
+        terminal.write("#ff0000ERROR: " .. tostring(text))
+    end
+end
+
+-----------------------------------------
+
+graphic_clear()
+
+local targetFile = "init.lua"
+local initCode
+if disk then
+    if disk.hasFile(targetFile) then
+        local code, err = load(disk.readFile(targetFile), "=init", nil, env)
+        if code then
+            initCode = code
+        else
+            graphic_error(err)
         end
     else
-        bios_splash("init file not found", true)
-        bios_stop = true
-        return
+        graphic_error("there is no init.lua file")
     end
-
-    bios_start = true
+else
+    graphic_error("no bootable medium found")
 end
 
-local ok, err = pcall(bios_systemcode, bios_disk)
-if not ok then
-    bios_splash("error in os: " .. (err or "unknown"), true)
-    bios_stop = true
-end]]
+function callback_loop()
+    if _endtick then
+        env._endtick = true
+    end
+
+    if initCode then
+        local successfully, err = pcall(env.callback_loop or initCode, disk)
+        if not successfully then
+            initCode = nil
+            if env.callback_error then
+                pcall(env.callback_error, err)
+            end
+            graphic_error(err)
+        end
+    end
+
+    if _endtick then
+        graphic_clear()
+    end
+end
+callback_loop()]]
     elseif name == "eCamera" then
         str = 
 [[
@@ -102,11 +139,18 @@ cameraIndex = 1
 
 function callback_loop()
     display = getDisplays()[1]
-    if not display then return end
-    display.reset()
-    --this approach will allow you to cause fewer lags, due to which the mod will reduce the clock frequency of the computer (virtual) less, due to which the rendering will be faster.
-    display.setSkipAtLags(true) --in order for rendering to be skipped if the game is lagging(true by default)
-    display.setSkipAtNotSight(true) --in order for the picture not to be updated for those who do not look at the screen
+    if not display then
+        oldDisplay = nil
+        return
+    end
+    if display ~= oldDisplay then
+        display.reset()
+        display.clear()
+        --this approach will allow you to cause fewer lags, due to which the mod will reduce the clock frequency of the computer (virtual) less, due to which the rendering will be faster.
+        display.setSkipAtLags(true) --in order for rendering to be skipped if the game is lagging(true by default)
+        display.setSkipAtNotSight(true) --in order for the picture not to be updated for those who do not look at the screen
+        oldDisplay = display
+    end
 
     cameras = getCameras()
 
@@ -359,6 +403,7 @@ if not start then
 
     display = getComponents("display")[1]
     display.reset()
+    display.clear()
     display.setSkipAtLags(true)
     display.setSkipAtNotSight(true)
 
@@ -426,6 +471,7 @@ end
 display = getComponents("display")[1]
 camera = getComponents("camera")[1]
 display.reset()
+display.clear()
 display.clearClicks()
 display.setSkipAtLags(false)
 display.setClicksAllowed(true)
@@ -608,6 +654,7 @@ motor.setActive(true)
 
 display = getComponents("display")[1]
 display.reset()
+display.clear()
 display.setSkipAtLags(false)
 display.setClicksAllowed(true)
 
@@ -893,6 +940,7 @@ image = require("image")
 ibridge = getComponents("ibridge")[1]
 display = getComponents("display")[1]
 display.reset()
+display.clear()
 
 if not ibridge.isAllow() then
     display.clear()
@@ -939,7 +987,7 @@ function callback_loop()
     for i, v in ipairs(gps.getTagsGpsData(0)) do
         print("position-tag:" .. tostring(i), utils.roundTo(v.position.x, 1), utils.roundTo(v.position.y, 1), utils.roundTo(v.position.z, 1))
         print("rotation-tag:" .. tostring(i), utils.roundTo(v.rotation.x, 1), utils.roundTo(v.rotation.y, 1), utils.roundTo(v.rotation.z, 1), utils.roundTo(v.rotation.w, 1))
-        print("rotation-euler-tag:" .. tostring(i), utils.roundTo(gpsdata.rotationEuler.x, 1), utils.roundTo(gpsdata.rotationEuler.y, 1), utils.roundTo(gpsdata.rotationEuler.z, 1))
+        print("rotation-euler-tag:" .. tostring(i), utils.roundTo(v.rotationEuler.x, 1), utils.roundTo(v.rotationEuler.y, 1), utils.roundTo(v.rotationEuler.z, 1))
     end
 end
 ]]
@@ -1046,7 +1094,7 @@ function callback_loop()
     if _endtick then
         holo.reset()
         holo.clear()
-        holo.flush()
+        holo.forceFlush()
     end
 end
 ]]
@@ -1064,6 +1112,7 @@ local utils = require("utils")
 local radar = getComponents("radar")[1]
 local display = getComponents("display")[1]
 display.reset()
+display.clear()
 
 radar.setHFov(math.rad(16))
 radar.setVFov(math.rad(180))
@@ -1078,7 +1127,7 @@ local idColors = {}
 function callback_loop()
     if _endtick then
         display.clear()
-        display.flush()
+        display.forceFlush()
         return
     end
 
@@ -1137,6 +1186,7 @@ str = [[
 local wasd = getComponents("wasd")[1]
 local display = getComponents("display")[1]
 display.reset()
+display.clear()
 
 function drawLabel(x, y, char, state, color)
     display.fillRect(x, y, 6, 7, state and color or "000000")
@@ -1146,7 +1196,7 @@ end
 function callback_loop()
     if _endtick then
         display.clear()
-        display.flush()
+        display.forceFlush()
         return
     end
 
@@ -1199,7 +1249,7 @@ display.flush()
 function callback_loop()
     if _endtick then
         display.clear()
-        display.flush()
+        display.forceFlush()
     end
 end
 ]]
@@ -1221,6 +1271,7 @@ end
 str = [[
 local display = getComponents("display")[1]
 display.reset()
+display.clear()
 --this approach will allow you to cause fewer lags, due to which the mod will reduce the clock frequency of the computer (virtual) less, due to which the rendering will be faster.
 display.setSkipAtLags(true) --in order for rendering to be skipped if the game is lagging(true by default)
 display.setSkipAtNotSight(true) --in order for the picture not to be updated for those who do not look at the screen
@@ -1232,7 +1283,7 @@ camera.setStep(512)
 function callback_loop()
     if _endtick then
         display.clear()
-        display.flush()
+        display.forceFlush()
         return
     end
 
@@ -1248,6 +1299,7 @@ local colors = require("colors")
 
 local display = getComponents("display")[1]
 display.reset()
+display.clear()
 --this approach will allow you to cause fewer lags, due to which the mod will reduce the clock frequency of the computer (virtual) less, due to which the rendering will be faster.
 display.setSkipAtLags(true) --in order for rendering to be skipped if the game is lagging(true by default)
 display.setSkipAtNotSight(true) --in order for the picture not to be updated for those who do not look at the screen
@@ -1259,7 +1311,7 @@ camera.setStep(512)
 function callback_loop()
     if _endtick then
         display.clear()
-        display.flush()
+        display.forceFlush()
         return
     end
 
@@ -1355,7 +1407,7 @@ function callback_loop()
     if _endtick then
         holo.reset()
         holo.clear()
-        holo.flush()
+        holo.forceFlush()
     end
 holo.setRotation(0, sm.game.getCurrentTick()*math.pi/180, 0)
 end
@@ -1370,7 +1422,7 @@ local rx, ry = display.getWidth(), display.getHeight()
 function callback_loop()
     if _endtick then
         display.clear()
-        display.flush()
+        display.forceFlush()
         return
     end
 
@@ -1448,7 +1500,9 @@ function callback_loop()
         return
     end
 
-    forward()
+    if wasd.isSeated() then
+        forward()
+    end
 
     if wasd.isW() then
         _up()

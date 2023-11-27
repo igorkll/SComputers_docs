@@ -705,6 +705,28 @@
       },
       {
          "box" : {
+            "x" : 3,
+            "y" : 3,
+            "z" : 1
+         },
+         "color" : "888888",
+         "physicsMaterial" : "Mechanical",
+         "ratings" : {
+            "buoyancy" : 1,
+            "density" : 10,
+            "durability" : 5,
+            "friction" : 3
+         },
+         "renderable" : "$CONTENT_DATA/Objects/Renderables/inertialEngineMini.rend",
+         "rotationSet" : "PropZ",
+         "scripted" : {
+            "classname" : "inertialEngine",
+            "filename" : "$CONTENT_DATA/Scripts/inertialEngine.lua"
+         },
+         "uuid" : "f9c63827-0e63-4ed0-b377-5c2d18d8e3e4"
+      },
+      {
+         "box" : {
             "x" : 4,
             "y" : 4,
             "z" : 2
@@ -727,6 +749,103 @@
             "filename" : "$CONTENT_DATA/Scripts/inertialEngine.lua"
          },
          "uuid" : "eb60707f-f3b2-4381-bc75-a794a9dc70b8"
+      },
+      {
+         "box" : {
+            "x" : 3,
+            "y" : 3,
+            "z" : 1
+         },
+         "color" : "c400a6",
+         "physicsMaterial" : "Mechanical",
+         "ratings" : {
+            "buoyancy" : 1,
+            "density" : 10,
+            "durability" : 5,
+            "friction" : 3
+         },
+         "renderable" : "$CONTENT_DATA/Objects/Renderables/inertialEngineMini.rend",
+         "rotationSet" : "PropZ",
+         "scripted" : {
+            "classname" : "inertialEngine",
+            "data" : {
+               "creative" : true
+            },
+            "filename" : "$CONTENT_DATA/Scripts/inertialEngine.lua"
+         },
+         "uuid" : "13d52b7b-6159-4925-a9f1-7e88c9a4ceb0"
+      },
+      {
+         "box" : {
+            "x" : 3,
+            "y" : 2,
+            "z" : 1
+         },
+         "color" : "0E63B1",
+         "physicsMaterial" : "Mechanical",
+         "ratings" : {
+            "buoyancy" : 3,
+            "density" : 3,
+            "durability" : 1,
+            "friction" : 6
+         },
+         "renderable" : "$CONTENT_DATA/Objects/Other/arduino/rend.rend",
+         "rotationSet" : "PropZ",
+         "scripted" : {
+            "classname" : "ScriptableComputer",
+            "data" : {
+               "arduino" : true
+            },
+            "filename" : "$CONTENT_DATA/Scripts/ScriptableComputer.lua"
+         },
+         "stackSize" : 10,
+         "sticky" : "-Z",
+         "uuid" : "b33253db-67e3-45f8-9a3f-4c16a3ea3fdd"
+      },
+      {
+         "box" : {
+            "x" : 5,
+            "y" : 2,
+            "z" : 2
+         },
+         "color" : "3c261e",
+         "physicsMaterial" : "Plastic",
+         "ratings" : {
+            "buoyancy" : 3,
+            "density" : 6,
+            "durability" : 4,
+            "friction" : 3
+         },
+         "renderable" : "$CONTENT_DATA/Objects/Other/chip/rend.rend",
+         "rotationSet" : "PropZ",
+         "scripted" : {
+            "classname" : "ScriptableComputer",
+            "data" : {
+               "chip" : true
+            },
+            "filename" : "$CONTENT_DATA/Scripts/ScriptableComputer.lua"
+         },
+         "stackSize" : 10,
+         "sticky" : "-Z",
+         "uuid" : "ef241100-53f7-440d-9576-d3c6ef25e7fb"
+      },
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "color" : "8a05a6",
+         "physicsMaterial" : "Mechanical",
+         "renderable" : "$CONTENT_DATA/Objects/Renderables/reboot.rend",
+         "rotationSet" : "PropYZ",
+         "scripted" : {
+            "classname" : "reboot",
+            "filename" : "$CONTENT_DATA/Scripts/reboot.lua"
+         },
+         "stackSize" : 10,
+         "sticky" : "-X+X-Y+Y-Z+Z",
+         "uuid" : "773d90ee-2f5e-4415-998c-90f4cfe12a77"
       }
    ]
 }

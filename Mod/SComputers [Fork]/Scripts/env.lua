@@ -365,7 +365,7 @@ function createSafeEnv(self, settings)
         getData = function ()
             if self.storageData.userdata then
                 if self.storageData.userdata_bs64 then
-                    return base64.decode(self.storageData.userdata)
+                    return (base64.decode(self.storageData.userdata))
                 else
                     return self.storageData.userdata
                 end

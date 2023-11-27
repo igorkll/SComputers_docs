@@ -167,6 +167,17 @@
       "title" : "[FORK ONLY] #f002a8Creative Inertial Engine#eeeeee"
    },
 
+   "f9c63827-0e63-4ed0-b377-5c2d18d8e3e4" : {
+      "description" : "allows you to move creation in any direction. requires connection of a container with batteries and fuel. it has the same consumption when switched on, regardless of the load, consumes 1 batteries and 1 gas per second",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Mini Inertial Engine"
+   },
+   "13d52b7b-6159-4925-a9f1-7e88c9a4ceb0" : {
+      "description" : "allows you to move creation in any direction.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] #f002a8Mini Creative Inertial Engine#eeeeee"
+   },
+
    "663bab7b-8e5b-4e1d-9843-3679e4961526" : {
       "description" : "A Display that you can connect to a computer and show whatever you want to!",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
@@ -441,5 +452,20 @@
       "description" : "allows you to get information about the presence of the player in the seat and pressing the WASD buttons",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] WASD Converter"
+   },
+   "b33253db-67e3-45f8-9a3f-4c16a3ea3fdd" : {
+      "description" : "arduino from aliexpress",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Arduino Uno"
+   },
+   "ef241100-53f7-440d-9576-d3c6ef25e7fb" : {
+      "description" : "Soviet microcontroller. an ancient thing, surprisingly still works",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Soviet Microcontroller"
+   },
+   "773d90ee-2f5e-4415-998c-90f4cfe12a77" : {
+      "description" : "press \"E\" on this unit or give a logical signal and it will restart all connected computers. it also gives a logical signal if the computer crashed",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Reboot Gate"
    }
 }

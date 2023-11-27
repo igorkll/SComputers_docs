@@ -7,7 +7,7 @@ synthesizer.colorNormal = sm.color.new(   0x006e93ff)
 synthesizer.colorHighlight = sm.color.new(0x00beffff)
 synthesizer.poseWeightCount = 1
 synthesizer.componentType = "synthesizer"
-
+synthesizer.maxBeeps = 4
 
 function synthesizer:server_onCreate()
     sc.synthesizerDatas[self.interactable.id] = {
@@ -19,12 +19,14 @@ function synthesizer:server_onCreate()
         end,
         addBeep = function (device, pitch, volume, duration)
             if not self.beeps then self.beeps = {} end
-            table.insert(self.beeps, {
-                device = device,
-                pitch = pitch,
-                volume = volume,
-                duration = duration
-            })
+            if #self.beeps < synthesizer.maxBeeps then
+                table.insert(self.beeps, {
+                    device = device,
+                    pitch = pitch,
+                    volume = volume,
+                    duration = duration
+                })
+            end
         end,
         stop = function ()
             self.stopFlag = true

@@ -191,6 +191,10 @@ function safe_load_code(self, chunk, chunkname, mode, env)
     checkArg(3, mode,      "string", "nil")
     checkArg(4, env,       "table",  "nil")
 
+    if sc.shutdownFlag then
+        return nil, "CRITICAL ISSUE IN SCOMPUTERS"
+    end
+
     local codelen = #chunk
     if codelen > sc.maxcodelen then
         return nil, "the code len " .. math.round(codelen) .. " bytes, the maximum code len " .. sc.maxcodelen .. " bytes"

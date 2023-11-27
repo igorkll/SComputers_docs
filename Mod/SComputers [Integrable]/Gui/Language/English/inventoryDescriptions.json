@@ -1,6 +1,6 @@
 {
     "14b629d7-a1b6-4803-ae6e-a0ff50d45053" : {
         "title": "Unsafe Computer",
-        "description": "it always works in unsafe mode and always has the ability to output messages to the chat. also, this computer has an increased CPU time limit (40 ticks). you can use it to create a challenge/customgame logic"
+        "description": "it always works in unsafe mode and always has the ability to output messages to the chat. also, this computer has an increased CPU time limit (40 ticks). you can use it to create a challenge/customgame logic. \"anti-lag\" \"and drop freq at lags\" do not work on this computer(this computer can easily reduce the performance of the game, so be careful)"
     }
 }

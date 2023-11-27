@@ -33,6 +33,7 @@ function keyboard:server_onCreate()
                 error("a string larger than 32 kb", 2)
             else
                 self.writeData = text
+                self.sdata.currentData = text
             end
             return true
         end,
@@ -52,9 +53,13 @@ function keyboard:server_onCreate()
 end
 
 function keyboard:server_onFixedUpdate()
-    if self.writeData then
+    local ctick = sm.game.getCurrentTick()
+	if ctick % sc.restrictions.screenRate == 0 then self.allow_update = true end
+
+    if self.writeData and self.allow_update then
         self:sv_writeData(self.writeData)
         self.writeData = nil
+        self.allow_update = nil
     end
 end
 

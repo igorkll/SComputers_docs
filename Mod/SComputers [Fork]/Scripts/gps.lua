@@ -9,14 +9,20 @@ gps.componentType = "gps" --absences can cause problems
 gps.minimalNoise = 1
 gps.maximumNoise = 4096
 
+local function noise(meters)
+    return (math.random() * meters) - (meters / 2)
+end
+
+local function clampRotation(val)
+    if val > math.pi then val = math.pi end
+    if val < -math.pi then val = -math.pi end
+    return val
+end
+
 function gps:generateNoise(dist, gpsdata)
     dist = constrain(dist, gps.minimalNoise, gps.maximumNoise)
     local degrees = dist / 100
     local meters = degrees / 4
-
-    local function noise(meters)
-        return (math.random() * meters) - (meters / 2)
-    end
 
     gpsdata.position = gpsdata.position + sm.vec3.new(noise(meters), noise(meters), noise(meters))
 
@@ -28,11 +34,13 @@ function gps:generateNoise(dist, gpsdata)
     gpsdata.rotation = NormalizeQuaternion(gpsdata.rotation)
     ]]
 
-    gpsdata.rotationEuler.x = gpsdata.rotationEuler.x + math.rad(noise(degrees))
-    gpsdata.rotationEuler.y = gpsdata.rotationEuler.y + math.rad(noise(degrees))
-    gpsdata.rotationEuler.z = gpsdata.rotationEuler.z + math.rad(noise(degrees))
-
+    --[[
+    gpsdata.rotationEuler.x = clampRotation(gpsdata.rotationEuler.x + math.rad(noise(degrees)))
+    gpsdata.rotationEuler.y = clampRotation(gpsdata.rotationEuler.y + math.rad(noise(degrees)))
+    gpsdata.rotationEuler.z = clampRotation(gpsdata.rotationEuler.z + math.rad(noise(degrees)))
     gpsdata.rotation = fromEuler(gpsdata.rotationEuler.x, gpsdata.rotationEuler.y, gpsdata.rotationEuler.z)
+    --gpsdata.rotation = sm.quat.fromEuler(gpsdata.rotationEuler)
+    ]]
 
     return gpsdata
 end

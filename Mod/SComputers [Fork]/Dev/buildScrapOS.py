@@ -16,7 +16,7 @@ os.chdir(path)
 time.sleep(1)
 
 # Копируем файл disk.json из importer в gamedisks и переименовываем в scrapOS.json
-shutil.copyfile("../USER/importer/disk.json", "../gamedisks/scrapOS.json")
+shutil.copyfile("../USER/importer/disk.json", "../ROM/gamedisks/scrapOS.json")
 
 # Удаляем файл disk.json и папку importer/files
 os.remove("../USER/importer/disk.json")

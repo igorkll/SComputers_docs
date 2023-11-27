@@ -61,8 +61,8 @@ function inertialEngine:server_onCreate()
                 end,
                 setStableMode = function (mode)
                     checkArg(1, mode, "number")
-                    if mode < 1 or mode > 4 then
-                        error("stable mode must be [1:4]", 2)
+                    if mode < 0 or mode > 4 then
+                        error("stable mode must be [0:4]", 2)
                     end
                     self.stableMode = mode
                     self:recreatePID()
@@ -144,10 +144,14 @@ function inertialEngine:recreatePID()
         self.rPidX = createPID(2, 0, 1500)
         self.rPidY = createPID(2, 0, 1500)
         self.rPidZ = createPID(2, 0, 1500)
-    else
+    elseif self.stableMode == 1 then
         self.rPidX = createPID(0.8, 0, 250)
         self.rPidY = createPID(0.8, 0, 250)
         self.rPidZ = createPID(0.8, 0, 250)
+    else
+        self.rPidX = createPID(0, 0, 0)
+        self.rPidY = createPID(0, 0, 0)
+        self.rPidZ = createPID(0, 0, 0)
     end
 end
 

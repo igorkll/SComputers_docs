@@ -11,8 +11,13 @@
          "renderable" : "$CONTENT_DATA/Objects/Renderables/Display.rend",
          "rotationSet" : "PropNegY",
          "scripted" : {
-            "classname" : "CompositeDisplay16",
-            "filename" : "$CONTENT_DATA/Scripts/Displays/Display16.lua"
+            "classname" : "AnyDisplay",
+            "data" : {
+               "v" : 2.0,
+               "x" : 16,
+               "y" : 16
+            },
+            "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
          "sticky" : "+X-Y+Y-Z+Z",
          "uuid" : "663bab7b-8e5b-4e1d-9843-3679e4961526"
@@ -28,8 +33,13 @@
          "renderable" : "$CONTENT_DATA/Objects/Renderables/Display.rend",
          "rotationSet" : "PropNegY",
          "scripted" : {
-            "classname" : "CompositeDisplay32",
-            "filename" : "$CONTENT_DATA/Scripts/Displays/Display32.lua"
+            "classname" : "AnyDisplay",
+            "data" : {
+               "v" : 1.0,
+               "x" : 32,
+               "y" : 32
+            },
+            "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
          "sticky" : "+X-Y+Y-Z+Z",
          "uuid" : "861f514f-5913-4538-852c-fa05aa5e265f"
@@ -89,8 +99,13 @@
          "renderable" : "$CONTENT_DATA/Objects/Renderables/Display2.rend",
          "rotationSet" : "PropNegY",
          "scripted" : {
-            "classname" : "CompositeDisplay32x2",
-            "filename" : "$CONTENT_DATA/Scripts/Displays/Display32x2.lua"
+            "classname" : "AnyDisplay",
+            "data" : {
+               "v" : 2.0,
+               "x" : 32,
+               "y" : 32
+            },
+            "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
          "sticky" : "+X-Y+Y-Z+Z",
          "uuid" : "cb0fa796-b709-439f-8c0d-9045e7107dfd"
@@ -106,8 +121,13 @@
          "renderable" : "$CONTENT_DATA/Objects/Renderables/Display2.rend",
          "rotationSet" : "PropNegY",
          "scripted" : {
-            "classname" : "CompositeDisplay64",
-            "filename" : "$CONTENT_DATA/Scripts/Displays/Display64.lua"
+            "classname" : "AnyDisplay",
+            "data" : {
+               "v" : 1.0,
+               "x" : 64,
+               "y" : 64
+            },
+            "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
          "sticky" : "+X-Y+Y-Z+Z",
          "uuid" : "e0e439e8-5103-4aa7-b74c-858ce6e1e1d4"
@@ -277,8 +297,13 @@
          "renderable" : "$CONTENT_DATA/Objects/Renderables/Display4.rend",
          "rotationSet" : "PropNegY",
          "scripted" : {
-            "classname" : "CompositeDisplay32x4",
-            "filename" : "$CONTENT_DATA/Scripts/Displays/Display32x4.lua"
+            "classname" : "AnyDisplay",
+            "data" : {
+               "v" : 4.0,
+               "x" : 32,
+               "y" : 32
+            },
+            "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
          "sticky" : "+X-Y+Y-Z+Z",
          "uuid" : "2b6b6b6f-7c7d-4f6a-9c8d-774a084b1cfb"
@@ -294,8 +319,13 @@
          "renderable" : "$CONTENT_DATA/Objects/Renderables/Display4.rend",
          "rotationSet" : "PropNegY",
          "scripted" : {
-            "classname" : "CompositeDisplay64x2",
-            "filename" : "$CONTENT_DATA/Scripts/Displays/Display64x2.lua"
+            "classname" : "AnyDisplay",
+            "data" : {
+               "v" : 2.0,
+               "x" : 64,
+               "y" : 64
+            },
+            "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
          "sticky" : "+X-Y+Y-Z+Z",
          "uuid" : "46271f6f-e61a-4173-b121-e37a1f56a904"
@@ -311,8 +341,13 @@
          "renderable" : "$CONTENT_DATA/Objects/Renderables/Display4.rend",
          "rotationSet" : "PropNegY",
          "scripted" : {
-            "classname" : "CompositeDisplay128",
-            "filename" : "$CONTENT_DATA/Scripts/Displays/Display128.lua"
+            "classname" : "AnyDisplay",
+            "data" : {
+               "v" : 1.0,
+               "x" : 128,
+               "y" : 128
+            },
+            "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
          "sticky" : "+X-Y+Y-Z+Z",
          "uuid" : "7abd8ee7-f1ac-4b32-924c-f8322f58a8e7"
@@ -328,8 +363,13 @@
          "renderable" : "$CONTENT_DATA/Objects/Renderables/Display4.rend",
          "rotationSet" : "PropNegY",
          "scripted" : {
-            "classname" : "CompositeDisplay256",
-            "filename" : "$CONTENT_DATA/Scripts/Displays/Display256.lua"
+            "classname" : "AnyDisplay",
+            "data" : {
+               "v" : 0.50,
+               "x" : 256,
+               "y" : 256
+            },
+            "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
          "sticky" : "+X-Y+Y-Z+Z",
          "uuid" : "f9b5c7ac-5a29-4973-ba7f-7b2b5ff66a20"
@@ -547,8 +587,13 @@
          "renderable" : "$CONTENT_DATA/Objects/Renderables/Display4x1.rend",
          "rotationSet" : "PropNegY",
          "scripted" : {
-            "classname" : "CompositeDisplay64_16",
-            "filename" : "$CONTENT_DATA/Scripts/Displays/Display64_16.lua"
+            "classname" : "AnyDisplay",
+            "data" : {
+               "v" : 2.0,
+               "x" : 64,
+               "y" : 16
+            },
+            "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
          "sticky" : "+X-Y+Y-Z+Z",
          "uuid" : "596660f2-1d92-468a-97c6-e7cdb9087095"
@@ -564,8 +609,13 @@
          "renderable" : "$CONTENT_DATA/Objects/Renderables/Display4x1.rend",
          "rotationSet" : "PropNegY",
          "scripted" : {
-            "classname" : "CompositeDisplay128_32",
-            "filename" : "$CONTENT_DATA/Scripts/Displays/Display128_32.lua"
+            "classname" : "AnyDisplay",
+            "data" : {
+               "v" : 1.0,
+               "x" : 128,
+               "y" : 32
+            },
+            "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
          "sticky" : "+X-Y+Y-Z+Z",
          "uuid" : "18a8e622-2c01-41c0-9b60-c0d8d88c09d8"

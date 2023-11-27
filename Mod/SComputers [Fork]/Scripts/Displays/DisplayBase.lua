@@ -1,5 +1,5 @@
 -- debug
-debug_out = true
+debug_out = false
 debug_printeffects = false
 debug_disablecheck = false
 debug_disabletext = false
@@ -233,7 +233,7 @@ local function debug_print(...)
 	end
 end
 
-local sc_display_shapesUuid = sm.uuid.new("41d7c8b2-e2de-4c29-b842-5efd8af37ae6")
+local sc_display_shapesUuid = sm.uuid.new("708d4a47-7de7-49df-8ba3-e58083c2610e")
 
 local sc_getEffectName = sc.getEffectName
 
@@ -262,6 +262,8 @@ local sc_display_client_drawLine
 local sc_display_client_optimize
 
 local sm_color_new = sm.color.new
+local black = sm_color_new("000000ff")
+local white = sm_color_new("ffffffff")
 
 local font_chars = sc.display.font.optimized
 local font_width = sc.display.font.width
@@ -1076,6 +1078,7 @@ function sc.display.createDisplay(scriptableObject, width, height, pixelScale)
 
 	display.force_update = true --первая отрисовка всегда форсированая
 	display.allow_update = true
+	display.audience = {}
 
 	return display
 end
@@ -1112,11 +1115,28 @@ local function isAllow(self)
 end
 
 function sc.display.server_update(self)
+	local audienceSize = 0
+	for id, timer in pairs(self.audience) do
+		audienceSize = audienceSize + 1
+		if timer <= 0 then
+			self.audience[id] = nil
+		else
+			self.audience[id] = timer - 1
+		end
+	end
+
+	local rate = sc.restrictions.screenRate
+	if audienceSize == 0 then
+		rate = 16
+	end
+
 	local ctick = sm.game.getCurrentTick()
-	if ctick % sc.restrictions.screenRate == 0 then self.allow_update = true end
+	if ctick % rate == 0 then self.allow_update = true end
 	if ctick % (40 * 2) == 0 then
 		self.force_update = true
 		self.allow_update = true
+		self.serverCache = {}
+		self.serverCacheAll = nil
 	end
 
 
@@ -1193,7 +1213,7 @@ function sc.display.server_update(self)
 
 			if #self.renderingStack > 0 then
 				local cancel
-				if self.lastComputer and not self.lastComputer.cdata.unsafe and type(sc.restrictions.lagDetector) == "number" then
+				if self.lastComputer and self.lastComputer.cdata and not self.lastComputer.cdata.unsafe and type(sc.restrictions.lagDetector) == "number" then
 					local oldLagScore = self.lastComputer.lagScore
 					for i, v in ipairs(self.renderingStack) do
 						local score = 0.002
@@ -1302,7 +1322,7 @@ function sc.display.client_init(self)
 
 
 	self.newEffects = {}
-	sc_display_client_clear(self, sm_color_new("000000ff"), true)
+	sc_display_client_clear(self, black, true)
 	applyNew(self)
 	self.newEffects = nil
 end
@@ -1338,6 +1358,18 @@ function sc.display.server_createData(self)
 		return x, y
 	end
 
+	local function checkRect(x, y, w, h)
+		w = math.floor(math.abs(w))
+		h = math.floor(math.abs(h))
+		if x + w > rwidth then
+			w = w - ((x + w) - rwidth)
+		end
+		if y + h > rheight then
+			h = h - ((y + h) - rheight)
+		end
+		return w, h
+	end
+
 	local data = {
 		isAllow = function ()
 			return isAllow(self)
@@ -1361,6 +1393,7 @@ function sc.display.server_createData(self)
 				color or "000000ff"
 			}
 			self.rnd_idx = self.rnd_idx + 1
+
 			self.serverCache = {}
 			self.serverCacheAll = color
 		end,
@@ -1378,6 +1411,9 @@ function sc.display.server_createData(self)
 			end
 		end,
 		drawRect = function (x, y, w, h, c)
+			x, y = checkPos(x, y)
+			w, h = checkRect(x, y, w, h)
+
 			self.renderingStack[self.rnd_idx] = {
 				2,
 				c or "ffffffff",
@@ -1387,9 +1423,24 @@ function sc.display.server_createData(self)
 				nRound(h)
 			}
 			self.rnd_idx = self.rnd_idx + 1
+			
 			self.serverCache = {}
+			self.serverCacheAll = nil
+
+			--[[
+			for ix = x, x + (w - 1) do
+				for iy = y, y + (h - 1) do
+					if ix == x or iy == y or ix == (x + (w - 1)) or iy == (y + (h - 1)) then
+						self.serverCache[x + (y * rwidth)] = c
+					end
+				end
+			end
+			]]
 		end,
 		fillRect = function (x, y, w, h, c)
+			x, y = checkPos(x, y)
+			w, h = checkRect(x, y, w, h)
+
 			self.renderingStack[self.rnd_idx] = {
 				3,
 				c or "ffffffff",
@@ -1399,7 +1450,17 @@ function sc.display.server_createData(self)
 				nRound(h)
 			}
 			self.rnd_idx = self.rnd_idx + 1
+			
 			self.serverCache = {}
+			self.serverCacheAll = nil
+
+			--[[
+			for ix = x, x + (w - 1) do
+				for iy = y, y + (h - 1) do
+					self.serverCache[x + (y * rwidth)] = c
+				end
+			end
+			]]
 		end,
 		drawCircle = function (x, y, r, c)
 			self.renderingStack[self.rnd_idx] = {
@@ -1410,7 +1471,9 @@ function sc.display.server_createData(self)
 				nRound(r)
 			}
 			self.rnd_idx = self.rnd_idx + 1
+			
 			self.serverCache = {}
+			self.serverCacheAll = nil
 		end,
 		fillCircle = function (x, y, r, c)
 			self.renderingStack[self.rnd_idx] = {
@@ -1421,7 +1484,9 @@ function sc.display.server_createData(self)
 				nRound(r)
 			}
 			self.rnd_idx = self.rnd_idx + 1
+			
 			self.serverCache = {}
+			self.serverCacheAll = nil
 		end,
 		drawLine = function (x, y, x1, y1, c)
 			self.renderingStack[self.rnd_idx] = {
@@ -1433,7 +1498,9 @@ function sc.display.server_createData(self)
 				nRound(y1)
 			}
 			self.rnd_idx = self.rnd_idx + 1
+			
 			self.serverCache = {}
+			self.serverCacheAll = nil
 		end,
 		drawText = function (x, y, text, c)
 			if not debug_disabletext then
@@ -1446,7 +1513,9 @@ function sc.display.server_createData(self)
 					text
 				}
 				self.rnd_idx = self.rnd_idx + 1
+				
 				self.serverCache = {}
+				self.serverCacheAll = nil
 			end
 		end,
 
@@ -1491,22 +1560,18 @@ function sc.display.server_createData(self)
 
 		setFont = function (font)
 			checkArg(1, font, "table", "nil")
-			--if font == self.saved_customFont then return end --а вдруг я изменю таблицу я захочу отправить ее заного?
 			if font then
-				if not font.chars or not font.width or not font.height then
-					error("font failed integrity check", 2)
-				end
+				basegraphic_checkFont(font)
 				self.customFont = {
 					width = font.width,
 					height = font.height,
 					chars = sc.display.optimizeFont(font.chars, font.width, font.height)
 				}
-				--self.saved_customFont = font
 			else
 				self.customFont = nil
-				--self.saved_customFont = nil
 			end
 			self.needSendData = true
+			self.dbuffcode = nil
 		end,
 
 		getFontWidth = function ()
@@ -1628,13 +1693,15 @@ function sc.display.server_onDataRequired(self, client)
 	self.force_update = true
 end
 
-function sc.display.server_recvPress(self, p)
+function sc.display.server_recvPress(self, p, caller)
 	if type(p) == "number" then
-		if self.lastComputer and not self.lastComputer.cdata.unsafe and type(sc.restrictions.lagDetector) == "number" then
+		if self.lastComputer and (not self.lastComputer.cdata or not self.lastComputer.cdata.unsafe) and type(sc.restrictions.lagDetector) == "number" then
 			local add = p * sc.restrictions.lagDetector
 			self.lastComputer.lagScore = self.lastComputer.lagScore + add
 			debug_print("get lag score", add)
 		end
+	elseif p == "reg" then --user reg
+		self.audience[caller.id] = 40
 	else
 		local d = self.clickData
 		if #d <= self.maxClicks then
@@ -2294,9 +2361,9 @@ function sc.display.client_update(self, dt)
 	
 	if not debug_disableEffectsBuffer then
 		--если картинка давно не обновлялась,
-		--то минимальное каличество для удаления эфектов 1000
-		--а если обновления идей сейчас то только если буферезированых минимум 10000
-		local minToRemove = (not self.lastDrawTime or ctick - self.lastDrawTime >= 40) and 1000 or 10000
+		--то минимальное каличество для удаления эфектов 5000
+		--а если обновления идей сейчас то только если буферезированых минимум 50000
+		local minToRemove = (not self.lastDrawTime or ctick - self.lastDrawTime >= 40) and 5000 or 50000
 		if quadTree.bf_idx >= minToRemove then
 			local effect
 			for i = 1, 250 do
@@ -2331,7 +2398,7 @@ function sc.display.client_update(self, dt)
 			self.cursor = quad_createEffect(quadTree, 0, 0, 0.06, 0.06, -0.0005, true, true)
 			effect_setParameter(self.cursor, "uuid", cursorUuid)
 			quadTree.rotation = old_rotation
-			effect_setParameter(self.cursor, "color", sm_color_new("ffffffff"))
+			effect_setParameter(self.cursor, "color", white)
 			effect_start(self.cursor)
 		end
 	elseif self.cursor then
@@ -2493,6 +2560,8 @@ function sc.display.client_update(self, dt)
 		end
 
 		if nowIsRendering then
+			self.scriptableObject.network:sendToServer("server_recvPress", "reg")
+
 			if self.old_opt and not sc.restrictions.optSpeed then
 				random_hide_show(self, 0)
 			end
@@ -2717,7 +2786,7 @@ function sc.display.client_drawStack(self, sendstack)
 end
 
 
-function sc.display.client_onClick(self, type, action) -- type - 1:interact|2:tinker (e.g 1 or 2), action - pressed, released, drag
+function sc.display.client_onClick(self, type, action, localPoint) -- type - 1:interact|2:tinker (e.g 1 or 2), action - pressed, released, drag
 	if not self.clicksAllowed then
 		return
 	end
@@ -2770,27 +2839,30 @@ function sc.display.client_onClick(self, type, action) -- type - 1:interact|2:ti
 			self.scriptableObject.network:sendToServer("server_recvPress", { pointX, pointY, action, type })
 		end
 	end
+
+	local function reg(localPoint)
+		if localPoint and localPoint.x < 0 then
+			local localPoint = sm_vec3_new(0, localPoint.y, localPoint.z)
+			local scale = sc_display_PIXEL_SCALE * self.pixelScale
+
+			local pointX = math_floor(self.width / 2 - localPoint.z / scale)
+			local pointY = math_floor(self.height / 2 + localPoint.y / scale)
+		
+			detect(pointX, pointY)
+		end
+	end
 	
-	if self.scriptableObject.shape then
+	if localPoint then
+		reg(localPoint)
+	elseif self.scriptableObject.shape then
 		local succ, res = sm_localPlayer.getRaycast((sc.restrictions and sc.restrictions.rend) or RENDER_DISTANCE)
 		if succ then
 			local shape = self.scriptableObject.shape
 			local localPoint = shape:transformPoint(res.pointWorld)
-	
-			if localPoint and localPoint.x < 0 then
-				local localPoint = sm_vec3_new(0, localPoint.y, localPoint.z)
-				local scale = sc_display_PIXEL_SCALE * self.pixelScale
-
-				local pointX = math_floor(self.width / 2 - localPoint.z / scale)
-				local pointY = math_floor(self.height / 2 + localPoint.y / scale)
-			
-				detect(pointX, pointY)
-			end
+			reg(localPoint)
 		end
-	else
-		if self.tablet_posX and self.tablet_posY then
-			detect(self.tablet_posX, self.tablet_posY)
-		end
+	elseif self.tablet_posX and self.tablet_posY then
+		detect(self.tablet_posX, self.tablet_posY)
 	end
 end
 

@@ -26,8 +26,8 @@ function AnyDisplay.server_onFixedUpdate(self, dt)
 	sc.display.server_update(self.display, dt)
 end
 
-function AnyDisplay.server_recvPress(self, p)
-	sc.display.server_recvPress(self.display, p)
+function AnyDisplay.server_recvPress(self, p, caller)
+	sc.display.server_recvPress(self.display, p, caller)
 end
 
 function AnyDisplay.server_onDataRequired(self, client)
@@ -55,6 +55,11 @@ end
 
 function AnyDisplay.client_onInteract(self, character, state)
 	sc.display.client_onInteract(self.display, character, state)
+end
+
+function AnyDisplay:client_onProjectile(position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
+	sc.display.client_onClick(self.display, 1, "pressed", normal)
+	sc.display.client_onClick(self.display, 1, "released", normal)
 end
 
 function AnyDisplay.client_canInteract(self, character)

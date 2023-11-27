@@ -36,6 +36,31 @@ local function drawChar(self, font, drawPixel, x, y, c, color)
 	end
 end
 
+function basegraphic_checkFont(font)
+	if type(font) ~= "table" then
+		error("the font should be a table", 3)
+	end
+	if type(font.chars) ~= "table" or type(font.width) ~= "number" or type(font.height) ~= "number" then
+		error("font failed integrity check", 3)
+	end
+	if font.width > 32 then
+		error("the font width should not exceed 32", 3)
+	end
+	if font.height > 32 then
+		error("the font height should not exceed 32", 3)
+	end
+	for char, data in pairs(font.chars) do
+		if type(char) ~= "string" or type(data) ~= "table" or #data ~= font.height then
+			error("font failed integrity check", 3)
+		end
+		for _, line in ipairs(data) do
+			if type(line) ~= "string" or #line ~= font.width then
+				error("font failed integrity check", 3)
+			end
+		end
+	end
+end
+
 function basegraphic_printText(font, utf8support, self, drawPixel, drawPixelForce, x, y, width, height, text, color)
     x = math_floor(x)
 	y = math_floor(y)

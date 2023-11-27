@@ -6,7 +6,9 @@ servicetool.instance = nil
 function servicetool:server_onCreate()
     dofile("$CONTENT_DATA/Scripts/Config.lua")
     sc.init()
+    sc.warningsCheck()
     self.sendRestrictions = true
+    self.network:sendToClients("cl_warns")
 end
 
 function servicetool:server_onFixedUpdate()
@@ -33,6 +35,10 @@ function servicetool:server_onFixedUpdate()
 
     if sm.game.getCurrentTick() % (40 * 60 * 30) == 0 or sc.restrictionsUpdated then
         self:sv_print_vulnerabilities()
+    end
+
+    if sc.shutdownFlag and sm.game.getCurrentTick() % (5 * 40) == 0 then
+        self.network:sendToClients("cl_warns")
     end
 end
 
@@ -105,11 +111,19 @@ function servicetool:client_onCreate()
     sm.gui.chatMessage("#f03c02be sure to read the documentation#ffffff: https://github.com/igorkll/SComputers_docs/blob/main/SComputers/Info.md")
     --sm.gui.chatMessage("current documentation is \"temporary\"")
     --sm.gui.chatMessage("because the scrapmechanictool site has closed")
+    
+    self.network:sendToServer("sv_dataRequest")
+    servicetool.instance = self
+end
+
+function servicetool:cl_warns()
     for _, warning in ipairs(warnings) do
         sm.gui.chatMessage(warning)
     end
-    self.network:sendToServer("sv_dataRequest")
-    servicetool.instance = self
+
+    if sc.shutdownFlag then
+        --sc.shutdown()
+    end
 end
 
 function servicetool:client_onFixedUpdate()

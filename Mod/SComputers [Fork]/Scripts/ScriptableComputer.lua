@@ -19,6 +19,9 @@ ScriptableComputer.longOperationMsg = "the computer has been performing the oper
 ScriptableComputer.oftenLongOperationMsg = "the computer exceeded the CPU time limit too often"
 ScriptableComputer.lagMsg = "this computer caused lags, please optimize your code or disable 'anti-lag' in 'Permission Tool'"
 
+ScriptableComputer.ledUuid = sm.uuid.new("94c8b309-b6fb-40f8-90bb-b5c3ac28bacd")
+ScriptableComputer.stub = "--this computer was saved using SComputers (fork of ScriptableComputer) download: https://steamcommunity.com/sharedfiles/filedetails/?id=2949350596\nif not a then for _,v in ipairs(getDisplays())do v.clear('0A3EE2')v.drawText(1,1,'need','EEEEEE')v.drawText(1,8,'SComputers!','EEEEEE')v.flush()end a=1 end"
+
 ----------------------- yield -----------------------
 
 local os_clock = os.clock
@@ -134,6 +137,13 @@ function ScriptableComputer:server_onCreate(constData)
 			self.storageData.gsubFix = true
 		end
 
+		if self.storageData.stub then
+			local _, bs64 = unpack(strSplit(string, self.storageData.script, "\n--"))
+			self.storageData.script = bs64
+		else
+			self.storageData.stub = true
+		end
+
 		if self.storageData.codeInBase64 then
 			self.storageData.script = base64.decode(self.storageData.script)
 		else
@@ -148,7 +158,8 @@ function ScriptableComputer:server_onCreate(constData)
 			script = "",
 			crashstate = {},
 			gsubFix = true,
-			codeInBase64 = true
+			codeInBase64 = true,
+			stub = true
 		}
 
 		if self.cdata.unsafe then
@@ -181,6 +192,7 @@ function ScriptableComputer:server_onCreate(constData)
 	self.lagScore = 0
 	self.skipped = 0
 	self.uptime = 0
+	self.wait = 5 --во избежании непрогрузки отдельных элементов цепи
 
 	self:sv_reset()
 	self:sv_reboot()
@@ -189,6 +201,7 @@ function ScriptableComputer:server_onCreate(constData)
 end
 
 function ScriptableComputer:sv_crash_to_real()
+	self:sv_formatException()
 	self.real_crashstate = {
 		hasException = self.storageData.crashstate.hasException,
 		exceptionMsg = self.storageData.crashstate.exceptionMsg
@@ -196,8 +209,29 @@ function ScriptableComputer:sv_crash_to_real()
 end
 
 function ScriptableComputer:sv_formatException()
+	for k, v in pairs(self.storageData.crashstate) do
+		if k ~= "hasException" and k ~= "exceptionMsg" then
+			self.storageData.crashstate[k] = nil
+		end
+	end
+
 	self.storageData.crashstate.hasException = not not self.storageData.crashstate.hasException
-	self.storageData.crashstate.exceptionMsg = tostring(self.storageData.crashstate.exceptionMsg or "Unknown error"):sub(1, 1024)
+	if self.storageData.crashstate.hasException then
+		local str = tostring(self.storageData.crashstate.exceptionMsg or "Unknown error"):sub(1, 1024)
+		local newstr = {}
+		for i = 1, #str do
+			local b = str:byte(i)
+			if b >= 32 and b <= 126 then
+				table.insert(newstr, string.char(b))
+			end
+		end
+		self.storageData.crashstate.exceptionMsg = table.concat(newstr)
+		if #self.storageData.crashstate.exceptionMsg == 0 then
+			self.storageData.crashstate.exceptionMsg = "Unknown error"
+		end
+	else
+		self.storageData.crashstate.exceptionMsg = nil
+	end
 end
 
 function ScriptableComputer:server_onDestroy()
@@ -217,6 +251,7 @@ function ScriptableComputer:server_onFixedUpdate()
 	if self.reboot_flag then
 		self:sv_reboot(true, true)
 		self.reboot_flag = nil
+		return
 	end
 
 	if self.new_code then
@@ -285,18 +320,14 @@ function ScriptableComputer:server_onFixedUpdate()
 
 	--------------------------------------------------------power control
 
-	local work = true
-	--[[
-	if true then
-		local fps = 1 / sc.deltaTime
-		local tick = 40 - fps
-		if tick > 0 then
-			work = sm.game.getCurrentTick() % tick == 0
+	if self.wait then
+		self.wait = self.wait - 1
+		if self.wait <= 0 then
+			self.wait = nil
 		end
 	end
-	]]
-
-	if not self.storageData.crashstate.hasException and work then
+	
+	if not self.storageData.crashstate.hasException and not self.wait then
 		if not activeNow and self.isActive then
 			self.uptime = 0
 			self:sv_execute(true) --последняя итерация после отключения входа, чтобы отлавить выключения
@@ -333,6 +364,9 @@ function ScriptableComputer:server_onFixedUpdate()
 			self.uptime = self.uptime + 1
 		end
 	end
+	if activeNow ~= self.isActive then
+		self.network:sendToClients("cl_setActive", activeNow)
+	end
 	self.isActive = activeNow
 
 	if sc.rebootAll then
@@ -351,7 +385,6 @@ function ScriptableComputer:server_onFixedUpdate()
 	self.storageData.crashstate.exceptionMsg ~= self.oldexceptionMsg then
 		self.oldhasException = self.storageData.crashstate.hasException
 		self.oldexceptionMsg = self.storageData.crashstate.exceptionMsg
-		self:sv_crash_to_real()
 		self:sv_sendException()
 	end
 
@@ -366,7 +399,7 @@ function ScriptableComputer:server_onFixedUpdate()
 		local sum = tableChecksum(self.storageData, "fsData")
 		if self.saveContent or self.old_sum ~= sum then
 			local newtbl = sc.deepcopy(self.storageData)
-			newtbl.script = base64.encode(newtbl.script)
+			newtbl.script = ScriptableComputer.stub .. "\n--" .. base64.encode(newtbl.script)
 			self.storage:save(newtbl)
 
 			self.saveContent = nil
@@ -456,6 +489,7 @@ function ScriptableComputer:sv_reset()
 	self.luastate = {}
 	self.libcache = {}
 	self.registers = {}
+	self.uptime = 0
 	self.env = self.localScriptMode.scriptMode == "unsafe" and createUnsafeEnv(self, self.envSettings) or createSafeEnv(self, self.envSettings)
 	self.publicTable = {
 		public = {
@@ -499,10 +533,9 @@ function ScriptableComputer:sv_reboot(force, not_execute)
 end
 
 function ScriptableComputer:sv_sendException()
+	self:sv_crash_to_real()
 	if self.storageData.crashstate.hasException then
 		self:sv_disableComponentApi()
-		self.storageData.crashstate.exceptionMsg = self.storageData.crashstate.exceptionMsg or "Unknown error"
-		self:sv_crash_to_real()
 		print("computer crashed", self.storageData.crashstate.exceptionMsg)
 		self.network:sendToClients("cl_onComputerException", self.storageData.crashstate.exceptionMsg)
 	else
@@ -645,6 +678,11 @@ function ScriptableComputer:sv_onDataRequired(_, client)
 				end
 			end
 			self.network:sendToClient(lclient, "cl_getParam", self:sv_genTable())
+			self.network:sendToClient(lclient, "cl_setActive", self.isActive)
+
+			if self.cdata.arduino then
+				self.network:sendToClient(lclient, "cl_createEffect")
+			end
 		end
 	end
 end
@@ -674,7 +712,8 @@ function ScriptableComputer.client_onFixedUpdate(self, dt)
 
 	if self.interactable then
 		local uvpos
-		if self.interactable:isActive() then
+		local isActive = self.interactable:isActive()
+		if isActive then
 			uvpos = ScriptableComputer.UV_NON_ACTIVE + ScriptableComputer.UV_ACTIVE_OFFSET
 		else
 			uvpos = ScriptableComputer.UV_NON_ACTIVE
@@ -685,9 +724,41 @@ function ScriptableComputer.client_onFixedUpdate(self, dt)
 			if not self.cStorageData.computersAllow then
 				uv = ScriptableComputer.UV_HAS_DISABLED
 			end
-			self.interactable:setUvFrameIndex((sm.game.getCurrentTick() % 60 >= 30) and uv or uvpos)
+
+			local blk = (sm.game.getCurrentTick() % 60 >= 30)
+			self.interactable:setUvFrameIndex(blk and uv or uvpos)
+			if self.led_eff then
+				self.led_eff:setParameter("color", sm.color.new(1, 0, 0))
+				if blk then
+					if not self.led_eff:isPlaying() then
+						self.led_eff:start()
+					end
+				else
+					self.led_eff:stop()
+				end
+			end
 		else
 			self.interactable:setUvFrameIndex(uvpos)
+			if self.led_eff then
+				self.led_eff:setParameter("color", sm.color.new(0, 1, 0))
+				if isActive then
+					if not self.led_eff:isPlaying() then
+						self.led_eff:start()
+					end
+				else
+					self.led_eff:stop()
+				end
+			end
+		end
+
+		if self.pwr_eff then
+			if self.clIsActive then
+				if not self.pwr_eff:isPlaying() then
+					self.pwr_eff:start()
+				end
+			else
+				self.pwr_eff:stop()
+			end
 		end
 	end
 
@@ -757,6 +828,28 @@ function ScriptableComputer.client_onInteract(self, _, state)
 		self.flag2 = true
 		self.interact = true
 	end
+end
+
+function ScriptableComputer:cl_createEffect()
+	if not self.pwr_eff then
+		self.pwr_eff = sm.effect.createEffect(sc.getEffectName(), self.interactable)
+		self.led_eff = sm.effect.createEffect(sc.getEffectName(), self.interactable)
+
+		self.pwr_eff:setParameter("color", sm.color.new(1, 0, 0))
+
+		self.pwr_eff:setParameter("uuid", ScriptableComputer.ledUuid)
+		self.led_eff:setParameter("uuid", ScriptableComputer.ledUuid)
+
+		self.pwr_eff:setScale(sm.vec3.new(0.03, 0.02, 0.01))
+		self.led_eff:setScale(sm.vec3.new(0.03, 0.02, 0.01))
+
+		self.pwr_eff:setOffsetPosition(sm.vec3.new(0.27, 0.095, -0.11))
+		self.led_eff:setOffsetPosition(sm.vec3.new(-0.03, 0.15, -0.11))
+	end
+end
+
+function ScriptableComputer:cl_setActive(isActive)
+	self.clIsActive = isActive
 end
 
 ------------gui
@@ -886,7 +979,13 @@ function ScriptableComputer:cl_invokeScript(tbl)
 	end
 
 	self:cl_init_yield()
+
+	tweaks()
+	sc.lastComputer = self
 	local ran, err = pcall(code, unpack(args))
+	unTweaks()
+	sc.lastComputer = nil
+
 	if not ran then
 		print("client invoke error: " .. (err or "Unknown error"))
 	end

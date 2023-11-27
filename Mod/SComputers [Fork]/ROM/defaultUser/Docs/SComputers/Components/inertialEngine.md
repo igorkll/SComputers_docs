@@ -27,6 +27,7 @@ note that the addPosition method perceives as a rotation for processing movement
 * inertialEngine.setStableMode(mode) - sets the stabilization mode (default 1) to a maximum of 4. this changes the stabilization force
 
 ### stable modes
+* 0 - no stabilization
 * 1 - small creation
 * 2 - medium creation
 * 3 - big creation

@@ -74,8 +74,8 @@ function jsonEncodeInputCheck(tbl, level, itemsCount)
 		local valuetype = type(value)
 
 		------ check count
-		if itemsCount > 100 then
-			error("your table cannot contain more than 100 items", level + 3)
+		if itemsCount > 256 then
+			error("your table cannot contain more than 256 items", level + 3)
 		end
 		itemsCount = itemsCount + 1
 
@@ -216,8 +216,44 @@ function fromEulerVec(vec) --custom implementation
 	return doQuat(1, 0, 0, x) * doQuat(0, 1, 0, y) * doQuat(0, 0, 1, z)
 end
 
+local sqrt = math.sqrt
 local atan2 = math.atan2
 local asin = math.asin
+local pi = math.pi
+
+--[[
+function toEuler(q)
+    local angles = sm.vec3.new(0, 0, 0)
+
+    -- roll (x-axis rotation)
+    local sinr_cosp = 2 * (q.w * q.x + q.y * q.z)
+    local cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y)
+    angles.x = atan2(sinr_cosp, cosr_cosp)
+
+    -- pitch (y-axis rotation)
+    local sinp = sqrt(1 + 2 * (q.w * q.y - q.x * q.z))
+    local cosp = sqrt(1 - 2 * (q.w * q.y - q.x * q.z))
+    angles.y = 2 * atan2(sinp, cosp) - pi / 2
+
+    -- yaw (z-axis rotation)
+    local siny_cosp = 2 * (q.w * q.z + q.x * q.y)
+    local cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z)
+    angles.z = atan2(siny_cosp, cosy_cosp)
+
+    return angles
+end
+]]
+
+--[[
+function toEuler(quat)
+	local x, y, z, w = quat.x, quat.y, quat.z, quat.w
+	local rollDegrees = atan2(2*(w*x + y*z), 1 - 2*(x*x + y*y))
+	local pitchDegrees = asin(2*(w*y - z*x))
+	local yawDegrees = atan2(2*(w*z + x*y), 1 - 2*(y*y + z*z))
+	return sm.vec3.new(rollDegrees, pitchDegrees, yawDegrees)
+end
+]]
+
 function toEuler(quat)
 	local x, y, z, w = quat.x, quat.y, quat.z, quat.w
 	local ex = atan2(2 * (w * x + y * z), 1 - 2 * (x^2 + y^2))

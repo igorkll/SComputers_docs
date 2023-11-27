@@ -1,3 +1,7 @@
+if not systemDisk then
+    systemDisk = ...
+end
+
 do --загаловок, инициализирует главные функции компьютера
     if STOPPED then return end --если комп остановлен(комп делает дополнительный тик после выключения)
     if STARTED then --если комп уже запушен

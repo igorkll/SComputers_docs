@@ -290,11 +290,9 @@ function vdisplay.create(callbacks, width, height)
         end,
 
         setFont = function (cfont)
-			--checkArg(1, cfont, "table", "nil")
+			checkArg(1, cfont, "table", "nil")
 			if cfont then
-				if not cfont.chars or not cfont.width or not cfont.height then
-					error("font failed integrity check", 2)
-				end
+				basegraphic_checkFont(font)
 
                 font = sc.display.optimizeFont(cfont.chars, cfont.width, cfont.height)
                 font_width = cfont.width

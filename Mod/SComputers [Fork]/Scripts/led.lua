@@ -75,18 +75,18 @@ function led:server_onFixedUpdate()
         self.lastChilds = self.interactable:getChildren()
     end
 
-    if self.allow_update and self.savedColor then
-        if self.shape.color ~= self.savedColor then
+    if self.allow_update and (self.savedColor or self.sendData) then
+        if self.savedColor and self.shape.color ~= self.savedColor then
             self.shape:setColor(self.savedColor)
+            self.savedColor = nil
+        end
+
+        if self.sendData then
+            self:sv_sendData()
+            self.sendData = nil
         end
 
         self.allow_update = nil
-        self.savedColor = nil
-    end
-
-    if self.sendData then
-        self:sv_sendData()
-        self.sendData = nil
     end
 end
 

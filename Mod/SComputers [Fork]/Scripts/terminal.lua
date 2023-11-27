@@ -22,9 +22,8 @@ function terminal:server_onCreate()
                     self.clear = true
                 end,
                 write = function (str)
-                    checkArg(1, str, "string")
                     if not self.writes then self.writes = {} end
-                    table.insert(self.writes, "#ffffff" .. str)
+                    table.insert(self.writes, "#ffffff" .. tostring(str))
                 end
             }
         }
@@ -32,14 +31,21 @@ function terminal:server_onCreate()
 end
 
 function terminal:server_onFixedUpdate()
-    if self.clear then
-        self.network:sendToClients("cl_clr")
-        self.clear = nil
-    end
+    local ctick = sm.game.getCurrentTick()
+	if ctick % sc.restrictions.screenRate == 0 then self.allow_update = true end
 
-    if self.writes then
-        self.network:sendToClients("cl_log", self.writes)
-        self.writes = nil
+    if self.allow_update and (self.clear or self.writes) then
+        if self.clear then
+            self.network:sendToClients("cl_clr")
+            self.clear = nil
+        end
+
+        if self.writes then
+            self.network:sendToClients("cl_log", self.writes)
+            self.writes = nil
+        end
+
+        self.allow_update = nil
     end
 end
 

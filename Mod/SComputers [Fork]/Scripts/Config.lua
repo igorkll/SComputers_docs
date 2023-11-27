@@ -17,7 +17,6 @@ dofile "$CONTENT_DATA/Scripts/FileSystem.lua"
 dofile "$CONTENT_DATA/Scripts/fsmanager.lua"
 dofile "$CONTENT_DATA/Scripts/env.lua"
 dofile "$CONTENT_DATA/Scripts/load_code.lua"
-dofile("$CONTENT_DATA/Scripts/warnings.lua")
 dofile "$CONTENT_DATA/Scripts/vnetwork.lua"
 dofile("etc/load_etc.lua")
 
@@ -33,11 +32,21 @@ dofile("remade-scrapVM/scrapvm.lua")
 
 -------------------------------------------------------
 
+local pairs = pairs
+local ipairs = ipairs
+local type = type
+
+local sm_color_new = sm.color.new
+local sm_vec3_new = sm.vec3.new
+local sm_quat_new = sm.quat.new
+
+-------------------------------------------------------
+
 
 sm.interactable.connectionType.composite = (4096 * 8)
 sm.interactable.connectionType.networking = (8192 * 8)
 
-sc = {
+local sc = {
 	gpstags = {},
 	antennasApis = {},
 
@@ -55,8 +64,9 @@ sc = {
 	synthesizerDatas = {},
 	keyboardDatas = {}
 }
+_G.sc = sc
 
-sc.version = "2.2a"
+sc.version = "2.3a"
 
 sc.deltaTime = 0
 sc.maxcodelen = 32 * 1024
@@ -65,6 +75,18 @@ sc.radarDetectedBodies = {}
 
 sc.display = {}
 sc.networking = {}
+
+function sc.shutdown() --destroying SComputers in case of a critical problem
+	for k, v in pairs(sc) do
+		if type(v) == "function" then
+			sc[k] = function()
+				error("CRITICAL ISSUE IN SCOMPUTERS", 2)
+			end
+		else
+			sc[k] = nil
+		end
+	end
+end
 
 function sc.yield() --для библиотек
 	if sc.lastComputer and sc.lastComputer.env and sc.lastComputer.env.__internal_yield then
@@ -100,45 +122,49 @@ function sc.networking.packetCopyPath(packet)
 end
 
 function sc.advDeepcopy(t)
-    local cache = {}
+	local cache = {}
 
-	local function clone(v)
-		if type(v) == "Color" then
-			return sm.color.new(v.r, v.g, v.b, v.a)
-		elseif type(v) == "Vec3" then
-			return sm.vec3.new(v.x, v.y, v.z)
-		elseif type(v) == "Quat" then
-			return sm.quat.new(v.x, v.y, v.z, v.w)
+	local function clone(v, ctype)
+		if ctype == "Color" then
+			return sm_color_new(v.r, v.g, v.b, v.a)
+		elseif ctype == "Vec3" then
+			return sm_vec3_new(v.x, v.y, v.z)
+		elseif ctype == "Quat" then
+			return sm_quat_new(v.x, v.y, v.z, v.w)
 		else
 			return v
 		end
 	end
 
-    local function recurse(tbl, newtbl)
-        local newtbl = newtbl or {}
-    
+    local function recurse(tbl, newTable)
         for k, v in pairs(tbl) do
-            if type(v) == "table" then
-                local ltbl = cache[v]
-                if not ltbl then
-                    cache[v] = {}
-                    ltbl = cache[v]
-                    recurse(v, cache[v])
-                end
-                newtbl[k] = ltbl
+			sc.yield()
+
+			local ctype = type(v)
+            if ctype == "table" then
+				if cache[v] then
+					newTable[k] = cache[v]
+				else
+					if v == tbl then
+						newTable[k] = newTable
+					else
+						cache[v] = {}
+						newTable[k] = recurse(v, cache[v])
+					end
+				end
             else
-				newtbl[k] = clone(v)
+				newTable[k] = clone(v, ctype)
 			end
         end
 
-        return newtbl
+        return newTable
     end
 
 	if type(t) == "table" then
-	    return recurse(t)
+		cache[t] = {}
+		return recurse(t, cache[t])
 	end
-
-	return clone(t)
+	return clone(t, type(t))
 end
 
 local type = type
@@ -590,7 +616,7 @@ function sc.getComponents(self, name, settings)
 					end
 				end
 			else
-				newapi[key] = value
+				newapi[key] = sc.advDeepcopy(value)
 			end
 		end
 		self.componentCache[interactable.id] = newapi
@@ -636,14 +662,18 @@ function sc.reg_internal_lib(name, tbl)
     _G.internal_libs[name] = tbl
 end
 
--------------------------------------------------------
-
 sm.sc = sc --для интеграций
 sm.sc_g = _G
 function sc.customVersion(char)
 	sc.version = sc.version:sub(1, #sc.version - 1) .. char
 end
 
+-------------------------------------------------------
+
 dofile("$CONTENT_DATA/Scripts/font.lua")
 dofile("$CONTENT_DATA/Scripts/basegraphic.lua")
+dofile("$CONTENT_DATA/Scripts/warnings.lua")
+
+-------------------------------------------------------
+
 print("SComputers Configuration has been loaded. version " .. tostring(sc.version))

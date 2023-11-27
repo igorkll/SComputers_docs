@@ -55,7 +55,11 @@ function wasd:client_onFixedUpdate()
     if sm.isHost then
         local ADValue =  0
         local count = 0
+        local seated = false
         for k, v in pairs(self.interactable:getParents()) do
+            if v:isActive() then
+                seated = true
+            end
             local _s_uuid = tostring(v:getShape():getShapeUuid())
             if v:getType() == "steering" or _s_uuid == "ccaa33b6-e5bb-4edc-9329-b40f6efe2c9e" or _s_uuid == "e627986c-b7dd-4365-8fd8-a0f8707af63d" then
                 ADValue = ADValue + (v:getPoseWeight(0) - 0.5) * 2
@@ -75,5 +79,7 @@ function wasd:client_onFixedUpdate()
         self.A = ADValue < 0
         self.D = ADValue > 0
         self.AD = ADValue
+
+        self.interactable:setUvFrameIndex(seated and 6 or 0)
     end
 end
