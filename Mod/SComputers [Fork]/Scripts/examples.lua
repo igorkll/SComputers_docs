@@ -1287,8 +1287,10 @@ function callback_loop()
         return
     end
 
-    camera.drawAdvanced(display)
-    display.flush()
+    if display.getAudience() > 0 then
+        camera.drawAdvanced(display)
+        display.flush()
+    end
 end
 ]]
     elseif name == "eCR" then
@@ -1315,19 +1317,21 @@ function callback_loop()
         return
     end
 
-    camera.drawCustom(display, function (x, y, raydata)
-        if not raydata then
-            return sm.color.new(0, math.random(), math.random())
-        elseif raydata.type == "limiter" then
-            return sm.color.new(math.random(), math.random(), math.random())
-        elseif raydata.type == "terrain" then
-            return sm.color.new(0, math.random(), 0)
-        elseif raydata.type == "asset" then
-            return sm.color.new(math.random(), 0, 0)
-        end
-        return sm.color.new(colors.hsvToRgb(((x + y) / 32) % 1, 1, 1)) * (raydata.color or sm.color.new(1, 1, 1))
-    end)
-    display.flush()
+    if display.getAudience() > 0 then
+        camera.drawCustom(display, function (x, y, raydata)
+            if not raydata then
+                return sm.color.new(0, math.random(), math.random())
+            elseif raydata.type == "limiter" then
+                return sm.color.new(math.random(), math.random(), math.random())
+            elseif raydata.type == "terrain" then
+                return sm.color.new(0, math.random(), 0)
+            elseif raydata.type == "asset" then
+                return sm.color.new(math.random(), 0, 0)
+            end
+            return sm.color.new(colors.hsvToRgb(((x + y) / 32) % 1, 1, 1)) * (raydata.color or sm.color.new(1, 1, 1))
+        end)
+        display.flush()
+    end
 end
 ]]
     elseif name == "eHSD" then

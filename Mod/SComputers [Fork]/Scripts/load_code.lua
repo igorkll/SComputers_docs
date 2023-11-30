@@ -64,6 +64,8 @@ function injectService(self, code, env) --спизженно с: https://github.
             yield(self)
         end
 
+        --[[
+        --RAM limitations in development
         if not analysis then
             analysis = true
 
@@ -83,6 +85,7 @@ function injectService(self, code, env) --спизженно с: https://github.
             self.usedRam = usedRam
             analysis = false
         end
+        ]]
     end
 
     local setmetatable = sc.getApi("setmetatable")
