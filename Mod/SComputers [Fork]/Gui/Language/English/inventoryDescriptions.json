@@ -467,5 +467,56 @@
       "description" : "press \"E\" on this unit or give a logical signal and it will restart all connected computers. it also gives a logical signal if the computer crashed",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Reboot Gate"
+   },
+
+   "98221d58-7aad-450f-abc3-f325da34514d" : {
+      "description" : "This is a holographic screen, which can be used, for example, to display information in a fighter",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Small Holographic Display 16x16"
+   },
+   "69d5f621-4afe-461b-b6e0-378ef677b725" : {
+      "description" : "This is a holographic screen, which can be used, for example, to display information in a fighter",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Small Holographic Display 32x32"
+   },
+   "c53c677c-fbba-490b-a64d-d5ce0edc3e22" : {
+      "description" : "This is a holographic screen, which can be used, for example, to display information in a fighter",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Small Holographic Display 64x64"
+   },
+   "09458a14-6fcd-45cb-aa5c-3890aaf6ddad" : {
+      "description" : "This is a holographic screen, which can be used, for example, to display information in a fighter",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Small Holographic Display 128x128"
+   },
+   "7e9cb8c1-1353-4b45-a67f-7a771f365703" : {
+      "description" : "This is a holographic screen, which can be used, for example, to display information in a fighter",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Small Holographic Display 256x256"
+   },
+   "2e8390f8-746b-4d17-a2ef-19ff1faa51d3" : {
+      "description" : "This is a holographic screen, which can be used, for example, to display information in a fighter",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Holographic Display 16x16"
+   },
+   "4c6fe32b-3555-4dba-88c7-614b3601605e" : {
+      "description" : "This is a holographic screen, which can be used, for example, to display information in a fighter",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Holographic Display 32x32"
+   },
+   "af787ebd-1557-493b-8d89-09fcb7c9edac" : {
+      "description" : "This is a holographic screen, which can be used, for example, to display information in a fighter",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Holographic Display 64x64"
+   },
+   "ec26d383-28c3-49d3-a100-e41c02331cbf" : {
+      "description" : "This is a holographic screen, which can be used, for example, to display information in a fighter",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Holographic Display 128x128"
+   },
+   "171803b0-14b5-4fc7-81ff-57ec8d2abfd0" : {
+      "description" : "This is a holographic screen, which can be used, for example, to display information in a fighter",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Holographic Display 256x256"
    }
 }
