@@ -115,12 +115,34 @@ end
 
 
 function ScriptableComputer:server_onCreate(constData)
+	------init
+
 	sc.init()
 
+	self.yieldName = "__internal_yield_"
+	self.yieldArg = ""
+
+	for i = 1, math.random(13, 33) do
+		self.yieldName = self.yieldName .. string.char(math.random(97, 122))
+	end
+
+	for i = 1, math.random(13, 33) do
+		self.yieldArg = self.yieldArg .. string.char(math.random(97, 122))
+	end
+
+	------ram
+
+	self.usedRam = 0
+
+	------cdata
 	if constData then
 		self.cdata = constData
 	else
 		self.cdata = self.data or {}
+	end
+
+	if not self.cdata.ram then
+		self.cdata.ram = 4 * 1024 * 1024 --4MB
 	end
 
 	------data

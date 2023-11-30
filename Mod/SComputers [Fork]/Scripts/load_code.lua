@@ -1,4 +1,8 @@
 function injectService(self, code, env) --спизженно с: https://github.com/Ocawesome101/oc-cynosure/blob/dev/base/load.lua
+    local computer = self
+    local yieldName = self.yieldName
+    local yieldArg = self.yieldArg
+
     local yield
     if sm.isServerMode() then
         yield = self.sv_yield
@@ -6,22 +10,86 @@ function injectService(self, code, env) --спизженно с: https://github.
         yield = self.cl_yield
     end
 
-    local function local_yield()
-        yield(self)
+    local mathram_doTable
+    local analysis = false
+    do
+        local function doObj(parsed, val)
+            local ctype = type(val)
+            if ctype == "table" then
+                return mathram_doTable(parsed, val)
+            elseif ctype == "number" then
+                return 4
+            elseif ctype == "string" then
+                return #val
+            elseif ctype == "boolean" then
+                return 1
+            else
+                return 1024
+            end
+        end
+
+        function mathram_doTable(parsed, tbl)
+            if parsed[tbl] then return 0 end
+            parsed[tbl] = true
+
+            local usedRam = 0
+            for k, v in pairs(tbl) do
+                sc.smartYield(self)
+                usedRam = usedRam + doObj(parsed, k)
+                usedRam = usedRam + doObj(parsed, v)
+            end
+            return usedRam
+        end
+    end
+
+    local function errCheck(func, ...)
+        local result = {pcall(func, ...)}
+        if result[1] then
+            return unpack(result, 2)
+        else
+            analysis = false
+            error(result[2], 3)
+        end
+    end
+
+    local function local_yield(arg, locals)
+        if arg ~= self.yieldArg then
+            error("yield abuse detected", 2)
+        else
+            yield(self)
+        end
+
+        if not analysis then
+            analysis = true
+            local usedRamGlobals = errCheck(mathram_doTable, {}, self.env)
+            local usedRamLocals = 0
+            if locals then
+                usedRamLocals = errCheck(mathram_doTable, locals, self.env)
+            end
+            
+            local usedRam = usedRamGlobals + usedRamLocals
+            if usedRam > self.cdata.ram then
+                analysis = false
+                error("not enough memory", 2)
+            end
+
+            self.usedRam = usedRam
+            analysis = false
+        end
     end
 
     local setmetatable = sc.getApi("setmetatable")
     local getmetatable = sc.getApi("getmetatable")
     if setmetatable and getmetatable then
         setmetatable(env, nil)
-        env.__internal_yield = nil
+        env[yieldName] = nil
         setmetatable(env,
             {
                 __index = {
-                    __internal_yield = local_yield
+                    [yieldName] = local_yield
                 },
                 __newindex = function (self, key, value)
-                    if key == "__internal_yield" then
+                    if key == yieldName then
                         error("failed to rewrite a mod-protected function", 2)
                     end
 
@@ -33,7 +101,7 @@ function injectService(self, code, env) --спизженно с: https://github.
             }
         )
     else
-        env.__internal_yield = local_yield
+        env[yieldName] = local_yield
     end
 
     --------------------------------
@@ -43,10 +111,10 @@ function injectService(self, code, env) --спизженно с: https://github.
         { "if([ %(])(.-)([ %)])then([ \n])", "if%1%2%3then%4__internal_yield() " },
         { "elseif([ %(])(.-)([ %)])then([ \n])", "elseif%1%2%3then%4__internal_yield() " },
         { "([ \n])else([ \n])", "%1else%2__internal_yield() " },--]]
-        {"([%);\n ])do([ \n%(])", "%1do%2 __internal_yield() "},
-        {"([%);\n ])repeat([ \n%(])", "%1repeat%2 __internal_yield() "},
-        {"([%);\n ])goto([ \n%(])", " __internal_yield() %1goto%2"},
-        {"([%);\n ])until([ \n%(])", " __internal_yield() %until%2"},
+        {"([%);\n ])do([ \n%(])", "%1do%2 " .. yieldName .. "('" .. yieldArg .. "') "},
+        {"([%);\n ])repeat([ \n%(])", "%1repeat%2 " .. yieldName .. "('" .. yieldArg .. "') "},
+        {"([%);\n ])goto([ \n%(])", " " .. yieldName .. "('" .. yieldArg .. "') %1goto%2"},
+        {"([%);\n ])until([ \n%(])", " " .. yieldName .. "('" .. yieldArg .. "') %until%2"},
         --{"([%);\n ])?)([ \n%(])", "%1?)%2__internal_yield() "} --пожалуй лишнее
     }
 
@@ -66,8 +134,10 @@ function injectService(self, code, env) --спизженно с: https://github.
                 wrapped = wrapped .. gsub(code)
                 break
             end
+
             local chunk, quote = code:match('(.-)([%["\'])')
             code = code:sub(#chunk + 2)
+
             if quote == '"' or quote == "'" then
                 if in_str == quote then
                     in_str = false
@@ -104,22 +174,29 @@ function injectService(self, code, env) --спизженно с: https://github.
                 end
             end
         end
+
         return wrapped
     end
 
     --------------------------------
 
-    return "do " .. process(code) .. " \n end __internal_yield() ", env
+    local code, err = process(code)
+    if code then
+        return "do " .. code .. " \n end " .. yieldName .. "('" .. yieldArg .. "') ", env
+    else
+        return nil, err or "unknown error"
+    end
 end
 
 
 
 
 function load_code(self, chunk, chunkname, mode, env)
-    checkArg(1, chunk,     "string")
-    checkArg(2, chunkname, "string", "nil")
-    checkArg(3, mode,      "string", "nil")
-    checkArg(4, env,       "table",  "nil")
+    checkArg(1, self,      "table")
+    checkArg(2, chunk,     "string")
+    checkArg(3, chunkname, "string", "nil")
+    checkArg(4, mode,      "string", "nil")
+    checkArg(5, env,       "table",  "nil")
 
     mode = mode or "bt"
     env = env or _G
@@ -168,9 +245,10 @@ function load_code(self, chunk, chunkname, mode, env)
                     return unpack(args)
                 end
                 
-                ll_Interpreter.internalData[env.__internal_yield] = true --а нехер перезаписывать __internal_yield, крашеры ебаные
+                ll_Interpreter.internalData[self.env[self.yieldName]] = true --а нехер перезаписывать __internal_yield, крашеры ебаные
 				local result = {pcall(ll_Interpreter.evaluate, ll_Interpreter, tree, enclosedEnv)}
-                ll_Interpreter.internalData[env.__internal_yield] = nil
+                ll_Interpreter.internalData[self.env[self.yieldName]] = nil
+
                 if result[1] then
                     return unpack(result, 2)
                 else
@@ -186,10 +264,11 @@ function load_code(self, chunk, chunkname, mode, env)
 end
 
 function safe_load_code(self, chunk, chunkname, mode, env)
-    checkArg(1, chunk,     "string")
-    checkArg(2, chunkname, "string", "nil")
-    checkArg(3, mode,      "string", "nil")
-    checkArg(4, env,       "table",  "nil")
+    checkArg(1, self,      "table")
+    checkArg(2, chunk,     "string")
+    checkArg(3, chunkname, "string", "nil")
+    checkArg(4, mode,      "string", "nil")
+    checkArg(5, env,       "table",  "nil")
 
     if sc.shutdownFlag then
         return nil, "CRITICAL ISSUE IN SCOMPUTERS"
@@ -218,6 +297,9 @@ function safe_load_code(self, chunk, chunkname, mode, env)
         return nil, preloadErr
     end
 
-    chunk, env = injectService(self, chunk, env)
+    chunk, env = injectService(self, chunk, env) --env may be a error
+    if not chunk then
+        return nil, env
+    end
     return load_code(self, chunk, chunkname, mode, env)
 end

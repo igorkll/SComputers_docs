@@ -88,12 +88,27 @@ function sc.shutdown() --destroying SComputers in case of a critical problem
 	end
 end
 
-function sc.yield() --для библиотек
-	if sc.lastComputer and sc.lastComputer.env and sc.lastComputer.env.__internal_yield then
-		local ok, err = pcall(sc.lastComputer.env.__internal_yield)
+function sc.yield(computer) --для библиотек
+	if computer then
+		local ok, err = pcall(computer.env[computer.yieldName], computer.yieldArg)
 		if not ok then
 			error(err or "unknown", 3)
 		end
+	elseif sc.lastComputer and sc.lastComputer.env then
+		local ok, err = pcall(sc.lastComputer.env[sc.lastComputer.yieldName], sc.lastComputer.yieldArg)
+		if not ok then
+			error(err or "unknown", 3)
+		end
+	end
+end
+
+local count = 0
+function sc.smartYield(computer) --для библиотек
+	if count >= 32 then
+		sc.yield(computer)
+		count = 0
+	else
+		count = count + 1
 	end
 end
 

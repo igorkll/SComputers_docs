@@ -461,10 +461,10 @@ function createSafeEnv(self, settings)
 
         --limitations of the amount of RAM in development
         getUsedRam = function ()
-            return 0
+            return self.usedRam
         end,
         getTotalRam = function ()
-            return math.huge
+            return self.cdata.ram
         end
 	}
 

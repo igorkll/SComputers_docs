@@ -39,8 +39,6 @@ function reboot:server_onFixedUpdate()
 end
 
 function reboot:sv_reboot()
-    print("ASDASDsadasdASD")
-
     for _, parent in ipairs(self.interactable:getParents()) do
         local publicApi = sc.computersDatas[parent.id]
         if publicApi and publicApi.self then

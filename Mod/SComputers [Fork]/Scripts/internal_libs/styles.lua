@@ -11,7 +11,7 @@ function styles:switch()
     local py = (self.y + sy) - 1
 
     self.display.fillRect(self.x + addX, self.y, self.sizeX - (addX * 2), self.sizeY, bg)
-    for i = 0, 1 do
+    for i = 0, 1 - (self.sizeY % 2) do
         if self.state then
             self.display.fillCircle(self.x + addX, py + i, sy, color1)
             self.display.fillCircle(self.x + (self.sizeX - 1 - addX), py + i, sy, color2)
