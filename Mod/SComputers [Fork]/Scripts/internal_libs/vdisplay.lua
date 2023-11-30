@@ -212,6 +212,9 @@ function vdisplay.create(callbacks, width, height)
         isAllow = function () --there are no restrictions on the size of the virtual display
             return true
         end,
+        getAudience = function() --виртуальный экран не может подсчитать аудиторию
+            return 1
+        end,
         optimize = function ()
         end,
         getClick = function ()

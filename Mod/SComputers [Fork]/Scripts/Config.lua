@@ -104,7 +104,7 @@ end
 
 local count = 0
 function sc.smartYield(computer) --для библиотек
-	if count >= 32 then
+	if count >= 128 then
 		sc.yield(computer)
 		count = 0
 	else
@@ -274,7 +274,7 @@ sc.defaultRestrictions = { --DEFAULT
 	adminOnly = true,
 	vm = sc.getDefaultVM(),
 	allowChat = false,
-	allowDist = true,
+	allowDist = false,
 	optSpeed = false,
 	rays = 0,
 	skipFps = 20,

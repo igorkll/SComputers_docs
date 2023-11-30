@@ -1,3 +1,5 @@
+local pcall, unpack, error, pairs, type = pcall, unpack, error, pairs, type
+
 function injectService(self, code, env) --спизженно с: https://github.com/Ocawesome101/oc-cynosure/blob/dev/base/load.lua
     local computer = self
     local yieldName = self.yieldName
@@ -12,11 +14,14 @@ function injectService(self, code, env) --спизженно с: https://github.
 
     local mathram_doTable
     local analysis = false
+
     do
+        local smartYield = sc.smartYield
+
         local function doObj(parsed, val)
             local ctype = type(val)
             if ctype == "table" then
-                return mathram_doTable(parsed, val)
+                return mathram_doTable(parsed, val) + 16
             elseif ctype == "number" then
                 return 4
             elseif ctype == "string" then
@@ -34,7 +39,7 @@ function injectService(self, code, env) --спизженно с: https://github.
 
             local usedRam = 0
             for k, v in pairs(tbl) do
-                sc.smartYield(self)
+                smartYield(self)
                 usedRam = usedRam + doObj(parsed, k)
                 usedRam = usedRam + doObj(parsed, v)
             end
@@ -61,12 +66,14 @@ function injectService(self, code, env) --спизженно с: https://github.
 
         if not analysis then
             analysis = true
-            local usedRamGlobals = errCheck(mathram_doTable, {}, self.env)
+
+            local parsed = {}
+            local usedRamGlobals = errCheck(mathram_doTable, parsed, self.env)
             local usedRamLocals = 0
             if locals then
-                usedRamLocals = errCheck(mathram_doTable, locals, self.env)
+                usedRamLocals = errCheck(mathram_doTable, parsed, locals)
             end
-            
+
             local usedRam = usedRamGlobals + usedRamLocals
             if usedRam > self.cdata.ram then
                 analysis = false
@@ -182,7 +189,7 @@ function injectService(self, code, env) --спизженно с: https://github.
 
     local code, err = process(code)
     if code then
-        return "do " .. code .. " \n end " .. yieldName .. "('" .. yieldArg .. "') ", env
+        return yieldName .. "('" .. yieldArg .. "') do " .. code .. " \n end " .. yieldName .. "('" .. yieldArg .. "') ", env
     else
         return nil, err or "unknown error"
     end

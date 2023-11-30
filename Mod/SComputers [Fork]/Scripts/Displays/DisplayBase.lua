@@ -1374,6 +1374,13 @@ function sc.display.server_createData(self)
 		isAllow = function ()
 			return isAllow(self)
 		end,
+		getAudience = function()
+			local num = 0
+			for k, v in pairs(self.audience) do
+				num = num + 1
+			end
+			return num
+		end,
 		reset = function ()
 			reset(self)
 			self.api.setFont()

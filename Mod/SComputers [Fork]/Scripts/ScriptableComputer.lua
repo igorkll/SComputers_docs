@@ -120,14 +120,10 @@ function ScriptableComputer:server_onCreate(constData)
 	sc.init()
 
 	self.yieldName = "__internal_yield_"
-	self.yieldArg = ""
+	self.yieldArg = tostring(sm.uuid.new())
 
 	for i = 1, math.random(13, 33) do
 		self.yieldName = self.yieldName .. string.char(math.random(97, 122))
-	end
-
-	for i = 1, math.random(13, 33) do
-		self.yieldArg = self.yieldArg .. string.char(math.random(97, 122))
 	end
 
 	------ram
