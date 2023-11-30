@@ -45,8 +45,8 @@ function RaycastCamera:createData()
 		drawCustom = function (display, drawer)
 			self:server_drawCustom(display, drawer)
 		end,
-		drawAdvanced = function (display)
-			self:server_drawAdvanced(display)
+		drawAdvanced = function (...)
+			self:server_drawAdvanced(...)
 		end,
 		rawRay = function (x, y, maxdist)
 			return self:sv_rawRay(x, y, maxdist)
@@ -241,9 +241,9 @@ function RaycastCamera:sv_rawRay(xAngle, yAngle, maxdist)
 	return self:sv_getRaydata(successful, raydata, maxdist)
 end
 
-function RaycastCamera:server_drawAdvanced(displayData)
+function RaycastCamera:server_drawAdvanced(displayData, noSpatialPoints)
 	local function addDot(posx, posy, dist, color)
-		if dist and dist > 0 and math.floor(((posx + 1.523) + (posy * 2.131)) % constrain(dist, 1, 128)) == 0 then
+		if not noSpatialPoints and dist and dist > 0 and math.floor(((posx + 1.523) + (posy * 2.131)) % constrain(dist, 1, 128)) == 0 then
 			color = color * 0.9
 		end
 		return color

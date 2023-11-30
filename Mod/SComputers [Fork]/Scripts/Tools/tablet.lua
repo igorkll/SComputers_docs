@@ -1,7 +1,7 @@
 if not ScriptableComputer then
     dofile("$CONTENT_DATA/Scripts/ScriptableComputer.lua")
 end
-dofile "$CONTENT_DATA/Scripts/Displays/DisplayBase.lua"
+dofile("$CONTENT_DATA/Scripts/Displays/DisplayBase.lua")
 
 local rend = {"$CONTENT_DATA/Tools/Renderables/tablet.rend"}
 tablet = class(ScriptableComputer)
@@ -177,8 +177,8 @@ function tablet.client_onDataResponse(self, data)
 	sc.display.client_onDataResponse(self.display, data)
 end
 
-function tablet.server_recvPress(self, p)
-	sc.display.server_recvPress(self.display, p)
+function tablet.server_recvPress(self, p, client)
+	sc.display.server_recvPress(self.display, p, client)
 end
 
 function tablet.server_onDataRequired(self, client)

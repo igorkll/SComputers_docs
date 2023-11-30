@@ -234,6 +234,8 @@ local function debug_print(...)
 end
 
 local sc_display_shapesUuid = sm.uuid.new("708d4a47-7de7-49df-8ba3-e58083c2610e")
+--local sc_display_shapesUuidGlass = sm.uuid.new("3d11dd1d-1296-414b-a2d9-101e876c022f")
+local sc_display_shapesUuidGlass = sm.uuid.new("75708339-6420-41e4-88a0-fbc210826c14")
 
 local sc_getEffectName = sc.getEffectName
 
@@ -344,7 +346,7 @@ function quad_createNode(parent, x, y, sizeX, sizeY, color)
 	end
 	]]
 
-	if color ~= parent.root.display.lastLastClearColor then
+	if color ~= parent.root.display.lastLastClearColor or parent.root.display.scriptableObject.data.noDoubleEffect then
 		node.effect = quad_createEffect(node.root, x, y, sizeX, sizeY)
 		quad_updateEffectColor(node, true)
 	end
@@ -376,7 +378,9 @@ function quad_createRoot(display, x, y, size, maxX, maxY)
 	}
 
 	node.root = node
-	node.back_effect = quad_createEffect(node, x, y, maxX, maxY, 0.0005, true)
+	if not display.scriptableObject.data.noDoubleEffect then
+		node.back_effect = quad_createEffect(node, x, y, maxX, maxY, 0.0005, true)
+	end
 
 	--node.effect = quad_createEffect(node, x, y, maxX, maxY)
 
@@ -395,7 +399,7 @@ function quad_updateEffectColor(self, force)
 	--if color ~= self.display.lastLastClearColor or force then
 		--effect_setScale(effect, sm.vec3.new(0.02, 0.02, 0.02))
 
-	if color ~= self.root.display.lastLastClearColor then
+	if color ~= self.root.display.lastLastClearColor or self.root.display.scriptableObject.data.noDoubleEffect then
 		if not self.effect then
 			self.effect = quad_createEffect(self.root, self.x, self.y, self.sizeX, self.sizeY)
 		end
@@ -424,7 +428,9 @@ function quad_destroy(self, removeAll)
 		debug_print("removeAll")
 		
 		--effect_stop(self.back_effect)
-		effect_destroy(self.back_effect)
+		if self.back_effect then
+			effect_destroy(self.back_effect)
+		end
 		total_effects = total_effects - 1
 		for effect in pairs(self.allEffects) do
 			if effect and sm_exists(effect) then
@@ -454,6 +460,9 @@ local function getHeight(self)
 		return self.height
 	end
 end
+
+local quad_alt_hideRot = sm_quat_fromEuler(sm_vec3_new(0, 90, 0))
+local quad_alt_visibleRot = sm_quat_fromEuler(sm_vec3_new(0, 180 + 90, 0))
 
 function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale)
 	--local attemptRemove
@@ -506,7 +515,12 @@ function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale)
 			--setParameter = function() end, id = math.random(0, 99999), trash = string.rep(" ", 1024 * 8)}
 			--print("create_id", effect.id)
 
-			effect_setParameter(effect, "uuid", sc_display_shapesUuid)
+			if display.scriptableObject and display.scriptableObject.data.glass then
+				effect_setParameter(effect, "uuid", sc_display_shapesUuidGlass)
+			else
+				effect_setParameter(effect, "uuid", sc_display_shapesUuid)
+			end
+			
 			--effect:start()
 
 			if not nonBuf and display.newEffects then
@@ -560,9 +574,15 @@ function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale)
 	local scale = sc_display_PIXEL_SCALE * display.pixelScale
 	local vx = scale * sizeX + 1e-4
 	local vy = scale * sizeY + 1e-4
-	local vecScale = sm_vec3_new(0, vy, vx)
+
+	local wide = 0
+	if display.scriptableObject.data and display.scriptableObject.data.wide then
+		wide = display.scriptableObject.data.wide
+	end
+
+	local vecScale = sm_vec3_new(wide, vy, vx)
 	if nativeScale then
-		effect_setScale(effect, sm_vec3_new(0, sizeX, sizeY))
+		effect_setScale(effect, sm_vec3_new(wide, sizeX, sizeY))
 	else
 		effect_setScale(effect, vecScale)
 	end
@@ -584,13 +604,20 @@ function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale)
 			loff = sm_vec3_new(display.scriptableObject.data.zpos, 0, 0)
 		end
 		offset = loff + offset
-		effect_setOffsetPosition(effect, offset)
+
+		if display.scriptableObject.data and display.scriptableObject.data.offset then
+			offset = offset + sm_vec3_new(0, display.scriptableObject.data.offset / 4, 0)
+			effect_setOffsetPosition(effect, offset)
+		else
+			effect_setOffsetPosition(effect, offset)
+		end
 	end
 
-	local tbl = {offset = offset, sizeX = sizeX, sizeY = sizeY}
+	--noRotateEffects
+	local tbl = {offset = offset, sizeX = sizeX, sizeY = sizeY, d = display.scriptableObject.data or {}}
 	if chr then
-		tbl.quad_hideRot =    sm_quat_fromEuler(sm_vec3_new(0, 90, 0))
-		tbl.quad_visibleRot = sm_quat_fromEuler(sm_vec3_new(0, 180 + 90, 0))
+		tbl.quad_hideRot =    quad_alt_hideRot
+		tbl.quad_visibleRot = quad_alt_visibleRot
 	else
 		tbl.quad_hideRot = quad_hideRot
 		tbl.quad_visibleRot = quad_visibleRot
@@ -619,15 +646,27 @@ function quad_destroyEffect(self)
 	self.effect = nil
 end
 
+local hideOffset = sm_vec3_new(10000000, 10000000, 10000000)
+
 function quad_effectHide(effect)
 	if effect and sm_exists(effect) then
-		effect_setOffsetRotation(effect, effectsData[effect.id].quad_hideRot)
+		local data = effectsData[effect.id]
+		if data.d.noRotateEffects then
+			effect_setOffsetPosition(effect, hideOffset)
+		else
+			effect_setOffsetRotation(effect, data.quad_hideRot)
+		end
 	end
 end
 
 function quad_effectShow(effect)
 	if effect and sm_exists(effect) then
-		effect_setOffsetRotation(effect, effectsData[effect.id].quad_visibleRot)
+		local data = effectsData[effect.id]
+		if data.d.noRotateEffects then
+			effect_setOffsetPosition(effect, data.offset)
+		else
+			effect_setOffsetRotation(effect, data.quad_visibleRot)
+		end
 	end
 end
 
@@ -914,7 +953,7 @@ function quad_rootRealShow(self, noRecurse)
 	if self.splashEffect and sm_exists(self.splashEffect) and effect_isDone(self.splashEffect) then
 		effect_start(self.splashEffect)
 	end
-	if effect_isDone(self.back_effect) then
+	if self.back_effect and effect_isDone(self.back_effect) then
 		effect_start(self.back_effect)
 	end
 	for effect in pairs(self.allEffects) do
@@ -952,7 +991,9 @@ function quad_rootRealHide(self, noRecurse)
 	if self.splashEffect and sm_exists(self.splashEffect) then
 		effect_stop(self.splashEffect)
 	end
-	effect_stop(self.back_effect)
+	if self.back_effect then
+		effect_stop(self.back_effect)
+	end
 	for effect in pairs(self.allEffects) do
 		if sm_exists(effect) then
 			effect_stop(effect)
@@ -987,7 +1028,7 @@ local function applyNew(self)
 		if self.quadTree.splashEffect and effect_isDone(self.quadTree.splashEffect) then
 			effect_start(self.quadTree.splashEffect)
 		end
-		if effect_isDone(self.quadTree.back_effect) then
+		if self.quadTree.back_effect and effect_isDone(self.quadTree.back_effect) then
 			effect_start(self.quadTree.back_effect)
 		end
 		showNewEffects(self)
@@ -995,7 +1036,7 @@ local function applyNew(self)
 		if self.quadTree.splashEffect then
 			effect_stop(self.quadTree.splashEffect)
 		end
-		if not effect_isDone(self.quadTree.back_effect) then
+		if self.quadTree.back_effect and not effect_isDone(self.quadTree.back_effect) then
 			effect_stop(self.quadTree.back_effect)
 		end
 		hideNewEffects(self)
@@ -1043,6 +1084,8 @@ local function random_hide_show(self, probabilityNum, allow)
 	end
 end
 
+local forceRotate = false
+
 local function reset(self)
 	self.maxClicks = 16
 	self.rotation = 0
@@ -1054,6 +1097,12 @@ local function reset(self)
 	self.clickData = {}
 
 	self.needSendData = true
+
+	if self.scriptableObject.data and self.scriptableObject.data.rotate then
+		forceRotate = true
+		self.api.setRotation(0)
+		forceRotate = false
+	end
 end
 
 function sc.display.createDisplay(scriptableObject, width, height, pixelScale)
@@ -1074,7 +1123,6 @@ function sc.display.createDisplay(scriptableObject, width, height, pixelScale)
 		quadTree = nil,
 		dragging = {interact=false, tinker=false, interactLastPos={x=-1, y=-1}, tinkerLastPos={x=-1, y=-1}},
 	}
-	reset(display)
 
 	display.force_update = true --первая отрисовка всегда форсированая
 	display.allow_update = true
@@ -1089,6 +1137,8 @@ function sc.display.server_init(self)
 	if self.scriptableObject.interactable then
 		sc.displaysDatas[self.scriptableObject.interactable.id] = sc.display.server_createData(self)
 	end
+
+	reset(self)
 end
 
 local function sendFont(self, client)
@@ -1320,7 +1370,6 @@ function sc.display.client_init(self)
 
 	self.scriptableObject.network:sendToServer("server_onDataRequired", sm_localPlayer_getPlayer())
 
-
 	self.newEffects = {}
 	sc_display_client_clear(self, black, true)
 	applyNew(self)
@@ -1528,10 +1577,13 @@ function sc.display.server_createData(self)
 
 
 		optimize = function ()
+			--ручная оптимизация отключена из за того что большенство использует ее неправильно, что вызовет понижения производительности. данная функция сейчас работает полностью автоматически
+			--[[
 			self.renderingStack[self.rnd_idx] = {
 				8
 			}
 			self.rnd_idx = self.rnd_idx + 1
+			]]
 		end,
 		update = function () --для совместимости с SCI
 			self.lastComputer = sc.lastComputer
@@ -1627,9 +1679,14 @@ function sc.display.server_createData(self)
 
 		setRotation = function (rotation)
 			if type(rotation) == "number" and rotation % 1 == 0 and rotation >= 0 and rotation <= 3 then
-				if self.rotation ~= rotation then
+				if self.rotation ~= rotation or forceRotate then
 					self.rotation = rotation
+					self.settedRotation = rotation
 					self.needSendData = true
+
+					if self.scriptableObject.data and self.scriptableObject.data.rotate then
+						self.rotation = (self.rotation + self.scriptableObject.data.rotate) % 4
+					end
 
 					if self.rotation == 1 or self.rotation == 3 then
 						rwidth = height
@@ -1643,7 +1700,7 @@ function sc.display.server_createData(self)
 				error("integer must be in [0; 3]", 2)
 			end
 		end,
-		getRotation = function () return self.rotation end,
+		getRotation = function () return self.settedRotation end,
 
 		setFrameCheck = function (framecheck) end, --legacy (stub)
 		getFrameCheck = function () return true end, --legacy (stub)
@@ -1673,6 +1730,8 @@ function sc.display.server_createData(self)
 		end,
 		getUtf8Support = function () return self.utf8support end
 	}
+
+	self.settedRotation = 0
 
 	self.api = data
 	return data
@@ -1736,7 +1795,7 @@ end
 
 
 function sc_display_client_clear(self, color, removeAll)
-	if not removeAll and color == self.lastLastClearColor2 then
+	if not removeAll and color == self.lastLastClearColor2 and not self.scriptableObject.data.noDoubleEffect then
 		return true
 	end
 	self.lastLastClearColor = color
@@ -1781,7 +1840,9 @@ function sc_display_client_clear(self, color, removeAll)
 	--	quad_effectShow(quadTree.effect)
 	--end
 
-	effect_setParameter(self.quadTree.back_effect, "color", color)
+	if self.quadTree.back_effect then
+		effect_setParameter(self.quadTree.back_effect, "color", color)
+	end
 
 	self.dbuffPixels = {}
 	self.dbuffPixelsAll = color
@@ -2749,6 +2810,7 @@ function sc.display.client_drawStack(self, sendstack)
 			clearColor = v[2]
 			isEndClear = true
 		elseif v[1] == 8 then
+			--ручная оптимизация отключена из за того что большенство использует ее неправильно, что вызовет понижения производительности. данная функция сейчас работает полностью автоматически
 		else
 			self.lastLastClearColor2 = nil
 			isEndClear = false
@@ -2794,7 +2856,7 @@ end
 
 
 function sc.display.client_onClick(self, type, action, localPoint) -- type - 1:interact|2:tinker (e.g 1 or 2), action - pressed, released, drag
-	if not self.clicksAllowed then
+	if not self.clicksAllowed or (self.scriptableObject.data or self.scriptableObject.data.noTouch) then
 		return
 	end
 
@@ -2894,9 +2956,9 @@ function sc.display.client_onTinker(self, character, state)
 end
 
 function sc.display.client_canInteract(self, character)
-	return self.clicksAllowed
+	return self.clicksAllowed and not (self.scriptableObject.data or self.scriptableObject.data.noTouch)
 end
 
 function sc.display.client_canTinker(self, character)
-	return self.clicksAllowed
+	return self.clicksAllowed and not (self.scriptableObject.data or self.scriptableObject.data.noTouch)
 end
