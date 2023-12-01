@@ -597,7 +597,6 @@ function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale)
 		offset.x = z
 		offset.y = -y
 		offset = offset + sm_vec3_new(0, 1, 1)
-		effect_setOffsetPosition(effect, offset)
 	else
 		local loff = quad_displayOffset
 		if display.scriptableObject.data and display.scriptableObject.data.zpos then
@@ -607,11 +606,10 @@ function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale)
 
 		if display.scriptableObject.data and display.scriptableObject.data.offset then
 			offset = offset + sm_vec3_new(0, display.scriptableObject.data.offset / 4, 0)
-			effect_setOffsetPosition(effect, offset)
-		else
-			effect_setOffsetPosition(effect, offset)
 		end
 	end
+
+	effect_setOffsetPosition(effect, offset)
 
 	--noRotateEffects
 	local tbl = {offset = offset, sizeX = sizeX, sizeY = sizeY, d = display.scriptableObject.data or {}}
@@ -2855,7 +2853,7 @@ end
 
 
 function sc.display.client_onClick(self, type, action, localPoint) -- type - 1:interact|2:tinker (e.g 1 or 2), action - pressed, released, drag
-	if not self.clicksAllowed or (self.scriptableObject.data or self.scriptableObject.data.noTouch) then
+	if not self.clicksAllowed or (self.scriptableObject and self.scriptableObject.data and self.scriptableObject.data.noTouch) then
 		return
 	end
 
@@ -2955,9 +2953,17 @@ function sc.display.client_onTinker(self, character, state)
 end
 
 function sc.display.client_canInteract(self, character)
-	return self.clicksAllowed and not (self.scriptableObject.data or self.scriptableObject.data.noTouch)
+	if self.scriptableObject and self.scriptableObject.data and self.scriptableObject.data.noTouch then
+		return false
+	end
+
+	return self.clicksAllowed
 end
 
 function sc.display.client_canTinker(self, character)
-	return self.clicksAllowed and not (self.scriptableObject.data or self.scriptableObject.data.noTouch)
+	if self.scriptableObject and self.scriptableObject.data and self.scriptableObject.data.noTouch then
+		return false
+	end
+
+	return self.clicksAllowed
 end
