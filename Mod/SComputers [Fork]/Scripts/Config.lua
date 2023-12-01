@@ -248,6 +248,10 @@ function sc.creativeCheck(self, isCreative)
 	end
 end
 
+----------------------   STORAGE    ----------------------
+
+sc.treesPainted = sm.storage.load("sc_treesPainted") or {}
+
 ---------------------- RESTRICTIONS ----------------------
 
 local ll = "luaInLua"
@@ -415,6 +419,11 @@ function sc.formatColorStr(data, isBlack, customAlpha)
 	return tostring(formatColor(data, isBlack, customAlpha))
 end
 ]]
+
+
+
+
+
 
 local bit = bit or bit32
 local function hexToRGB(color)

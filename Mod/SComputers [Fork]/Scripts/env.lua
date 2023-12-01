@@ -345,7 +345,6 @@ function createSafeEnv(self, settings)
                 error("the maximum amount of code is 32 KB", 2)
             end
             self.new_code = code
-            sc.addLagScore(4)
         end,
         getCode = function ()
             return self.storageData.script or ""
@@ -360,7 +359,6 @@ function createSafeEnv(self, settings)
             end
             self.storageData.userdata = base64.encode(data)
             self.storageData.userdata_bs64 = true
-            sc.addLagScore(4)
         end,
         getData = function ()
             if self.storageData.userdata then
@@ -457,6 +455,16 @@ function createSafeEnv(self, settings)
         end,
         getUptime = function ()
             return self.uptime
+        end,
+
+        getDeviceType = function()
+            if self.interactable then
+                return "computer"
+            elseif self.tool then
+                return "tablet"
+            else
+                return "unknown"
+            end
         end,
 
         --limitations of the amount of RAM in development

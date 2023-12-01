@@ -518,5 +518,10 @@
       "description" : "This is a holographic screen, which can be used, for example, to display information in a fighter",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Holographic Display 256x256"
+   },
+   "f33d5c9a-61f2-418c-9e78-9230794001b0" : {
+      "description" : "it allows you to shoot paintballs, which for some unknown reason appear in the cannon themselves. Please note that the maximum firing range is 4 meters(16 blocks). allows you to paint: shapes / robots / trees",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Paint Gun"
    }
 }

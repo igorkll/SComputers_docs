@@ -1089,6 +1089,7 @@ local forceRotate = false
 local function reset(self)
 	self.maxClicks = 16
 	self.rotation = 0
+	self.settedRotation = 0
 	self.skipAtNotSight = false
 	self.utf8support = false
 	self.renderAtDistance = false
@@ -1730,8 +1731,6 @@ function sc.display.server_createData(self)
 		end,
 		getUtf8Support = function () return self.utf8support end
 	}
-
-	self.settedRotation = 0
 
 	self.api = data
 	return data

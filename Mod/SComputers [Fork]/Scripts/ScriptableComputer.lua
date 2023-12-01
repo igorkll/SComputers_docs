@@ -347,13 +347,12 @@ function ScriptableComputer:server_onFixedUpdate()
 	
 	if not self.storageData.crashstate.hasException and not self.wait then
 		if not activeNow and self.isActive then
-			self.uptime = 0
 			self:sv_execute(true) --последняя итерация после отключения входа, чтобы отлавить выключения
 			self:sv_disableComponentApi()
+			self.uptime = 0
 		end
 		
 		if activeNow and not self.isActive then
-			self.uptime = 0
 			self:sv_reboot()
 		end
 

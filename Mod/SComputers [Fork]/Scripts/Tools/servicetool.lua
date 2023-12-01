@@ -72,6 +72,10 @@ function servicetool:sv_dataRequest()
     self.sendRestrictions = true
 end
 
+function servicetool:sv_dataRequest2()
+    self.network:sendToClients("cl_onDataResponse", {sc.treesPainted})
+end
+
 function servicetool:sv_cheat(data)
     self.network:sendToClient(data.player, "cl_cheat")
 end
@@ -113,7 +117,16 @@ function servicetool:client_onCreate()
     --sm.gui.chatMessage("because the scrapmechanictool site has closed")
     
     self.network:sendToServer("sv_dataRequest")
+    self.timeout = 40
     servicetool.instance = self
+end
+
+function servicetool:cl_onDataResponse(data)
+    for _, dat in pairs(data[1]) do
+        if sm.exists(dat[1]) then
+            dat[1]:setColor(dat[2])
+        end
+    end
 end
 
 function servicetool:cl_warns()
@@ -129,6 +142,15 @@ end
 function servicetool:client_onFixedUpdate()
     if self.gui and not self.gui:isActive() then
         self.gui:open()
+    end
+
+    if self.timeout then
+        if self.timeout <= 0 then
+            self.network:sendToServer("sv_dataRequest2")
+            self.timeout = nil
+        else
+            self.timeout = self.timeout - 1
+        end
     end
 
     if _G.tcCache and sm.game.getCurrentTick() % (40 * 16) == 0 then
