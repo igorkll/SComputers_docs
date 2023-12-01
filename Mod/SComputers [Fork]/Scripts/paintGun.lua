@@ -24,10 +24,7 @@ function paintGun:server_onCreate()
 end
 
 function paintGun:server_onFixedUpdate()
-    local ctick = sm.game.getCurrentTick()
-	if ctick % sc.restrictions.screenRate == 0 then self.allow_update = true end
-
-    if self.allow_update and self.shot then
+    if self.shot then
         local data
 
         local ok, raydata = sm.physics.raycast(self.shape.worldPosition, self.shape.worldPosition + (self.shape.worldRotation * sm.vec3.new(0, 0, 4)))
