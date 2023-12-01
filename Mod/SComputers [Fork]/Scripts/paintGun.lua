@@ -17,6 +17,29 @@ function paintGun:server_onCreate()
             api = {
                 shot = function(color)
                     self.shot = sc.formatColor(color)
+                end,
+                scan = function ()
+                    local ok, raydata = sm.physics.raycast(self.shape.worldPosition, self.shape.worldPosition + (self.shape.worldRotation * sm.vec3.new(0, 0, 4)))
+                    if ok then
+                        local shape = raydata:getShape()
+                        local character = raydata:getCharacter()
+                        local joint = raydata:getJoint()
+                        local harvestable = raydata:getHarvestable()
+
+                        if shape then
+                            return shape.color, raydata.fraction * 4
+                        elseif character then
+                            return character.color, raydata.fraction * 4
+                        elseif joint then
+                            return joint.color, raydata.fraction * 4
+                        elseif harvestable then
+                            if sc.treesPainted[harvestable.id] then
+                                return sc.treesPainted[harvestable.id][2] or sm.color.new(0, 0, 0), raydata.fraction * 4
+                            else
+                                return sm.color.new(0, 0, 0), raydata.fraction * 4
+                            end
+                        end
+                    end
                 end
             }
         }
