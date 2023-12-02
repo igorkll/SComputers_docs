@@ -24,7 +24,7 @@ function keyboard:server_onCreate()
             self.writeData = ""
         end,
         read = function ()
-            return self.sdata.currentData
+            return self.writeData or self.sdata.currentData
         end,
         write = function (text)
             checkArg(1, text, "string")

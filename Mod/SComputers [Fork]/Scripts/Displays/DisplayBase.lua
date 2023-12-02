@@ -464,7 +464,7 @@ end
 local quad_alt_hideRot = sm_quat_fromEuler(sm_vec3_new(0, 90, 0))
 local quad_alt_visibleRot = sm_quat_fromEuler(sm_vec3_new(0, 180 + 90, 0))
 
-function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale)
+function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale, wide)
 	--local attemptRemove
 
 	--::attempt::
@@ -575,7 +575,7 @@ function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale)
 	local vx = scale * sizeX + 1e-4
 	local vy = scale * sizeY + 1e-4
 
-	local wide = 0
+	wide = wide or 0
 	if display.scriptableObject.data and display.scriptableObject.data.wide then
 		wide = display.scriptableObject.data.wide
 	end
@@ -611,7 +611,6 @@ function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale)
 
 	effect_setOffsetPosition(effect, offset)
 
-	--noRotateEffects
 	local tbl = {offset = offset, sizeX = sizeX, sizeY = sizeY, d = display.scriptableObject.data or {}}
 	if chr then
 		tbl.quad_hideRot =    quad_alt_hideRot
@@ -2460,7 +2459,7 @@ function sc.display.client_update(self, dt)
 		else
 			local old_rotation = quadTree.rotation
 			quadTree.rotation = 0
-			self.cursor = quad_createEffect(quadTree, 0, 0, 0.06, 0.06, -0.0005, true, true)
+			self.cursor = quad_createEffect(quadTree, 0, 0, 0.06, 0.06, -0.0005, true, true, 0.01)
 			effect_setParameter(self.cursor, "uuid", cursorUuid)
 			quadTree.rotation = old_rotation
 			effect_setParameter(self.cursor, "color", white)

@@ -867,6 +867,26 @@
          },
          "sticky" : "-Z-Y+Y-X+X",
          "uuid" : "f33d5c9a-61f2-418c-9e78-9230794001b0"
+      },
+      {
+         "color" : "ffffff",
+         "density" : 1250.0,
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "physicsMaterial" : "Mechanical",
+         "qualityLevel" : 4,
+         "ratings" : {},
+         "renderable" : "$CONTENT_DATA/Objects/Renderables/smallPaintGun.rend",
+         "rotationSet" : "PropYZ",
+         "scripted" : {
+            "classname" : "paintGun",
+            "filename" : "$CONTENT_DATA/Scripts/paintGun.lua"
+         },
+         "sticky" : "-Z-Y+Y-X+X",
+         "uuid" : "5dfeacad-524f-4913-9490-5cae6265dedc"
       }
    ]
 }

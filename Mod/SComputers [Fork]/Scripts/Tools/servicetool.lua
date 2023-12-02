@@ -8,7 +8,6 @@ function servicetool:server_onCreate()
     sc.init()
     sc.warningsCheck()
     self.sendRestrictions = true
-    self.network:sendToClients("cl_warns")
 end
 
 function servicetool:server_onFixedUpdate()
@@ -33,12 +32,8 @@ function servicetool:server_onFixedUpdate()
         self.sendRestrictions = nil
     end
 
-    if sm.game.getCurrentTick() % (40 * 60 * 30) == 0 or sc.restrictionsUpdated then
+    if sm.game.getCurrentTick() % (40 * 60 * 60) == 0 or sc.restrictionsUpdated or (sc.shutdownFlag and sm.game.getCurrentTick() % (5 * 40) == 0) then
         self:sv_print_vulnerabilities()
-    end
-
-    if sc.shutdownFlag and sm.game.getCurrentTick() % (5 * 40) == 0 then
-        self.network:sendToClients("cl_warns")
     end
 end
 
@@ -61,6 +56,10 @@ function servicetool:sv_print_vulnerabilities()
         table.insert(vulnerabilities, "call limits are disabled, this allows you to burden some SComputers mechanics")
     end
 
+    if sc.shutdownFlag then
+        vulnerabilities.shutdown = true
+    end
+    
     self.network:sendToClients("cl_print_vulnerabilities", vulnerabilities)
 end
 
@@ -90,6 +89,7 @@ function servicetool:sv_safe(data)
         sc.restrictions.allowChat = false
         sc.restrictions.scriptMode = "safe"
         sc.restrictions.disCompCheck = false
+        sc.restrictions.disableCallLimit = false
 
         sc.saveRestrictions()
         sc.rebootAll = true
@@ -126,16 +126,6 @@ function servicetool:cl_onDataResponse(data)
         if sm.exists(dat[1]) then
             dat[1]:setColor(dat[2])
         end
-    end
-end
-
-function servicetool:cl_warns()
-    for _, warning in ipairs(warnings) do
-        sm.gui.chatMessage(warning)
-    end
-
-    if sc.shutdownFlag then
-        --sc.shutdown()
     end
 end
 
@@ -190,12 +180,24 @@ function servicetool:cl_print_vulnerabilities(vulnerabilities)
         table.insert(vulnerabilities, "you can activate cheats (which may lead to accidental activation)")
     end
 
+    local oldVulnerabilitiesCount = #vulnerabilities
+    for _, warning in ipairs(warnings) do
+        table.insert(vulnerabilities, warning)
+    end
+
     if #vulnerabilities > 0 then
         sm.gui.chatMessage("#ff0000warnings from the SComputers security system:#ffffff")
         for index, value in ipairs(vulnerabilities) do
             sm.gui.chatMessage(tostring(index) .. ". " .. value .. ".")
         end
-        sm.gui.chatMessage("#ffff00the host can enter /sv_scomputers_safe to automatically bring security back to normal#ffffff")
+
+        if oldVulnerabilitiesCount > 0 then
+            sm.gui.chatMessage("#ffff00the host can enter /sv_scomputers_safe to automatically bring security back to normal#ffffff")
+        end
+    end
+
+    if vulnerabilities.shutdown then
+        sc.shutdown()
     end
 end
 

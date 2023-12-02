@@ -79,7 +79,7 @@
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] #f002a8Creative Pocket Permission Tool#eeeeee"
    },
-   "4022ae8e-4147-4948-b242-ae99020e761e" : {
+   "d933ab9f-0007-4398-ad30-9aab6bac8b0a" : {
       "description" : "Radius: 128 blocks. A antenna is used if you wan't like internet. Antenna's dosen't need to be connected to another network port or antenna. They are routed by values. Great for projects like creating your own internet.",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Small Antenna"
@@ -133,11 +133,6 @@
       "description" : "A Display that you can connect to a computer and show whatever you want to!",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Display 3x3 (128x128)"
-   },
-   "60966b58-94a2-4730-bddb-6652144a7ea8" : {
-      "description" : "Use a Hard Drive (128 KB) that can be used to store files and folders",
-      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
-      "title" : "[FORK ONLY] HDD (128 KB)"
    },
    "623318f9-dbef-4fa4-80c6-f279d0780af1" : {
       "description" : "A Display that you can connect to a computer and show whatever you want to!",
@@ -212,11 +207,6 @@
       "description" : "used for importing and exporting text",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Realistic keyboard"
-   },
-   "78eb45cd-39e6-46a1-9fc2-9959d9dd1400" : {
-      "description" : "Use a Hard Drive (128 KB) that can be used to store files and folders",
-      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
-      "title" : "[FORK ONLY] HDD (128 KB)"
    },
    "7936702f-092a-4b02-9794-f51abbb42a9f" : {
       "description" : "allows you to interact with the computer using the console, does not cause lags, unlike displays",
@@ -328,7 +318,7 @@
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "Composite Writer"
    },
-   "b59e44cd-deda-4df4-87c0-e83a1fc80752" : {
+   "6ed15b2a-6407-4330-9b54-acdd855e33da" : {
       "description" : "#ff0000ATTENTION: THIS DISK DOES NOT SAVE DATA AFTER RE-ENTRY AND ON THE BLUEPRINT#eeeeee\nUse a Hard Drive (1 MB) that can be used to store files and folders.",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] #f002a8CREATIVE HDD (1 MB)#eeeeee"
@@ -428,7 +418,7 @@
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Very Very Big Display 16x12 (64x48)"
    },
-   "f9b5c7ac-5a29-4973-ba7f-7b2b5ff66a20" : {
+   "92361ece-e595-4f82-b89d-a427d3070374" : {
       "description" : "A Display that you can connect to a computer and show whatever you want to!",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Big Display (256x256)"
@@ -523,5 +513,10 @@
       "description" : "it allows you to shoot paintballs, which for some unknown reason appear in the cannon themselves. Please note that the maximum firing range is 4 meters(16 blocks). allows you to paint: shapes / robots / trees",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Paint Gun"
+   },
+   "5dfeacad-524f-4913-9490-5cae6265dedc" : {
+      "description" : "it allows you to shoot paintballs, which for some unknown reason appear in the cannon themselves. Please note that the maximum firing range is 4 meters(16 blocks). allows you to paint: shapes / robots / trees",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Small Paint Gun"
    }
 }

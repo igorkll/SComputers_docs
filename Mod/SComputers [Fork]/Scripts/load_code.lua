@@ -311,5 +311,6 @@ function safe_load_code(self, chunk, chunkname, mode, env)
     if not chunk then
         return nil, env
     end
+    
     return load_code(self, chunk, chunkname, mode, env)
 end

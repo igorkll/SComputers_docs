@@ -76,16 +76,7 @@ sc.radarDetectedBodies = {}
 sc.display = {}
 sc.networking = {}
 
-function sc.shutdown() --destroying SComputers in case of a critical problem
-	for k, v in pairs(sc) do
-		if type(v) == "function" then
-			sc[k] = function()
-				error("CRITICAL ISSUE IN SCOMPUTERS", 2)
-			end
-		else
-			sc[k] = nil
-		end
-	end
+function sc.shutdown()
 end
 
 function sc.yield(computer) --для библиотек
