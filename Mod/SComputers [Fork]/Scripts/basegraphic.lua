@@ -542,10 +542,14 @@ function basegraphic_doubleBuffering(self, stack, width, height, font, utf8suppo
 
 			local cx, cy = math_min(r, 1024), math_min(r, 1024)
 			local px, py
-			for ix = -cx, cx do
+
+			local ccx, ccy
+			if x < 0 then ccx = -x end
+			if y < 0 then ccy = -y end
+			for ix = (ccx and math_max(-cx, ccx) or -cx), cx do
 				px = x + ix
 				if px >= 0 and px < width then
-					for iy = -cy, cy do
+					for iy = (ccy and math_max(-cy, ccy) or -cy), cy do
 						py = y + iy
 						if py >= height then
 							break
@@ -566,9 +570,10 @@ function basegraphic_doubleBuffering(self, stack, width, height, font, utf8suppo
 	end
 
 	local buffer1All = self.buffer1All
+	local buffer2All = self.buffer2All
 	for i = 0, maxBuf do
 		local col = buffer1[i] or buffer1All
-		if col ~= buffer2[i] then
+		if col ~= (buffer2[i] or buffer2All) then
 			newstack[newstackI] = math_floor(i % width)
 			newstackI = newstackI + 1
 

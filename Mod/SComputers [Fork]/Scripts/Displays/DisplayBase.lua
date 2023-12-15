@@ -1,5 +1,5 @@
 -- debug
-debug_out = true
+debug_out = false
 debug_printeffects = false
 debug_disablecheck = false
 debug_disabletext = false
@@ -1544,6 +1544,10 @@ function sc.display.server_createData(self)
 			self.serverCacheAll = nil
 		end,
 		drawCircle = function (x, y, r, c)
+			if r > 1024 then
+				r = 1024
+			end
+
 			self.renderingStack[self.rnd_idx] = {
 				4,
 				c or "ffffffff",
@@ -1557,6 +1561,10 @@ function sc.display.server_createData(self)
 			self.serverCacheAll = nil
 		end,
 		fillCircle = function (x, y, r, c)
+			if r > 1024 then
+				r = 1024
+			end
+
 			self.renderingStack[self.rnd_idx] = {
 				5,
 				c or "ffffffff",
@@ -1873,6 +1881,7 @@ function sc_display_client_clear(self, color, removeAll)
 	self.buffer1 = {}
 	self.buffer2 = {}
 	self.buffer1All = nil
+	self.buffer2All = nil
 end
 
 function sc_display_client_drawPixelForce(self, x, y, color)
@@ -2788,6 +2797,7 @@ function sc.display.client_onDataResponse(self, data)
 		self.buffer1 = {}
 		self.buffer2 = {}
 		self.buffer1All = nil
+		self.buffer2All = nil
 
 		self.old_rotation = data.rotation
 	end
@@ -2892,19 +2902,25 @@ function sc.display.client_drawStack(self, sendstack)
 
 	if isEndClear and #stack == 1 then
 		debug_print("clear only render")
+
+		local col = formatColor(stack[1][2], true)
+
 		self.buffer1 = {}
 		self.buffer2 = {}
-		self.buffer1All = nil
+		self.buffer2All = col
+		self.buffer1All = col
 
-		if not sc_display_client_clear(self, formatColor(stack[1][2], true)) then
+		if not sc_display_client_clear(self, col) then
 			isEffect = true
 		end
 
 		self.oldRenderType = true
 	elseif self.isRendering and (sendstack.force or (self.forceNativeRender and ctick - self.forceNativeRender < 10)) then
 		debug_print("native render")
+
 		self.buffer1 = {}
 		self.buffer2 = {}
+		self.buffer2All = nil
 		self.buffer1All = nil
 
 		local startRnd = os_clock()
@@ -2935,8 +2951,8 @@ function sc.display.client_drawStack(self, sendstack)
 		end
 
 		local rendTime = os_clock() - startRnd
-		if not self.oldRenderType and self.lastNativeRenderTime and self.lastNativeRenderTime < rendTime and not debug_disableForceNativeRender then
-			debug_print("force native render", self.lastNativeRenderTime, rendTime)
+		if not self.oldRenderType and self.lastNativeRenderTime and (self.lastNativeRenderTime * 3) < rendTime and not debug_disableForceNativeRender then
+			debug_print("force native render", self.lastNativeRenderTime, self.lastNativeRenderTime * 3, rendTime)
 			self.forceNativeRender = ctick
 		end
 
