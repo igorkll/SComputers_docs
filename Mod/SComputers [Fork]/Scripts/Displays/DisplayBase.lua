@@ -1,5 +1,5 @@
 -- debug
-debug_out = false
+debug_out = true
 debug_printeffects = false
 debug_disablecheck = false
 debug_disabletext = false
@@ -2901,7 +2901,7 @@ function sc.display.client_drawStack(self, sendstack)
 		end
 
 		self.oldRenderType = true
-	elseif sendstack.force or (self.forceNativeRender and ctick - self.forceNativeRender < 10) then
+	elseif self.isRendering and (sendstack.force or (self.forceNativeRender and ctick - self.forceNativeRender < 10)) then
 		debug_print("native render")
 		self.buffer1 = {}
 		self.buffer2 = {}
@@ -2925,16 +2925,6 @@ function sc.display.client_drawStack(self, sendstack)
 	else
 		debug_print("buffer render")
 
-		if self.oldRenderType then --for normal measurement of render time
-			local tbl, tblI = basegraphic_doubleBuffering(self, stack, getWidth(self), getHeight(self), self.customFont, self.utf8support)
-			for i = 1, tblI, 3 do
-				if not sc_display_client_drawPixelForce(self, tbl[i], tbl[i + 1], tbl[i + 2]) then
-					self.lastLastClearColor2 = nil
-					isEffect = true
-				end
-			end
-		end
-
 		local startRnd = os_clock()
 		local tbl, tblI = basegraphic_doubleBuffering(self, stack, getWidth(self), getHeight(self), self.customFont, self.utf8support)
 		for i = 1, tblI, 3 do
@@ -2945,7 +2935,7 @@ function sc.display.client_drawStack(self, sendstack)
 		end
 
 		local rendTime = os_clock() - startRnd
-		if self.lastNativeRenderTime and self.lastNativeRenderTime < rendTime and not debug_disableForceNativeRender then
+		if not self.oldRenderType and self.lastNativeRenderTime and self.lastNativeRenderTime < rendTime and not debug_disableForceNativeRender then
 			debug_print("force native render", self.lastNativeRenderTime, rendTime)
 			self.forceNativeRender = ctick
 		end
