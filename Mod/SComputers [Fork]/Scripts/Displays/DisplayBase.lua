@@ -1,5 +1,5 @@
 -- debug
-debug_out = false
+debug_out = true
 debug_printeffects = false
 debug_disablecheck = false
 debug_disabletext = false
@@ -8,6 +8,7 @@ debug_raycast = false
 debug_offset = false
 debug_disableEffectsBuffer = false
 debug_disableDBuff = false
+debug_disableForceNativeRender = false
 
 --settings
 mul_ray_fov = 2
@@ -2929,7 +2930,10 @@ function sc.display.client_drawStack(self, sendstack)
 				isEffect = true
 			end
 		end
-		if self.lastNativeRenderTime and self.lastNativeRenderTime < os_clock() - startRnd then
+
+		local rendTime = os_clock() - startRnd
+		if self.lastNativeRenderTime and self.lastNativeRenderTime < rendTime and not debug_disableForceNativeRender then
+			debug_print("force native render", self.lastNativeRenderTime, rendTime)
 			self.forceNativeRender = ctick
 		end
 	end
