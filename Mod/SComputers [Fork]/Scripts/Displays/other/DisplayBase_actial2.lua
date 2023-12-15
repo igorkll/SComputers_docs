@@ -263,8 +263,10 @@ local sc_display_client_drawPixelForce
 local sc_display_client_drawPixel
 local sc_display_client_drawRect
 local sc_display_client_fillRect
+local drawCircle_putpixel
 local sc_display_client_drawCircle
 local sc_display_client_fillCircle
+local sc_display_client_drawLineForce
 local sc_display_client_drawLine
 local sc_display_client_optimize
 
@@ -899,7 +901,6 @@ function quad_treeFillCircle(self, x, y, r, color)
 			if self.color ~= color then
 				self.color = color
 				quad_updateEffectColor(self)
-				return true --если получилось шось отрисовать
 			end
 
 			--if self.root.display.isRendering then
@@ -911,12 +912,10 @@ function quad_treeFillCircle(self, x, y, r, color)
 
 				local children = self.children
 
-				local drawed = false
-				if quad_treeFillCircle(children[1], x, y, r, color) then drawed = true end
-				if quad_treeFillCircle(children[2], x, y, r, color) then drawed = true end
-				if quad_treeFillCircle(children[3], x, y, r, color) then drawed = true end
-				if quad_treeFillCircle(children[4], x, y, r, color) then drawed = true end
-				return drawed
+				quad_treeFillCircle(children[1], x, y, r, color)
+				quad_treeFillCircle(children[2], x, y, r, color)
+				quad_treeFillCircle(children[3], x, y, r, color)
+				quad_treeFillCircle(children[4], x, y, r, color)
 			end
 		end
 	end
@@ -1061,7 +1060,7 @@ local function applyNew(self)
 		if self.quadTree.splashEffect then
 			effect_stop(self.quadTree.splashEffect)
 		end
-		if self.quadTree.back_effect then
+		if self.quadTree.back_effect and not effect_isDone(self.quadTree.back_effect) then
 			effect_stop(self.quadTree.back_effect)
 		end
 		hideNewEffects(self)
@@ -1147,10 +1146,8 @@ function sc.display.createDisplay(scriptableObject, width, height, pixelScale)
 		rnd = math_random(0, 40 * 5),
 		dbuffPixels = {},
 		quadTree = nil,
+		currentPixels = {},
 		dragging = {interact=false, tinker=false, interactLastPos={x=-1, y=-1}, tinkerLastPos={x=-1, y=-1}},
-
-		buffer1 = {},
-		buffer2 = {}
 	}
 
 	display.force_update = true --первая отрисовка всегда форсированая
@@ -1216,9 +1213,6 @@ function sc.display.server_update(self)
 		self.allow_update = true
 		self.serverCache = {}
 		self.serverCacheAll = nil
-		self.stackChecksum = nil
-
-		debug_print("force setted")
 	end
 
 
@@ -1252,11 +1246,11 @@ function sc.display.server_update(self)
 
 	if self.needUpdate and self.allow_update then
 		--debug_print("self.needUpdate")
-		local stackChecksum
+		local dbuffcode
 		if not debug_disablecheck then
-			stackChecksum = tableChecksum(self.renderingStack)
+			dbuffcode = tableChecksum(self.renderingStack)
 		end
-		--debug_print("stackChecksum", stackChecksum)
+		--debug_print("dbuffcode", dbuffcode)
 
 		--optimize
 		--[[
@@ -1273,9 +1267,9 @@ function sc.display.server_update(self)
 
 		--sending
 		if self.force_update or
-		not stackChecksum or
-		not self.stackChecksum or
-		self.stackChecksum ~= stackChecksum then
+		not dbuffcode or
+		not self.dbuffcode or
+		self.dbuffcode ~= dbuffcode then
 			--debug_print("self.needUpdate-sending")
 
 			--[[
@@ -1293,7 +1287,7 @@ function sc.display.server_update(self)
 			end
 			]]
 
-			if self.rnd_idx > 1 then
+			if #self.renderingStack > 0 then
 				local cancel
 				if self.lastComputer and self.lastComputer.cdata and not self.lastComputer.cdata.unsafe and type(sc.restrictions.lagDetector) == "number" then
 					local oldLagScore = self.lastComputer.lagScore
@@ -1381,22 +1375,16 @@ function sc.display.server_update(self)
 						debug_print("self.needUpdate-sending end")
 					end
 				end
-
-				self.stackChecksum = stackChecksum
-		
-				self.rnd_idx = 1
-				self.renderingStack = {}
-				
-				self.needUpdate = false
-				self.force_update = false
-				self.allow_update = false
-
-				debug_print("RENDER!!!")
-			else
-				debug_print("render empty")
 			end
-		else
-			debug_print("render wait", self.force_update, stackChecksum, self.stackChecksum)
+
+			self.dbuffcode = dbuffcode
+		
+			self.rnd_idx = 1
+			self.renderingStack = {}
+			
+			self.needUpdate = false
+			self.force_update = false
+			self.allow_update = false
 		end
 	end
 end
@@ -1487,11 +1475,14 @@ function sc.display.server_createData(self)
 			return rheight
 		end,
 		clear = function (color)
-			self.renderingStack = {{
+			self.renderingStack = {}
+			self.rnd_idx = 1
+
+			self.renderingStack[self.rnd_idx] = {
 				0,
 				color or "000000ff"
-			}}
-			self.rnd_idx = 2
+			}
+			self.rnd_idx = self.rnd_idx + 1
 
 			self.serverCache = {}
 			self.serverCacheAll = color
@@ -1524,6 +1515,16 @@ function sc.display.server_createData(self)
 			
 			self.serverCache = {}
 			self.serverCacheAll = nil
+
+			--[[
+			for ix = x, x + (w - 1) do
+				for iy = y, y + (h - 1) do
+					if ix == x or iy == y or ix == (x + (w - 1)) or iy == (y + (h - 1)) then
+						self.serverCache[x + (y * rwidth)] = c
+					end
+				end
+			end
+			]]
 		end,
 		fillRect = function (x, y, w, h, c)
 			x, y = checkRectPos(x, y)
@@ -1541,6 +1542,14 @@ function sc.display.server_createData(self)
 			
 			self.serverCache = {}
 			self.serverCacheAll = nil
+
+			--[[
+			for ix = x, x + (w - 1) do
+				for iy = y, y + (h - 1) do
+					self.serverCache[x + (y * rwidth)] = c
+				end
+			end
+			]]
 		end,
 		drawCircle = function (x, y, r, c)
 			self.renderingStack[self.rnd_idx] = {
@@ -1584,12 +1593,13 @@ function sc.display.server_createData(self)
 		end,
 		drawText = function (x, y, text, c)
 			if not debug_disabletext then
+				text = tostring(text)
 				self.renderingStack[self.rnd_idx] = {
 					7,
 					c or "ffffffff",
 					nRound(x),
 					nRound(y),
-					tostring(text)
+					text
 				}
 				self.rnd_idx = self.rnd_idx + 1
 				
@@ -1601,7 +1611,6 @@ function sc.display.server_createData(self)
 
 		optimize = function ()
 			--ручная оптимизация отключена из за того что большенство использует ее неправильно, что вызовет понижения производительности. данная функция сейчас работает полностью автоматически
-			--потом может быть что-то придумаю
 			--[[
 			self.renderingStack[self.rnd_idx] = {
 				8
@@ -1654,7 +1663,7 @@ function sc.display.server_createData(self)
 				self.customFont = nil
 			end
 			self.needSendData = true
-			self.stackChecksum = nil
+			self.dbuffcode = nil
 		end,
 
 		getFontWidth = function ()
@@ -1816,7 +1825,17 @@ end
 
 
 
-function sc_display_client_clear(self, color, removeAll)
+function sc_display_client_clear(self, color, removeAll, pixelMode)
+	if pixelMode and self.quadTree then
+		for ix = 0, getWidth(self) do
+			for iy = 0, getHeight(self) do
+				sc_display_client_drawPixelForce(self, ix, iy, color)
+			end
+		end
+		self.optimize_flag = true
+		return
+	end
+
 	if not removeAll and color == self.lastLastClearColor2 and not self.scriptableObject.data.noDoubleEffect then
 		return true
 	end
@@ -1869,14 +1888,13 @@ function sc_display_client_clear(self, color, removeAll)
 	self.dbuffPixels = {}
 	self.dbuffPixelsAll = color
 
-	self.buffer1 = {}
-	self.buffer2 = {}
-	self.buffer1All = nil
+	self.currentPixels = {}
+	self.currentPixelsAll = color
 end
 
 function sc_display_client_drawPixelForce(self, x, y, color)
 	local width = getWidth(self)
-	local currentColor = self.dbuffPixels[x + (y * width)] or self.dbuffPixelsAll
+	local currentColor = self.currentPixels[x + (y * width)] or self.currentPixelsAll
 
 	if currentColor and currentColor == color and not debug_disableDBuff then
 		return true --если нехрена не поменялось
@@ -1944,34 +1962,29 @@ function sc_display_client_drawRect(self, x, y, w, h, color)
 end
 
 function sc_display_client_fillRect(self, x, y, w, h, color)
-	self.dbuffPixels = {}
-	self.dbuffPixelsAll = nil
-	quad_treeFillRect(self.quadTree, math_floor(x), math_floor(y), math_floor(w), math_floor(h), color)
+	--self.dbuffPixels = {}
+	--self.dbuffPixelsAll = nil
 
-	--[[
 	local realAction = false
 	local mw, mh = getWidth(self), getHeight(self)
 	for cx = x, x + (w - 1) do
 		for cy = y, y + (h - 1) do
 			if cx >= 0 and cy >= 0 and cx < mw and cy < mh then
-				if self.dbuffPixels[x + (y * mw)] or self.dbuffPixelsAll ~= color then
-					self.dbuffPixels[cx + (cy * mw)] = color
+				if self.currentPixels[x + (y * mw)] or self.currentPixelsAll ~= color then
 					realAction = true
 				end
+				self.dbuffPixels[cx + (cy * mw)] = color
 			end
 		end
 	end
 	if realAction then
 		quad_treeFillRect(self.quadTree, math_floor(x), math_floor(y), math_floor(w), math_floor(h), color)
-	else
-		return true
 	end
-	]]
 end
 
 sc.display.client_fillRect = sc_display_client_fillRect
 
-local function drawCircle_putpixel(self, cx, cy, x, y, color)
+function drawCircle_putpixel(self, cx, cy, x, y, color)
 	local posDX_x = cx + x
 	local negDX_x = cx - x
 	local posDX_y = cx + y
@@ -2020,41 +2033,18 @@ function sc_display_client_drawCircle(self, x, y, r, color)
 	return not isEffect
 end
 
-function sc_display_client_fillCircle(self, x, y, r, color)
-	if quad_treeFillCircle(self.quadTree, x, y, r, color) then
-		self.dbuffPixels = {}
-		self.dbuffPixelsAll = nil
-	else
-		return true
-	end
+sc.display.client_drawCircle = sc_display_client_drawCircle
 
-	--[[
-	r = math_abs(r)
-	local mw, mh = getWidth(self), getHeight(self)
-	local cx, cy = math_min(r, 1024), math_min(r, 1024)
-	local px, py
-	for ix = -cx, cx do
-		px = x + ix
-		if px >= 0 and px < mw then
-			for iy = -cy, cy do
-				py = y + iy
-				if py >= mh then
-					break
-				elseif ix*ix + iy*iy <= r*r and py >= 0 then
-					sc_display_client_drawPixel(self, px, py, color)
-					self.dbuffPixels[px + (py * mw)] = color
-				end
-			end
-			if px == true then --dubble break
-				break
-			end
-		end
-    end
-	]]
+function sc_display_client_fillCircle(self, x, y, r, color)
+	--self.dbuffPixels = {} --в теории отключения этого может вызвать проблемы с перекрытием кгура тем же цветом что был под ним, но это редкий случай а оптимизация важнее
+	--self.dbuffPixelsAll = nil
+
+	quad_treeFillCircle(self.quadTree, x, y, r, color)
 end
 
---[[
-local function sc_display_client_drawLineForce(self, x, y, x1, y1, color)
+sc.display.client_fillCircle = sc_display_client_fillCircle
+
+function sc_display_client_drawLineForce(self, x, y, x1, y1, color)
 	x = math_floor(x)
 	y = math_floor(y)
 	x1 = math_floor(x1)
@@ -2086,7 +2076,6 @@ local function sc_display_client_drawLineForce(self, x, y, x1, y1, color)
     end
 	return not isEffect
 end
-]]
 
 -- y = y0 + round( (x-x0) * dy / dx )
 function sc_display_client_drawLine(self, x, y, x1, y1, color)
@@ -2784,10 +2773,6 @@ function sc.display.client_onDataResponse(self, data)
 		self.dbuffPixels = {}
 		self.dbuffPixelsAll = nil
 
-		self.buffer1 = {}
-		self.buffer2 = {}
-		self.buffer1All = nil
-
 		self.old_rotation = data.rotation
 	end
 
@@ -2801,7 +2786,7 @@ end
 
 
 local drawActions = {
-	[sc_display_drawType.clear] = function (self, t) return sc_display_client_clear(self, t[2]) end,
+	[sc_display_drawType.clear] = function (self, t) return sc_display_client_clear(self, t[2], nil, true) end,
 	[sc_display_drawType.drawPixel] = function (self, t) return sc_display_client_drawPixel(self, t[3], t[4], t[2]) end,
 	[sc_display_drawType.drawRect] = function (self, t) return sc_display_client_drawRect(self, t[3], t[4], t[5], t[6], t[2]) end,
 	[sc_display_drawType.fillRect] = function (self, t) return sc_display_client_fillRect(self, t[3], t[4], t[5], t[6], t[2]) end,
@@ -2812,7 +2797,6 @@ local drawActions = {
 	[sc_display_drawType.optimize] = function (self) self.optimize_flag = true end,
 }
 
-local basegraphic_doubleBuffering = basegraphic_doubleBuffering
 function sc.display.client_drawStack(self, sendstack)
 	local startExecTimeStart = os_clock()
 
@@ -2879,61 +2863,45 @@ function sc.display.client_drawStack(self, sendstack)
 		debug_print_force("localLag > 120!!")
 	end
 
-	local ctick = getCurrentTick()
-
-	local startExecTime = os_clock()
-
-	local isEndClear = stack[#stack][1] == 0
-	local clearColor = formatColor(stack[#stack][2])
-
+	local isEndClear = false
+	local clearColor
 	self.newEffects = {}
 	local isEffect --если от всего стека был хоть какой-то смысл
+	local isClear
+	for _, v in ipairs(stack) do
+		local startExecTime = os_clock()
 
-	if isEndClear and #stack == 1 then
-		debug_print("clear only render")
-		self.buffer1 = {}
-		self.buffer2 = {}
-		self.buffer1All = nil
+		isClear = v[1] == 0
+		v[2] = formatColor(v[2], isClear)
+		--v[2] = sm_color_new(v[2])
+		
+		if isClear then
+			clearColor = v[2]
+			isEndClear = true
+		elseif v[1] == 8 then
+			--ручная оптимизация отключена из за того что большенство использует ее неправильно, что вызовет понижения производительности. данная функция сейчас работает полностью автоматически
+		else
+			self.lastLastClearColor2 = nil
+			isEndClear = false
+		end
 
-		if not sc_display_client_clear(self, formatColor(stack[1][2], true)) then
+		--если хоть что-то не вернуло значения, значит эфект от стека был
+		if not drawActions[v[1]](self, v) and v[1] ~= 8 then
 			isEffect = true
 		end
-	elseif sendstack.force or (self.forceNativeRender and ctick - self.forceNativeRender < 10) then
-		debug_print("native render")
-		self.buffer1 = {}
-		self.buffer2 = {}
-		self.buffer1All = nil
 
-		local startRnd = os_clock()
-		for _, v in ipairs(stack) do
-			v[2] = formatColor(v[2], v[1] == 0)
-	
-			if v[1] ~= 0 and v[1] ~= 8 then
-				self.lastLastClearColor2 = nil
-			end
-	
-			--если хоть что-то не вернуло значения, значит эфект от стека был
-			if not drawActions[v[1]](self, v) and v[1] ~= 8 then
-				isEffect = true
-			end
-		end
-		self.lastNativeRenderTime = os_clock() - startRnd
-	else
-		debug_print("buffer render")
-
-		local startRnd = os_clock()
-		local tbl, tblI = basegraphic_doubleBuffering(self, stack, getWidth(self), getHeight(self), self.customFont, self.utf8support)
-		for i = 1, tblI, 3 do
-			if not sc_display_client_drawPixelForce(self, tbl[i], tbl[i + 1], tbl[i + 2]) then
-				self.lastLastClearColor2 = nil
-				isEffect = true
-			end
-		end
-		if self.lastNativeRenderTime and self.lastNativeRenderTime < os_clock() - startRnd then
-			self.forceNativeRender = ctick
+		self.localLag = self.localLag + ((os_clock() - startExecTime) * sc.clockLagMul)
+		if self.localLag > 120 then
+			debug_print_force("localLag > 120!!")
+			break
 		end
 	end
+
+	self.currentPixels = sc.advDeepcopy(self.dbuffPixels)
+	self.currentPixelsAll = self.dbuffPixelsAll
 	
+	local startExecTimeEnd = os_clock()
+
 	if isEffect then
 		debug_print("isEffect!!")
 
@@ -2945,16 +2913,14 @@ function sc.display.client_drawStack(self, sendstack)
 			self.dispValue = nil
 		end
 		
-		self.clientDrawingTimer = ctick
+		self.clientDrawingTimer = getCurrentTick()
 		self.lastDrawTime = self.clientDrawingTimer
 
 		applyNew(self)
-	else
-		debug_print("no effect")
 	end
 	self.newEffects = nil
 
-	self.localLag = self.localLag + ((os_clock() - startExecTime) * sc.clockLagMul)
+	self.localLag = self.localLag + ((os_clock() - startExecTimeEnd) * sc.clockLagMul)
 	if self.localLag > 120 then
 		debug_print_force("localLag > 120!!")
 	end

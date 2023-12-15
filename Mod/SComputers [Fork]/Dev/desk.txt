@@ -28,3 +28,6 @@ you will still need to study the documentation of the parent mod (ScriptableComp
 
 SComputers documentation: https://github.com/igorkll/SComputers_docs/blob/main/SComputers/Info.md
 Parent Mod documentation(ScriptableComputer): https://steamcommunity.com/sharedfiles/filedetails/?id=2831560152
+
+Tags:
+ScriptableComputer, Lua, Programming, Displays, Screens, Coding, DLM, LUA, fork.

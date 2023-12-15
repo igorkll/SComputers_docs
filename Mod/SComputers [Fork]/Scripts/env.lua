@@ -419,18 +419,11 @@ function createSafeEnv(self, settings)
 
         
         reboot = function ()
-            --self:sv_reboot(true, true)
-
-            local noSoftwareReboot = {
-                [ScriptableComputer.oftenLongOperationMsg] = true,
-                [ScriptableComputer.lagMsg] = true
-            }
-
-            if self.real_crashstate and noSoftwareReboot[self.real_crashstate.exceptionMsg] then
+            if self.storageData.noSoftwareReboot then
                 error("this computer cannot be restarted programmatically", 2)
             end
             
-            self.reboot_flag = true
+            self.software_reboot_flag = true
         end,
         getCurrentComputer = function ()
             return self.publicTable.public

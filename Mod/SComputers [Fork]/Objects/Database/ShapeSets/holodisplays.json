@@ -13,7 +13,6 @@
          "scripted" : {
             "classname" : "AnyDisplay",
             "data" : {
-               "zpos" : 0,
                "glass" : true,
                "noDoubleEffect" : true,
                "noRotateEffects" : true,
@@ -21,9 +20,10 @@
                "offset" : 3,
                "rotate" : 2,
                "v" : 6.0,
-               "wide" : 0.001,
+               "wide" : 0.0010,
                "x" : 16,
-               "y" : 16
+               "y" : 16,
+               "zpos" : 0
             },
             "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
@@ -43,7 +43,6 @@
          "scripted" : {
             "classname" : "AnyDisplay",
             "data" : {
-               "zpos" : 0,
                "glass" : true,
                "noDoubleEffect" : true,
                "noRotateEffects" : true,
@@ -51,9 +50,10 @@
                "offset" : 3,
                "rotate" : 2,
                "v" : 3.0,
-               "wide" : 0.001,
+               "wide" : 0.0010,
                "x" : 32,
-               "y" : 32
+               "y" : 32,
+               "zpos" : 0
             },
             "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
@@ -73,7 +73,6 @@
          "scripted" : {
             "classname" : "AnyDisplay",
             "data" : {
-               "zpos" : 0,
                "glass" : true,
                "noDoubleEffect" : true,
                "noRotateEffects" : true,
@@ -81,9 +80,10 @@
                "offset" : 3,
                "rotate" : 2,
                "v" : 1.50,
-               "wide" : 0.001,
+               "wide" : 0.0010,
                "x" : 64,
-               "y" : 64
+               "y" : 64,
+               "zpos" : 0
             },
             "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
@@ -103,7 +103,6 @@
          "scripted" : {
             "classname" : "AnyDisplay",
             "data" : {
-               "zpos" : 0,
                "glass" : true,
                "noDoubleEffect" : true,
                "noRotateEffects" : true,
@@ -111,9 +110,10 @@
                "offset" : 3,
                "rotate" : 2,
                "v" : 0.750,
-               "wide" : 0.001,
+               "wide" : 0.0010,
                "x" : 128,
-               "y" : 128
+               "y" : 128,
+               "zpos" : 0
             },
             "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
@@ -133,7 +133,6 @@
          "scripted" : {
             "classname" : "AnyDisplay",
             "data" : {
-               "zpos" : 0,
                "glass" : true,
                "noDoubleEffect" : true,
                "noRotateEffects" : true,
@@ -141,12 +140,14 @@
                "offset" : 3,
                "rotate" : 2,
                "v" : 0.3750,
-               "wide" : 0.001,
+               "wide" : 0.0010,
                "x" : 256,
-               "y" : 256
+               "y" : 256,
+               "zpos" : 0
             },
             "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
+         "showInInventory" : false,
          "sticky" : "+X-Y+Y-Z+Z",
          "uuid" : "7e9cb8c1-1353-4b45-a67f-7a771f365703"
       },
@@ -163,7 +164,6 @@
          "scripted" : {
             "classname" : "AnyDisplay",
             "data" : {
-               "zpos" : 0,
                "glass" : true,
                "noDoubleEffect" : true,
                "noRotateEffects" : true,
@@ -171,9 +171,10 @@
                "offset" : 3,
                "rotate" : 2,
                "v" : 8,
-               "wide" : 0.001,
+               "wide" : 0.0010,
                "x" : 16,
-               "y" : 16
+               "y" : 16,
+               "zpos" : 0
             },
             "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
@@ -193,7 +194,6 @@
          "scripted" : {
             "classname" : "AnyDisplay",
             "data" : {
-               "zpos" : 0,
                "glass" : true,
                "noDoubleEffect" : true,
                "noRotateEffects" : true,
@@ -201,9 +201,10 @@
                "offset" : 3,
                "rotate" : 2,
                "v" : 4.0,
-               "wide" : 0.001,
+               "wide" : 0.0010,
                "x" : 32,
-               "y" : 32
+               "y" : 32,
+               "zpos" : 0
             },
             "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
@@ -223,7 +224,6 @@
          "scripted" : {
             "classname" : "AnyDisplay",
             "data" : {
-               "zpos" : 0,
                "glass" : true,
                "noDoubleEffect" : true,
                "noRotateEffects" : true,
@@ -231,9 +231,10 @@
                "offset" : 3,
                "rotate" : 2,
                "v" : 2.0,
-               "wide" : 0.001,
+               "wide" : 0.0010,
                "x" : 64,
-               "y" : 64
+               "y" : 64,
+               "zpos" : 0
             },
             "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
@@ -253,7 +254,6 @@
          "scripted" : {
             "classname" : "AnyDisplay",
             "data" : {
-               "zpos" : 0,
                "glass" : true,
                "noDoubleEffect" : true,
                "noRotateEffects" : true,
@@ -261,9 +261,10 @@
                "offset" : 3,
                "rotate" : 2,
                "v" : 1.0,
-               "wide" : 0.001,
+               "wide" : 0.0010,
                "x" : 128,
-               "y" : 128
+               "y" : 128,
+               "zpos" : 0
             },
             "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
@@ -283,7 +284,6 @@
          "scripted" : {
             "classname" : "AnyDisplay",
             "data" : {
-               "zpos" : 0,
                "glass" : true,
                "noDoubleEffect" : true,
                "noRotateEffects" : true,
@@ -291,12 +291,14 @@
                "offset" : 3,
                "rotate" : 2,
                "v" : 0.50,
-               "wide" : 0.001,
+               "wide" : 0.0010,
                "x" : 256,
-               "y" : 256
+               "y" : 256,
+               "zpos" : 0
             },
             "filename" : "$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua"
          },
+         "showInInventory" : false,
          "sticky" : "+X-Y+Y-Z+Z",
          "uuid" : "171803b0-14b5-4fc7-81ff-57ec8d2abfd0"
       }

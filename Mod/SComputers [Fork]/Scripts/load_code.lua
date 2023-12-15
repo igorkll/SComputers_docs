@@ -1,6 +1,6 @@
 local pcall, unpack, error, pairs, type = pcall, unpack, error, pairs, type
 
-function injectService(self, code, env) --спизженно с: https://github.com/Ocawesome101/oc-cynosure/blob/dev/base/load.lua
+function addServiceCode(self, code, env) --спизженно с: https://github.com/Ocawesome101/oc-cynosure/blob/dev/base/load.lua
     local computer = self
     local yieldName = self.yieldName
     local yieldArg = self.yieldArg
@@ -307,7 +307,7 @@ function safe_load_code(self, chunk, chunkname, mode, env)
         return nil, preloadErr
     end
 
-    chunk, env = injectService(self, chunk, env) --env may be a error
+    chunk, env = addServiceCode(self, chunk, env) --env may be a error
     if not chunk then
         return nil, env
     end

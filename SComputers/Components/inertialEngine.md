@@ -25,6 +25,7 @@ note that the addPosition method perceives as a rotation for processing movement
 * inertialEngine.addRotation(offset:vec3) - adds an angle in radians to the target angle of rotation of the structure
 * inertialEngine.addPosition(offset:vec3) - adds a position in meters to the target position of the structure(the position is added taking into account the rotation)
 * inertialEngine.setStableMode(mode) - sets the stabilization mode (default 1) to a maximum of 4. this changes the stabilization force
+* inertialEngine.getOffset():number - returns the distance in meters from the actual location to the target point
 
 ### stable modes
 * 0 - no stabilization

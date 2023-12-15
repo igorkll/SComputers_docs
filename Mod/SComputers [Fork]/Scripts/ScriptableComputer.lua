@@ -15,9 +15,9 @@ ScriptableComputer.UV_HAS_ERROR = 10
 ScriptableComputer.UV_HAS_DISABLED = 9
 
 ScriptableComputer.maxcodesize = 32 * 1024
-ScriptableComputer.longOperationMsg = "the computer has been performing the operation for too long"
-ScriptableComputer.oftenLongOperationMsg = "the computer exceeded the CPU time limit too often"
-ScriptableComputer.lagMsg = "this computer caused lags, please optimize your code or disable 'anti-lag' in 'Permission Tool'"
+ScriptableComputer.longOperationMsg = "too long without yielding"
+ScriptableComputer.oftenLongOperationMsg = "too long without yielding"
+ScriptableComputer.lagMsg = "too long without yielding"
 
 ScriptableComputer.ledUuid = sm.uuid.new("94c8b309-b6fb-40f8-90bb-b5c3ac28bacd")
 ScriptableComputer.stub = "--this computer was saved using SComputers (fork of ScriptableComputer) download: https://steamcommunity.com/sharedfiles/filedetails/?id=2949350596\nif not a then for _,v in ipairs(getDisplays())do v.clear('0A3EE2')v.drawText(1,1,'need','EEEEEE')v.drawText(1,8,'SComputers!','EEEEEE')v.flush()end a=1 end"
@@ -47,7 +47,8 @@ function ScriptableComputer:sv_yield()
 		if self.sv_patience <= 0 then
 			self.storageData.crashstate.hasException = true
 			self.storageData.crashstate.exceptionMsg = ScriptableComputer.oftenLongOperationMsg
-			self:sv_crash_to_real()
+			self.storageData.noSoftwareReboot = true
+			self:sv_formatException()
 			error(ScriptableComputer.oftenLongOperationMsg, 3)
 		else
 			self.sv_startTickTime = os_clock() --if an error occurs in the application program of the operating system, the OS should be able to handle the error
@@ -65,14 +66,14 @@ function ScriptableComputer:loadScript()
 	if not self.env then
 		self.storageData.crashstate.exceptionMsg = "env is missing"
 		self.storageData.crashstate.hasException = true
-		self:sv_crash_to_real()
+		self:sv_formatException()
 		return
 	end
 
 	if not self.storageData.script then
 		self.storageData.crashstate.exceptionMsg = "script string is missing"
 		self.storageData.crashstate.hasException = true
-		self:sv_crash_to_real()
+		self:sv_formatException()
 		return
 	end
 
@@ -89,7 +90,7 @@ function ScriptableComputer:loadScript()
 		self.storageData.crashstate.exceptionMsg = err
 		self.storageData.crashstate.hasException = true
 	end
-	self:sv_crash_to_real()
+	self:sv_formatException()
 
 	if self.storageData.crashstate.hasException then
 		self:sv_sendException()
@@ -210,20 +211,12 @@ function ScriptableComputer:server_onCreate(constData)
 	self.lagScore = 0
 	self.skipped = 0
 	self.uptime = 0
-	self.wait = 5 --во избежании непрогрузки отдельных элементов цепи
+	self.wait = 40 --во избежании непрогрузки отдельных элементов цепи
 
 	self:sv_reset()
 	self:sv_reboot()
 
 	self.old_sum = tableChecksum(self.storageData, "fsData")
-end
-
-function ScriptableComputer:sv_crash_to_real()
-	self:sv_formatException()
-	self.real_crashstate = {
-		hasException = self.storageData.crashstate.hasException,
-		exceptionMsg = self.storageData.crashstate.exceptionMsg
-	}
 end
 
 function ScriptableComputer:sv_formatException()
@@ -266,15 +259,15 @@ function ScriptableComputer:server_onFixedUpdate()
 		self.sv_patience = self.sv_max_patience
 	end
 
-	if self.reboot_flag then
-		self:sv_reboot(true, true)
-		self.reboot_flag = nil
-		return
-	end
-
 	if self.new_code then
 		self:sv_updateScript(self.new_code, nil, true)
 		self.new_code = nil
+	end
+
+	if self.reboot_flag or self.software_reboot_flag or sc.rebootAll then
+		self:sv_reboot(self.reboot_flag or self.software_reboot_flag, not self.reboot_flag)
+		self.reboot_flag = nil
+		self.software_reboot_flag = nil
 	end
 
 	local sendTable = self:sv_genTable()
@@ -339,6 +332,7 @@ function ScriptableComputer:server_onFixedUpdate()
 	--------------------------------------------------------power control
 
 	if self.wait then
+		self.lagScore = 0
 		self.wait = self.wait - 1
 		if self.wait <= 0 then
 			self.wait = nil
@@ -386,17 +380,6 @@ function ScriptableComputer:server_onFixedUpdate()
 	end
 	self.isActive = activeNow
 
-	if sc.rebootAll then
-		self:sv_reboot()
-	end
-
-	--[[
-	if self.storageData.crashstate.hasException then
-		self.interactable:setActive(false)
-        self.interactable:setPower(0)
-	end
-	]]
-
 	self:sv_formatException()
 	if self.storageData.crashstate.hasException ~= self.oldhasException or
 	self.storageData.crashstate.exceptionMsg ~= self.oldexceptionMsg then
@@ -405,7 +388,9 @@ function ScriptableComputer:server_onFixedUpdate()
 		self:sv_sendException()
 	end
 
-	if sc.needSaveData() then  --saving content
+	--------------------------------------------------------data control
+
+	if sc.needSaveData() then
 		if self.changed then
 			self.storageData.fsData = self.fs:serialize()
 			self.changed = nil
@@ -423,6 +408,8 @@ function ScriptableComputer:server_onFixedUpdate()
 			self.old_sum = sum
 		end
 	end
+
+	--------------------------------------------------------lagScore control
 
 	if self.lagScore > 0 then
 		self.lagScore = self.lagScore - 1
@@ -516,6 +503,7 @@ function ScriptableComputer:sv_reset()
 		},
 		self = self
 	}
+	self.storageData.noSoftwareReboot = nil
 	self:updateSharedData()
 end
 
@@ -546,11 +534,11 @@ function ScriptableComputer:sv_reboot(force, not_execute)
 	self:loadScript()
 	self:sv_disableComponentApi()
 	self.network:sendToClients("cl_clear")
-	self:sv_crash_to_real()
+	self:sv_formatException()
 end
 
 function ScriptableComputer:sv_sendException()
-	self:sv_crash_to_real()
+	self:sv_formatException()
 	if self.storageData.crashstate.hasException then
 		self:sv_disableComponentApi()
 		print("computer crashed", self.storageData.crashstate.exceptionMsg)
@@ -570,7 +558,7 @@ function ScriptableComputer:sv_execute(endtick)
 		if not self.env then
 			self.storageData.crashstate.hasException = true
 			self.storageData.crashstate.exceptionMsg = "Unknown error"
-			self:sv_crash_to_real()
+			self:sv_formatException()
 			return
 		end
 
@@ -596,7 +584,7 @@ function ScriptableComputer:sv_execute(endtick)
 			if not lok and not err then
 				self.storageData.crashstate.hasException = true
 				self.storageData.crashstate.exceptionMsg = lerr
-				self:sv_crash_to_real()
+				self:sv_formatException()
 			end
 		end
 
@@ -608,7 +596,8 @@ function ScriptableComputer:sv_execute(endtick)
 			self.lagScore = 0
 			self.storageData.crashstate.hasException = true
 			self.storageData.crashstate.exceptionMsg = ScriptableComputer.lagMsg
-			self:sv_crash_to_real()
+			self.storageData.noSoftwareReboot = true
+			self:sv_formatException()
 		end
 		
 		if not ran then
@@ -618,7 +607,7 @@ function ScriptableComputer:sv_execute(endtick)
 
 			self.storageData.crashstate.hasException = true
 			self.storageData.crashstate.exceptionMsg = err
-			self:sv_crash_to_real()
+			self:sv_formatException()
 			
 			if self.env.callback_error then
 				self:sv_init_yield()

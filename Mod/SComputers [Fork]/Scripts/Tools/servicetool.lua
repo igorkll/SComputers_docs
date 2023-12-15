@@ -32,7 +32,9 @@ function servicetool:server_onFixedUpdate()
         self.sendRestrictions = nil
     end
 
-    if sm.game.getCurrentTick() % (40 * 60 * 60) == 0 or sc.restrictionsUpdated or (sc.shutdownFlag and sm.game.getCurrentTick() % (5 * 40) == 0) then
+    --local forceSend = sm.game.getCurrentTick() % (40 * 60 * 60) == 0
+    local forceSend = false
+    if forceSend or sc.restrictionsUpdated or (sc.shutdownFlag and sm.game.getCurrentTick() % (5 * 40) == 0) then
         self:sv_print_vulnerabilities()
     end
 end

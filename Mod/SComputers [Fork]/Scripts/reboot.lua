@@ -39,21 +39,27 @@ function reboot:server_onFixedUpdate()
 end
 
 function reboot:sv_reboot()
+    local blink
+
     for _, parent in ipairs(self.interactable:getParents()) do
         local publicApi = sc.computersDatas[parent.id]
-        if publicApi and publicApi.self then
+        if publicApi and publicApi.self and not publicApi.self.storageData.noSoftwareReboot then
             publicApi.self.reboot_flag = true
+            blink = true
         end
     end
 
     for _, child in ipairs(self.interactable:getChildren()) do
         local publicApi = sc.computersDatas[child.id]
-        if publicApi and publicApi.self then
+        if publicApi and publicApi.self and not publicApi.self.storageData.noSoftwareReboot then
             publicApi.self.reboot_flag = true
+            blink = true
         end
     end
 
-    self.network:sendToClients("cl_blink")
+    if blink then
+        self.network:sendToClients("cl_blink")
+    end
 end
 
 

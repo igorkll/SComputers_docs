@@ -174,12 +174,20 @@ local function tableChecksum(input, blkey)
 		value = (input + 17) * 2
 	elseif input_type == "Vec3" then
 		value = value + (input.x * 2)
-		value = value + (input.y * 4)
+		value = value - (input.y * 4)
 		value = value + (input.z * 8)
 	elseif input_type == "Color" then
 		value = value + (input.r * 2)
-		value = value + (input.g * 4)
+		value = value - (input.g * 4)
 		value = value + (input.b * 8)
+	elseif input_type == "boolean" then
+		if input then
+			value = value + 8231
+		else
+			value = value - 3265
+		end
+	elseif input_type == "nil" then
+		value = value - 984
 	else
 		input = tostring(input)
 		for i = 1, #input do

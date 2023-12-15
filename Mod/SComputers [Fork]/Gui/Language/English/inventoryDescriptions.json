@@ -70,7 +70,7 @@
       "title" : "[FORK ONLY] Tablet 32S"
    },
    "06da2ef1-d444-4e87-aed2-4021b1bfc20f" : {
-      "description" : "allows you to draw holograms.\nmax scale: 0.5\nmax offset: 16\nmax voxel offset: 16\nmax voxels count: 1024",
+      "description" : "allows you to draw holograms.\nmax scale: 0.5\nmax offset: 16\nmax voxel offset: 16\nmax voxels count: 1024\nmax local scale: 4",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Holoprojector"
    },
@@ -179,17 +179,17 @@
       "title" : "Small Display (16x16)"
    },
    "82bddce1-94ae-4559-ab7a-05d8f2b90fec" : {
-      "description" : "allows you to draw holograms.\nmax scale: 0.25\nmax offset: 8\nmax voxel offset: 8\nmax voxels count: 256",
+      "description" : "allows you to draw holograms.\nmax scale: 0.25\nmax offset: 8\nmax voxel offset: 8\nmax voxels count: 256\nmax local scale: 4",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Mini Holoprojector"
    },
    "68749ef7-4c99-4e11-8c33-46652bc7ec9d" : {
-      "description" : "allows you to draw holograms. max voxels count: 4096",
+      "description" : "allows you to draw holograms.\nmax voxels count: 16384\nin addition to the number of voxels, it has no other restrictions",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] #f002a8Creative Mini Holoprojector#eeeeee"
    },
    "3c46e9e5-2875-47b4-8668-005a0768c992" : {
-      "description" : "allows you to draw holograms. max voxels count: 4096",
+      "description" : "allows you to draw holograms.\nmax voxels count: 16384\nin addition to the number of voxels, it has no other restrictions",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] #f002a8Creative Holoprojector#eeeeee"
    },
@@ -212,6 +212,11 @@
       "description" : "allows you to interact with the computer using the console, does not cause lags, unlike displays",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Terminal"
+   },
+   "e9e72dbe-8962-4710-aa3e-73313b1aef22" : {
+      "description" : "allows you to interact with the computer using the console, does not cause lags, unlike displays",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] Vertical Terminal"
    },
    "7a8ce597-9f4b-4386-a50d-fe26edafe4a3" : {
       "description" : "A Display that you can connect to a computer and show whatever you want to!",
@@ -343,6 +348,11 @@
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] GPS"
    },
+   "cadc5226-3e96-43e7-9630-3507f9652350" : {
+      "description" : "Unlike conventional GPS, this does not contain noise in measurements.",
+      "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
+      "title" : "[FORK ONLY] CREATIVE GPS"
+   },
    "c400e00a-c636-4aa3-8669-23405c527eb6" : {
       "description" : "A Display that you can connect to a computer and show whatever you want to!",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
@@ -394,7 +404,7 @@
       "title" : "Display (64x64)"
    },
    "e99397c7-f055-45a7-92f2-b6850dc6d073" : {
-      "description" : "Its a Raycasting camera. Connect it to the computer and have a display connected. Write the code and then you have a display showing the pov of the camera!\n\nNOTE: Using cameras is not patrical if you want real time. It's method of showing pixels is up to down and slow.",
+      "description" : "Its a Raycasting camera. Connect it to the computer and have a display connected. Write the code and then you have a display showing the pov of the camera!\nbut only in SComputers, the camera can detect the type of object and uuid (for the balance, of determining the uuid, it works at a distance of up to 16 blocks)",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "Camera (Raycasted)"
    },

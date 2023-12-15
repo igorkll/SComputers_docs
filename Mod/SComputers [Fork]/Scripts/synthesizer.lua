@@ -7,7 +7,8 @@ synthesizer.colorNormal = sm.color.new(   0x006e93ff)
 synthesizer.colorHighlight = sm.color.new(0x00beffff)
 synthesizer.poseWeightCount = 1
 synthesizer.componentType = "synthesizer"
-synthesizer.maxBeeps = 4
+
+local maxBeeps = 2
 
 function synthesizer:server_onCreate()
     sc.synthesizerDatas[self.interactable.id] = {
@@ -18,13 +19,18 @@ function synthesizer:server_onCreate()
             self.flushFlag = true
         end,
         addBeep = function (device, pitch, volume, duration)
+            checkArg(1, device, "number", "nil")
+            checkArg(2, pitch, "number", "nil")
+            checkArg(3, volume, "number", "nil")
+            checkArg(4, duration, "number", "nil")
+
             if not self.beeps then self.beeps = {} end
-            if #self.beeps < synthesizer.maxBeeps then
+            if #self.beeps < maxBeeps then
                 table.insert(self.beeps, {
-                    device = device,
-                    pitch = pitch,
-                    volume = volume,
-                    duration = duration
+                    device,
+                    pitch,
+                    volume,
+                    duration
                 })
             end
         end,
@@ -81,10 +87,10 @@ end
 function synthesizer:client_onFixedUpdate()
     for i = #self.effects, 1, -1 do
         local data = self.effects[i]
-        if data.duration then
-            data.duration = data.duration - 1
+        if data[4] then
+            data[4] = data[4] - 1
         
-            if data.duration <= 0 then
+            if data[4] <= 0 then
                 data.effect:stop()
                 data.effect:destroy()
                 table.remove(self.effects, i)
@@ -107,33 +113,34 @@ function synthesizer:cl_stop()
     for _, data in ipairs(self.effects) do
         data.effect:stop()
 
-        if not self.effectsCache[data.device] then self.effectsCache[data.device] = {} end
-        table.insert(self.effectsCache[data.device], data.effect)
+        if not self.effectsCache[data[1]] then self.effectsCache[data[1]] = {} end
+        table.insert(self.effectsCache[data[1]], data.effect)
     end
     self.effects = {}
 end
 
 function synthesizer:cl_upload(datas)
     for _, data in ipairs(datas) do
-        data.device = data.device or 0
+        data[1] = data[1] or 0
 
-        for i = 1, math.floor(sm.util.clamp((data.volume or 0.1) * 10, 0, 10) + 0.5) do
+        for i = 1, math.floor(sm.util.clamp((data[3] or 0.1) * 10, 0, 10) + 0.5) do
             local effect
-            if self.effectsCache[data.device] and #self.effectsCache[data.device] > 0 then
-                effect = table.remove(self.effectsCache[data.device])
+            if self.effectsCache[data[1]] and #self.effectsCache[data[1]] > 0 then
+                effect = table.remove(self.effectsCache[data[1]])
             else
-                if data.device == 0 then
+                if data[1] == 0 then
                     effect = sm.effect.createEffect("Horn - Honk", self.interactable)
                 else
-                    effect = sm.effect.createEffect(sc.getSoundEffectName("tote" .. data.device), self.interactable)
+                    effect = sm.effect.createEffect(sc.getSoundEffectName("tote" .. data[1]), self.interactable)
                 end    
             end
             
             if effect then
-                effect:setParameter("pitch", data.pitch or 0.5)
+                effect:setParameter("pitch", data[2] or 0.5)
                 effect:start()
                 
-                table.insert(self.effects, {effect = effect, duration = data.duration or math.huge, device = data.device})
+                data.effect = effect
+                table.insert(self.effects, data)
             end
         end
     end

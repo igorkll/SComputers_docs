@@ -66,7 +66,7 @@ local sc = {
 }
 _G.sc = sc
 
-sc.version = "2.3a"
+sc.version = "2.4a"
 
 sc.deltaTime = 0
 sc.maxcodelen = 32 * 1024
@@ -417,18 +417,17 @@ end
 
 
 local bit = bit or bit32
+local band = bit.band
+local rshift = bit.rshift
 local function hexToRGB(color)
-	local r = bit.band(bit.rshift(color, 16), 0xFF) / 255.0
-	local g = bit.band(bit.rshift(color, 8), 0xFF) / 255.0
-	local b = bit.band(color, 0xFF) / 255.0
-	return r, g, b
+	return band(rshift(color, 16), 0xFF) / 255, band(rshift(color, 8), 0xFF) / 255, band(color, 0xFF) / 255
 end
 
 local black = "000000ff"
 local white = "ffffffff"
 
 local type = type
-function sc.formatColor(data, isBlack)
+function sc.formatColor(data, default, advancedDefault)
 	local t = type(data)
 	if t == "Color" then
 		return data
@@ -437,12 +436,17 @@ function sc.formatColor(data, isBlack)
 	elseif t == "number" then
 		return sm.color.new(hexToRGB(data))
 	end
-	return sm_color_new(isBlack and black or white)
+
+	if advancedDefault then
+		return default
+	else
+		return sm_color_new(default and black or white)
+	end
 end
 
 local formatColor, tostring = sc.formatColor, tostring
-function sc.formatColorStr(data, isBlack)
-	return tostring(formatColor(data, isBlack))
+function sc.formatColorStr(data, default, advancedDefault)
+	return tostring(formatColor(data, default, advancedDefault))
 end
 
 function sc.display.optimizeFont(chars, width, height)

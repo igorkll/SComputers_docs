@@ -41,29 +41,44 @@ holoprojector.connectionInput = sm.interactable.connectionType.composite
 holoprojector.colorNormal = sm_color_new(0x58b170ff)
 holoprojector.colorHighlight = sm_color_new(0x80ffa2ff)
 holoprojector.componentType = "holoprojector"
-holoprojector.blocks = {
+
+local blocks = {
     sm_uuid_new("2f4c970d-c249-4f8d-ac2e-0a89abd2013f"),
     sm_uuid_new("d3db3f52-0a8d-4884-afd6-b4f2ac4365c2"),
     sm_uuid_new("765c61be-7d34-4b11-bb2f-e58cfc1708e6"),
 }
+local blocksCount = #blocks
+local error = error
+local tostring = tostring
+local huge = math.huge
 
+local function tableInsert(self, dat)
+    local tbl = self.voxels
+    for i = 1, huge do
+        if not tbl[i] then
+            tbl[i] = dat
+            if i > self.maxVoxelId then
+                self.maxVoxelId = i
+            end
+            return i
+        end
+    end
+end
 
+local function err1(maxvoxeloffset, attempt)
+    error("the maximum voxel offset exceeded the limit for this projector: " .. tostring(maxvoxeloffset) .. ". attempt: " .. tostring(attempt), 3)
+end
+
+local function err2(maxlocalscale, attempt)
+    error("the maximum local scale exceeded the limit for this projector: " .. tostring(maxlocalscale) .. ". attempt: " .. tostring(attempt), 3)
+end
+
+local formatColor = sc.formatColor
+local defaultColor = sm_color_new("00ff00")
 
 function holoprojector:server_onCreate()
     self.creative = not self.data
     self.data = self.data or {}
-
-    local function tableInsert(tbl, dat)
-        for i = 1, math.huge do
-            if not tbl[i] then
-                tbl[i] = dat
-                if i > self.maxVoxelId then
-                    self.maxVoxelId = i
-                end
-                return i
-            end
-        end
-    end
 
     sc.holoDatas[self.interactable.id] = {
         reset = function ()
@@ -79,25 +94,44 @@ function holoprojector:server_onCreate()
             self.updateData = true
         end,
 
-        addVoxel = function(x, y, z, color, voxel_type)
+        addVoxel = function(x, y, z, color, voxel_type, localScale)
             if not self.voxels then self.voxels = {} end
-            local maxvoxels = (self.data.maxvoxels or 4096)
+            local maxvoxels = (self.data.maxvoxels or 16384)
             if self.voxelsCount >= maxvoxels then error("voxel limit exceeded (" .. tostring(maxvoxels) .. ")", 2) end
             self.voxelsCount = self.voxelsCount + 1
 
-            local maxvoxeloffset = self.data.maxvoxeloffset or math.huge
-            local function err(attempt)
-                error("the maximum voxel offset exceeded the limit for this projector: " .. tostring(maxvoxeloffset) .. ". attempt: " .. tostring(attempt), 3)
+            local maxvoxeloffset = self.data.maxvoxeloffset
+            if maxvoxeloffset then
+                if x < -maxvoxeloffset or x > maxvoxeloffset then err1(maxvoxeloffset, x) end
+                if y < -maxvoxeloffset or y > maxvoxeloffset then err1(maxvoxeloffset, y) end
+                if z < -maxvoxeloffset or z > maxvoxeloffset then err1(maxvoxeloffset, z) end
             end
-            if x < -maxvoxeloffset or x > maxvoxeloffset then err(x) end
-            if y < -maxvoxeloffset or y > maxvoxeloffset then err(y) end
-            if z < -maxvoxeloffset or z > maxvoxeloffset then err(z) end
 
-            return tableInsert(self.voxels, {
-                position = sm_vec3_new(x / 4, y / 4, z / 4),
-                color = type(color) == "Color" and color or sm_color_new(color or "00ff00"),
-                voxel_type = (voxel_type or 0) + 1
-            })
+
+
+            local data = {
+                x / 4,
+                y / 4,
+                z / 4,
+                formatColor(color, defaultColor, true),
+                (voxel_type or 0) + 1
+            }
+
+            local maxlocalscale = self.data.maxlocalscale or huge
+            if localScale then
+                local x, y, z = localScale.x, localScale.y, localScale.z
+                if x <= 0 or x > maxlocalscale then err2(maxlocalscale, x) end
+                if y <= 0 or y > maxlocalscale then err2(maxlocalscale, y) end
+                if z <= 0 or z > maxlocalscale then err2(maxlocalscale, z) end
+            end
+
+            if localScale then
+                data[6] = localScale.x
+                data[7] = localScale.y
+                data[8] = localScale.z
+            end
+
+            return tableInsert(self, data)
         end,
         delVoxel = function (voxelId)
             if self.voxels and self.voxels[voxelId] then
@@ -181,7 +215,7 @@ function holoprojector:server_onCreate()
         end,
         getScale = function ()
             return self.scaleX, self.scaleY, self.scaleZ
-        end,
+        end
     }
 
     self.voxelsCount = 0
@@ -190,6 +224,7 @@ function holoprojector:server_onCreate()
     sc.creativeCheck(self, self.creative)
 end
 
+local sendToClients = vnetwork.sendToClients
 function holoprojector:server_onFixedUpdate()
     local ctick = sm.game.getCurrentTick()
 	if ctick % sc.restrictions.screenRate == 0 then self.allow_update = true end
@@ -233,7 +268,7 @@ function holoprojector:server_onFixedUpdate()
                     --end
                     sc.addLagScore(self.maxVoxelId / 100)
                     self.voxels.len = self.maxVoxelId
-                    if pcall(vnetwork.sendToClients, self, "cl_upload", self.voxels) then
+                    if pcall(sendToClients, self, "cl_upload", self.voxels) then
                     --    self.clearFlag = nil
                     else
                         local index = 1
@@ -250,14 +285,14 @@ function holoprojector:server_onFixedUpdate()
                             index = index + count
                             if datapack[#datapack] == self.voxels[#self.voxels] then
                                 datapack.endPack = true
-                                if pcall(vnetwork.sendToClients, self, "cl_upload", datapack) then
+                                if pcall(sendToClients, self, "cl_upload", datapack) then
                                     --self.clearFlag = nil
                                     break
                                 else
                                     index = index - count
                                     count = math_floor((count / 2) + 0.5)
                                 end
-                            elseif pcall(vnetwork.sendToClients, self, "cl_upload", datapack) then
+                            elseif pcall(sendToClients, self, "cl_upload", datapack) then
                                 --self.clearFlag = nil
                             else
                                 index = index - count
@@ -305,11 +340,12 @@ function holoprojector:cl_recreateBuffer()
     end
     
     self.bufeffects = {}
-    for i = 1, #holoprojector.blocks do
+    for i = 1, blocksCount do
         self.bufeffects[i] = {}
     end
 end
 
+local fromEuler = fromEuler
 local function cl_doEffect(self, edata)
     local effect, data = edata[1], edata[2]
 
@@ -319,11 +355,12 @@ local function cl_doEffect(self, edata)
     local scale = sm_vec3_new(self_drawData.scaleX, self_drawData.scaleY, self_drawData.scaleZ)
 
 
-    effect_setScale(effect, scale)
+    local addScale = sm_vec3_new(data[6] or 1, data[7] or 1, data[8] or 1)
+    effect_setScale(effect, scale * addScale)
     --effect_setOffsetPosition(effect, ((rotate * data.position) + sm_vec3_new(self_drawData.offsetX, self_drawData.offsetY, self_drawData.offsetZ)) * (scale * 4))
     effect_setOffsetRotation(effect, rotate)
 
-    return ((rotate * data.position) + sm_vec3_new(self_drawData.offsetX, self_drawData.offsetY, self_drawData.offsetZ)) * (scale * 4)
+    return ((rotate * sm_vec3_new(data[1], data[2], data[3])) + sm_vec3_new(self_drawData.offsetX, self_drawData.offsetY, self_drawData.offsetZ)) * (scale * 4)
 end
 
 function holoprojector:client_onDestroy()
@@ -355,7 +392,7 @@ function holoprojector:cl_upload(datas)
     for _, edata in ipairs(self.effects) do
         if sm_exists(edata[1]) then
             gotos[edata[1]] = hideOffset
-            table_insert(self.bufeffects[edata[2].voxel_type], edata[1])
+            table_insert(self.bufeffects[edata[2][5]], edata[1])
         end
     end
     self.effects = {}
@@ -365,18 +402,18 @@ function holoprojector:cl_upload(datas)
         for i = 1, datas.len do
             local data = datas[i]
             if data then
-                if not holoprojector.blocks[data.voxel_type] then data.voxel_type = 1 end
+                if not blocks[data[5]] then data[5] = 1 end
 
                 local effect
-                if #self.bufeffects[data.voxel_type] > 0 then
-                    effect = table_remove(self.bufeffects[data.voxel_type])
+                if #self.bufeffects[data[5]] > 0 then
+                    effect = table_remove(self.bufeffects[data[5]])
                 else
                     effect = sm_effect_createEffect(sc_getEffectName(), self.interactable)
-                    effect_setParameter(effect, "uuid", holoprojector.blocks[data.voxel_type])
+                    effect_setParameter(effect, "uuid", blocks[data[5]])
                     effect_start(effect)
                 end
                 
-                effect_setParameter(effect, "color", data.color)
+                effect_setParameter(effect, "color", data[4])
         
                 local ldata = {effect, data}
                 gotos[effect] = cl_doEffect(self, ldata)

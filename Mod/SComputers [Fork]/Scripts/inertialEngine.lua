@@ -66,6 +66,22 @@ function inertialEngine:server_onCreate()
                     end
                     self.stableMode = mode
                     self:recreatePID()
+                end,
+
+                getOffset = function()
+                    return mathDist(self.targetPosition, self.shape.worldPosition)
+                end,
+                raw_rotation = function(vec)
+                    if vec.x < -8 then vec.x = -8 end
+                    if vec.x > 8 then vec.x = 8 end
+
+                    if vec.y < -8 then vec.y = -8 end
+                    if vec.y > 8 then vec.y = 8 end
+
+                    if vec.z < -8 then vec.z = -8 end
+                    if vec.z > 8 then vec.z = 8 end
+
+                    sm.physics.applyTorque(self.shape.body, self.shape.worldRotation * (vec * self.shape.body.mass), true)
                 end
             }
         }
@@ -118,7 +134,6 @@ end
 
 function inertialEngine:sv_reset()
     self.targetPosition = self.shape.worldPosition
-    self.targetPosition.z = self.targetPosition.z + 2
 
     self.targetRotation = self:getSelfRotation()
     self.targetRotation.x = 0
@@ -187,6 +202,7 @@ function inertialEngine:sv_stable()
     vec.y = constrain(-vec.y, -max, max)
     vec.z = constrain(vec.z, -amax, amax)
     ]]
+
     local target = self.targetRotation
     local current = self:getSelfRotation()
 

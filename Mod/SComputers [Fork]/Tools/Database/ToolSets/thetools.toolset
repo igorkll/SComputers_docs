@@ -32,6 +32,7 @@
       {
          "name" : "tablet 32S",
          "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
+         "previewRenderable" : "$CONTENT_DATA/Tools/Renderables/t1.rend",
          "script" : {
             "class" : "tablet",
             "data" : {
@@ -45,6 +46,7 @@
       },
       {
          "name" : "tablet 64",
+         "previewRenderable" : "$CONTENT_DATA/Tools/Renderables/t2.rend",
          "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
          "script" : {
             "class" : "tablet",
@@ -61,6 +63,7 @@
       {
          "name" : "tablet 128",
          "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
+         "previewRenderable" : "$CONTENT_DATA/Tools/Renderables/t3.rend",
          "script" : {
             "class" : "tablet",
             "data" : {
@@ -76,6 +79,7 @@
 
       {
          "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
+         "previewRenderable" : "$CONTENT_DATA/Tools/Renderables/pt0.rend",
          "script" : {
             "class" : "PermissionTool",
             "data" : {
@@ -87,6 +91,7 @@
       },
       {
          "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
+         "previewRenderable" : "$CONTENT_DATA/Tools/Renderables/pt1.rend",
          "script" : {
             "class" : "PermissionTool",
             "file" : "$CONTENT_DATA/Scripts/tools/PermissionTool.lua"

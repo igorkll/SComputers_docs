@@ -23,6 +23,9 @@ end
 function tablet:server_onCreate()
     ScriptableComputer.server_onCreate(self)
 
+    self.player = self.tool:getOwner()
+    self.character = self.player.character
+
     self.display = self.display or sc.display.createDisplay(self, self.data.screenX, self.data.screenY, self.data.screenV)
 	sc.display.server_init(self.display)
     self.envSettings.vcomponents.display = {sc.display.server_createData(self.display)}
@@ -110,7 +113,7 @@ function tablet:client_onEquip()
     if not self.tool:isLocal() then return end
 
     self:cl_resetData()
-    self.display.tablet_posX = 0
+    self.display.tablet_posX = self.display.width / 2
     self.display.tablet_posY = 0
 
     --self.tool:setTpRenderables(rend)

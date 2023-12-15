@@ -20,8 +20,10 @@ local function clampRotation(val)
 end
 
 function gps:generateNoise(dist, gpsdata)
-    dist = constrain(dist, gps.minimalNoise, gps.maximumNoise)
-    local degrees = dist / 100
+    if self.data and self.data.creative then return gpsdata end
+
+    local constrainedDist = constrain(dist, gps.minimalNoise, gps.maximumNoise)
+    local degrees = constrainedDist / 100
     local meters = degrees / 4
 
     gpsdata.position = gpsdata.position + sm.vec3.new(noise(meters), noise(meters), noise(meters))
@@ -54,6 +56,8 @@ function gps:sv_createGpsData(shape)
 end
 
 function gps:server_onCreate()
+    sc.creativeCheck(self, self.data and self.data.creative)
+
     self.interactable.publicData = {
         sc_component = {
             type = gps.componentType,
@@ -90,4 +94,8 @@ function gps:server_onCreate()
             }
         }
     }
+end
+
+function gps:server_onFixedUpdate()
+    sc.creativeCheck(self, self.data and self.data.creative)
 end

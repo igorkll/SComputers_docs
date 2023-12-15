@@ -216,6 +216,7 @@ function PermissionTool.cl_guiUpdateButtons(self)
 	self.gui:setVisible("disCompCheck", not survival or self.currentSettings.disCompCheck)
 	self.gui:setVisible("AdminOnlyButton", not survival or not self.currentSettings.adminOnly)
 	self.gui:setVisible("acreative", not survival or self.currentSettings.acreative)
+	self.gui:setVisible("disableCallLimit", not survival or self.currentSettings.disableCallLimit)
 
 	if not self:client_canChangeSettings() then
 		self.gui:setVisible("ApplyButton", false)

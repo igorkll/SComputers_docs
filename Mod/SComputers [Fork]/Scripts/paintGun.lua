@@ -9,6 +9,7 @@ paintGun.componentType = "paint"
 
 local blockSize = sm.vec3.new(1, 1, 1)
 local floor = math.floor
+local oneSize = sm.vec3.new(0.25, 0.25, 0.25)
 
 function paintGun:server_onCreate()
     self.interactable.publicData = {
@@ -58,20 +59,22 @@ function paintGun:server_onFixedUpdate()
             local harvestable = raydata:getHarvestable()
 
             if shape then
-                if shape.isBlock then
-                    local uuid = shape.uuid
-                    local pos = raydata.pointLocal + (shape:transformRotation(self.shape.worldRotation) * sm.vec3.new(0, 0, 0.1))
+                if shape.color ~= self.shot then
+                    if shape.isBlock and shape:getBoundingBox() ~= oneSize then
+                        local uuid = shape.uuid
+                        local pos = raydata.pointLocal + (shape:transformRotation(self.shape.worldRotation) * sm.vec3.new(0, 0, 0.1))
 
-                    local lpos = pos * 4
-                    lpos.x = floor(lpos.x)
-                    lpos.y = floor(lpos.y)
-                    lpos.z = floor(lpos.z)
+                        local lpos = pos * 4
+                        lpos.x = floor(lpos.x)
+                        lpos.y = floor(lpos.y)
+                        lpos.z = floor(lpos.z)
 
-                    shape:destroyBlock(lpos)
-                    local block = shape.body:createBlock(uuid, blockSize, lpos)
-                    block.color = self.shot
-                else
-                    shape.color = self.shot
+                        shape:destroyBlock(lpos)
+                        local block = shape.body:createBlock(uuid, blockSize, lpos)
+                        block.color = self.shot
+                    else
+                        shape.color = self.shot
+                    end
                 end
             elseif character then
                 character.color = self.shot
