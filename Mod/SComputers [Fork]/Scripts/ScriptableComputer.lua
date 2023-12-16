@@ -45,8 +45,8 @@ function ScriptableComputer:sv_yield()
 	local maxcputime = self.localScriptMode.cpulimit or sc.restrictions.cpu
 	if os_clock() - self.sv_startTickTime > maxcputime then
 		if self.sv_patience <= 0 then
-			self.storageData.crashstate.hasException = true
-			self.storageData.crashstate.exceptionMsg = ScriptableComputer.oftenLongOperationMsg
+			self.crashstate.hasException = true
+			self.crashstate.exceptionMsg = ScriptableComputer.oftenLongOperationMsg
 			self.storageData.noSoftwareReboot = true
 			self:sv_formatException()
 			error(ScriptableComputer.oftenLongOperationMsg, 3)
@@ -64,15 +64,15 @@ function ScriptableComputer:loadScript()
 	self.scriptFunc = nil
 
 	if not self.env then
-		self.storageData.crashstate.exceptionMsg = "env is missing"
-		self.storageData.crashstate.hasException = true
+		self.crashstate.exceptionMsg = "env is missing"
+		self.crashstate.hasException = true
 		self:sv_formatException()
 		return
 	end
 
 	if not self.storageData.script then
-		self.storageData.crashstate.exceptionMsg = "script string is missing"
-		self.storageData.crashstate.hasException = true
+		self.crashstate.exceptionMsg = "script string is missing"
+		self.crashstate.hasException = true
 		self:sv_formatException()
 		return
 	end
@@ -83,16 +83,16 @@ function ScriptableComputer:loadScript()
 	local code, err = safe_load_code(self, text, "=computer_" .. tostring(math.floor(self.shape and self.shape.id or self.tool.id)), "t", self.env)
 	if code then
 		self.scriptFunc = code
-		self.storageData.crashstate.exceptionMsg = nil
-		self.storageData.crashstate.hasException = false
+		self.crashstate.exceptionMsg = nil
+		self.crashstate.hasException = false
 	else
 		self.scriptFunc = nil
-		self.storageData.crashstate.exceptionMsg = err
-		self.storageData.crashstate.hasException = true
+		self.crashstate.exceptionMsg = err
+		self.crashstate.hasException = true
 	end
 	self:sv_formatException()
 
-	if self.storageData.crashstate.hasException then
+	if self.crashstate.hasException then
 		self:sv_sendException()
 	end
 end
@@ -146,10 +146,7 @@ function ScriptableComputer:server_onCreate(constData)
 	local data = self.storage:load()
 	if data then
 		self.storageData = data
-
-		if not self.storageData.crashstate then
-			self.storageData.crashstate = {}
-		end
+		self.storageData.crashstate = nil
 
 		if not self.storageData.gsubFix then
 			self.storageData.script = self.storageData.script:gsub("%[NL%]", "\n")
@@ -168,14 +165,9 @@ function ScriptableComputer:server_onCreate(constData)
 		else
 			self.storageData.codeInBase64 = true
 		end
-
-		if self.storageData.crashstate.hasException then
-			self:sv_sendException()
-		end
 	else
 		self.storageData = {
 			script = "",
-			crashstate = {},
 			gsubFix = true,
 			codeInBase64 = true,
 			stub = true
@@ -204,6 +196,7 @@ function ScriptableComputer:server_onCreate(constData)
 
 	------init
 
+	self.crashstate = {}
 	self.hostonly = not not self.cdata.unsafe
 
 	self.sv_max_patience = 2
@@ -220,15 +213,15 @@ function ScriptableComputer:server_onCreate(constData)
 end
 
 function ScriptableComputer:sv_formatException()
-	for k, v in pairs(self.storageData.crashstate) do
+	for k, v in pairs(self.crashstate) do
 		if k ~= "hasException" and k ~= "exceptionMsg" then
-			self.storageData.crashstate[k] = nil
+			self.crashstate[k] = nil
 		end
 	end
 
-	self.storageData.crashstate.hasException = not not self.storageData.crashstate.hasException
-	if self.storageData.crashstate.hasException then
-		local str = tostring(self.storageData.crashstate.exceptionMsg or "Unknown error"):sub(1, 1024)
+	self.crashstate.hasException = not not self.crashstate.hasException
+	if self.crashstate.hasException then
+		local str = tostring(self.crashstate.exceptionMsg or "Unknown error"):sub(1, 1024)
 		local newstr = {}
 		for i = 1, #str do
 			local b = str:byte(i)
@@ -236,12 +229,12 @@ function ScriptableComputer:sv_formatException()
 				table.insert(newstr, string.char(b))
 			end
 		end
-		self.storageData.crashstate.exceptionMsg = table.concat(newstr)
-		if #self.storageData.crashstate.exceptionMsg == 0 then
-			self.storageData.crashstate.exceptionMsg = "Unknown error"
+		self.crashstate.exceptionMsg = table.concat(newstr)
+		if #self.crashstate.exceptionMsg == 0 then
+			self.crashstate.exceptionMsg = "Unknown error"
 		end
 	else
-		self.storageData.crashstate.exceptionMsg = nil
+		self.crashstate.exceptionMsg = nil
 	end
 end
 
@@ -339,7 +332,7 @@ function ScriptableComputer:server_onFixedUpdate()
 		end
 	end
 	
-	if not self.storageData.crashstate.hasException and not self.wait then
+	if not self.crashstate.hasException and not self.wait then
 		if not activeNow and self.isActive then
 			self:sv_execute(true) --последняя итерация после отключения входа, чтобы отлавить выключения
 			self:sv_disableComponentApi()
@@ -381,10 +374,10 @@ function ScriptableComputer:server_onFixedUpdate()
 	self.isActive = activeNow
 
 	self:sv_formatException()
-	if self.storageData.crashstate.hasException ~= self.oldhasException or
-	self.storageData.crashstate.exceptionMsg ~= self.oldexceptionMsg then
-		self.oldhasException = self.storageData.crashstate.hasException
-		self.oldexceptionMsg = self.storageData.crashstate.exceptionMsg
+	if self.crashstate.hasException ~= self.oldhasException or
+	self.crashstate.exceptionMsg ~= self.oldexceptionMsg then
+		self.oldhasException = self.crashstate.hasException
+		self.oldexceptionMsg = self.crashstate.exceptionMsg
 		self:sv_sendException()
 	end
 
@@ -448,7 +441,7 @@ function ScriptableComputer:sv_genTable()
 		scriptMode = self.localScriptMode.scriptMode,
 		vm = sc.restrictions.vm,
 		allowChat = self.localScriptMode.allowChat,
-		hasException = self.storageData.crashstate.hasException,
+		hasException = self.crashstate.hasException,
 		computersAllow = _G.computersAllow,
 		localScriptMode = self.localScriptMode,
 		hostonly = self.hostonly
@@ -499,7 +492,7 @@ function ScriptableComputer:sv_reset()
 		public = {
 			registers = self.registers,
 			env = self.env,
-			crashstate = self.storageData.crashstate
+			crashstate = self.crashstate
 		},
 		self = self
 	}
@@ -508,19 +501,19 @@ function ScriptableComputer:sv_reset()
 end
 
 function ScriptableComputer:sv_reboot(force, not_execute)
-	local fromException = self.storageData.crashstate.hasException
-	if force and self.storageData.crashstate.hasException then
-		self.storageData.crashstate.hasException = nil
-		self.storageData.crashstate.exceptionMsg = nil
+	local fromException = self.crashstate.hasException
+	if force and self.crashstate.hasException then
+		self.crashstate.hasException = nil
+		self.crashstate.exceptionMsg = nil
 		self:sv_sendException()
 	end
 
-	if self.storageData.crashstate.hasException then
+	if self.crashstate.hasException then
 		return
 	end
 
-	self.storageData.crashstate.hasException = nil
-	self.storageData.crashstate.exceptionMsg = nil
+	self.crashstate.hasException = nil
+	self.crashstate.exceptionMsg = nil
 	self.oldhasException = nil
 	self.oldexceptionMsg = nil
 
@@ -539,10 +532,10 @@ end
 
 function ScriptableComputer:sv_sendException()
 	self:sv_formatException()
-	if self.storageData.crashstate.hasException then
+	if self.crashstate.hasException then
 		self:sv_disableComponentApi()
-		print("computer crashed", self.storageData.crashstate.exceptionMsg)
-		self.network:sendToClients("cl_onComputerException", self.storageData.crashstate.exceptionMsg)
+		print("computer crashed", self.crashstate.exceptionMsg)
+		self.network:sendToClients("cl_onComputerException", self.crashstate.exceptionMsg)
 	else
 		self.network:sendToClients("cl_onComputerException")
 	end
@@ -556,8 +549,8 @@ function ScriptableComputer:sv_execute(endtick)
 		local startExecTime = os.clock()
 
 		if not self.env then
-			self.storageData.crashstate.hasException = true
-			self.storageData.crashstate.exceptionMsg = "Unknown error"
+			self.crashstate.hasException = true
+			self.crashstate.exceptionMsg = "Unknown error"
 			self:sv_formatException()
 			return
 		end
@@ -582,20 +575,20 @@ function ScriptableComputer:sv_execute(endtick)
 		do
 			local lok, lerr = pcall(function(self) self:sv_yield() end, self) --касыль с лямбдой НУЖЕН для правильного разположения ошибки
 			if not lok and not err then
-				self.storageData.crashstate.hasException = true
-				self.storageData.crashstate.exceptionMsg = lerr
+				self.crashstate.hasException = true
+				self.crashstate.exceptionMsg = lerr
 				self:sv_formatException()
 			end
 		end
 
-		if self.storageData.crashstate.hasException then
+		if self.crashstate.hasException then
 			return
 		end
 
 		if ran and self.lagScore > 100 then
 			self.lagScore = 0
-			self.storageData.crashstate.hasException = true
-			self.storageData.crashstate.exceptionMsg = ScriptableComputer.lagMsg
+			self.crashstate.hasException = true
+			self.crashstate.exceptionMsg = ScriptableComputer.lagMsg
 			self.storageData.noSoftwareReboot = true
 			self:sv_formatException()
 		end
@@ -605,8 +598,8 @@ function ScriptableComputer:sv_execute(endtick)
 				err = ll_shorterr(err)
 			end
 
-			self.storageData.crashstate.hasException = true
-			self.storageData.crashstate.exceptionMsg = err
+			self.crashstate.hasException = true
+			self.crashstate.exceptionMsg = err
 			self:sv_formatException()
 			
 			if self.env.callback_error then

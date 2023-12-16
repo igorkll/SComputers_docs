@@ -13,8 +13,8 @@ function reboot:server_onFixedUpdate()
 
     for _, parent in ipairs(self.interactable:getParents()) do
         local publicApi = sc.computersDatas[parent.id]
-        if publicApi and publicApi.self and publicApi.self.storageData and publicApi.self.storageData.crashstate then
-            if publicApi.self.storageData.crashstate.hasException then
+        if publicApi and publicApi.self and publicApi.self.crashstate then
+            if publicApi.self.crashstate.hasException then
                 active = true
             end
         elseif parent:isActive() then
@@ -24,7 +24,7 @@ function reboot:server_onFixedUpdate()
 
     for _, child in ipairs(self.interactable:getChildren()) do
         local publicApi = sc.computersDatas[child.id]
-        if publicApi and publicApi.self and publicApi.self.storageData and publicApi.self.storageData.crashstate and publicApi.self.storageData.crashstate.hasException then
+        if publicApi and publicApi.self and publicApi.self.crashstate and publicApi.self.crashstate.hasException then
             active = true
             break
         end
@@ -38,22 +38,26 @@ function reboot:server_onFixedUpdate()
     self.interactable:setActive(active)
 end
 
-function reboot:sv_reboot()
+function reboot:sv_reboot(force)
     local blink
 
     for _, parent in ipairs(self.interactable:getParents()) do
         local publicApi = sc.computersDatas[parent.id]
-        if publicApi and publicApi.self and not publicApi.self.storageData.noSoftwareReboot then
-            publicApi.self.reboot_flag = true
-            blink = true
+        if publicApi then
+            if force or (publicApi.self and not publicApi.self.storageData.noSoftwareReboot) then
+                publicApi.self.reboot_flag = true
+                blink = true
+            end
         end
     end
 
     for _, child in ipairs(self.interactable:getChildren()) do
         local publicApi = sc.computersDatas[child.id]
-        if publicApi and publicApi.self and not publicApi.self.storageData.noSoftwareReboot then
-            publicApi.self.reboot_flag = true
-            blink = true
+        if publicApi then
+            if force or (publicApi.self and not publicApi.self.storageData.noSoftwareReboot) then
+                publicApi.self.reboot_flag = true
+                blink = true
+            end
         end
     end
 
@@ -62,6 +66,9 @@ function reboot:sv_reboot()
     end
 end
 
+function reboot:sv_n_reboot()
+    self:sv_reboot(true)
+end
 
 
 
@@ -79,7 +86,7 @@ end
 
 function reboot:client_onInteract(_, state)
     if state then
-        self.network:sendToServer("sv_reboot")
+        self.network:sendToServer("sv_n_reboot")
     end
 end
 
