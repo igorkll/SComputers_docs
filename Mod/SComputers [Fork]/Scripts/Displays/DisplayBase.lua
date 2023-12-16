@@ -1212,9 +1212,9 @@ function sc.display.server_update(self)
 
 	local ctick = sm.game.getCurrentTick()
 	if ctick % rate == 0 then self.allow_update = true end
+	if ctick % (40 * 4) == 0 then self.forceNative_update = true end
 	if ctick % (40 * 2) == 0 then
 		self.force_update = true
-		self.forceNative_update = true
 		self.allow_update = true
 		self.serverCache = {}
 		self.serverCacheAll = nil
@@ -1222,7 +1222,6 @@ function sc.display.server_update(self)
 
 		debug_print("force setted")
 	end
-
 
 
 	if self.needUpdate and self.this_display_blocked then
@@ -1298,6 +1297,7 @@ function sc.display.server_update(self)
 			if self.rnd_idx > 1 then
 				local cancel
 				if self.lastComputer and self.lastComputer.cdata and not self.lastComputer.cdata.unsafe and type(sc.restrictions.lagDetector) == "number" then
+					--[[
 					local oldLagScore = self.lastComputer.lagScore
 					for i, v in ipairs(self.renderingStack) do
 						local score = 0.0005
@@ -1324,6 +1324,9 @@ function sc.display.server_update(self)
 							break
 						end
 					end
+					]]
+					local oldLagScore = self.lastComputer.lagScore
+					self.lastComputer.lagScore = self.lastComputer.lagScore + (self.rnd_idx * 0.0005 * sc.restrictions.lagDetector)
 					debug_print("lag score delta", self.lastComputer.lagScore - oldLagScore)
 				end
 
@@ -1390,7 +1393,6 @@ function sc.display.server_update(self)
 				self.rnd_idx = 1
 				self.renderingStack = {}
 				
-				self.needUpdate = false
 				self.force_update = false
 				self.allow_update = false
 				self.forceNative_update = false
@@ -1402,6 +1404,8 @@ function sc.display.server_update(self)
 		else
 			debug_print("render wait", self.force_update, stackChecksum, self.stackChecksum)
 		end
+
+		self.needUpdate = false
 	end
 end
 
@@ -1790,7 +1794,7 @@ function sc.display.server_onDataRequired(self, client)
 	self.scriptableObject.network:sendToClient(client, "client_onDataResponse", sc.display.server_createNetworkData(self))
 	sendFont(self, client)
 	self.serverCache = {}
-	
+
 	self.allow_update = true
 	self.force_update = true
 	self.forceNative_update = true
@@ -2516,12 +2520,9 @@ function sc.display.client_update(self, dt)
 
 		self.newEffects = {}
 		local isEffect = false
-		local tbl, tblI = basegraphic_doubleBuffering(self, nil, getWidth(self), getHeight(self), self.customFont, self.utf8support, true)
-		for i = 1, tblI, 3 do
-			if not sc_display_client_drawPixelForce(self, tbl[i], tbl[i + 1], tbl[i + 2]) then
-				self.lastLastClearColor2 = nil
-				isEffect = true
-			end
+		if basegraphic_doubleBuffering(self, nil, getWidth(self), getHeight(self), self.customFont, self.utf8support, sc_display_client_drawPixelForce) then
+			self.lastLastClearColor2 = nil
+			isEffect = true
 		end
 
 		if isEffect then
@@ -2985,12 +2986,9 @@ function sc.display.client_drawStack(self, sendstack)
 		debug_print("buffer render")
 
 		local startRnd = os_clock()
-		local tbl, tblI = basegraphic_doubleBuffering(self, stack, getWidth(self), getHeight(self), self.customFont, self.utf8support, self.isRendering)
-		for i = 1, tblI, 3 do
-			if not sc_display_client_drawPixelForce(self, tbl[i], tbl[i + 1], tbl[i + 2]) then
-				self.lastLastClearColor2 = nil
-				isEffect = true
-			end
+		if basegraphic_doubleBuffering(self, stack, getWidth(self), getHeight(self), self.customFont, self.utf8support, self.isRendering and sc_display_client_drawPixelForce) then
+			self.lastLastClearColor2 = nil
+			isEffect = true
 		end
 
 		local rendTime = os_clock() - startRnd

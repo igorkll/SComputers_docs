@@ -456,8 +456,6 @@ end
 
 local formatColor = sc.formatColor
 function basegraphic_doubleBuffering(self, stack, width, height, font, utf8support, flush)
-	local newstack = {}
-	local newstackI = 1
 	local maxBuf = (width * height) - 1
 	local buffer1, buffer2 = self.buffer1, self.buffer2
 
@@ -561,24 +559,18 @@ function basegraphic_doubleBuffering(self, stack, width, height, font, utf8suppo
 	end
 
 	if flush then
+		local isEffect = false
 		local buffer1All = self.buffer1All
 		local buffer2All = self.buffer2All
 		for i = 0, maxBuf do
 			local col = buffer1[i] or buffer1All
 			if col ~= (buffer2[i] or buffer2All) then
-				newstack[newstackI] = math_floor(i % width)
-				newstackI = newstackI + 1
-
-				newstack[newstackI] = math_floor(i / width)
-				newstackI = newstackI + 1
-
-				newstack[newstackI] = col
-				newstackI = newstackI + 1
-
+				if not flush(self, math_floor(i % width), math_floor(i / width), col) then
+					isEffect = true
+				end
 				buffer2[i] = col
 			end
 		end
+		return isEffect
 	end
-
-	return newstack, newstackI - 1
 end
