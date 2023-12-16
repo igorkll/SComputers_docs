@@ -12,7 +12,6 @@ the engine remembers the position and rotation when starting, and strives to occ
 no other means of traction can be used together with this engine
 please note that the engine always tries to take a horizontal position
 hint: you can connect several containers of the same type so that you have more fuel
-please note that the movements can be so fast that they can break through the wall of the world!
 note that the addPosition method perceives as a rotation for processing movement not a real rotation but a target one
 
 ### inertialEngine component
@@ -96,7 +95,9 @@ function callback_loop()
         return
     end
 
-    forward()
+    if wasd.isSeated() then
+        forward()
+    end
 
     if wasd.isW() then
         _up()
