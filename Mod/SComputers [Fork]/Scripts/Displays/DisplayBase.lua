@@ -1214,6 +1214,7 @@ function sc.display.server_update(self)
 	if ctick % rate == 0 then self.allow_update = true end
 	if ctick % (40 * 2) == 0 then
 		self.force_update = true
+		self.forceNative_update = true
 		self.allow_update = true
 		self.serverCache = {}
 		self.serverCacheAll = nil
@@ -1328,6 +1329,7 @@ function sc.display.server_update(self)
 
 				if not cancel then
 					self.renderingStack.force = self.force_update
+					self.renderingStack.forceNative = self.forceNative_update
 					self.renderingStack.endPack = true
 					--[[
 					local dist = RENDER_DISTANCE
@@ -1391,6 +1393,7 @@ function sc.display.server_update(self)
 				self.needUpdate = false
 				self.force_update = false
 				self.allow_update = false
+				self.forceNative_update = false
 
 				debug_print("RENDER!!!")
 			else
@@ -1439,11 +1442,11 @@ function sc.display.server_createData(self)
 	local rheight = height
 
 	local function checkPos(x, y)
-		if x < 0 then return end
-		if y < 0 then return end
-		if x >= rwidth then return end
-		if y >= rheight then return end
-		return true
+		x = nRound(x)
+		y = nRound(y)
+		if x ~= x or x < 0 or x >= rwidth then return end
+		if y ~= y or y < 0 or y >= rheight then return end
+		return x, y
 	end
 
 	local function checkRectPos(x, y)
@@ -1498,12 +1501,13 @@ function sc.display.server_createData(self)
 			self.serverCacheAll = color
 		end,
 		drawPixel = function (x, y, color)
-			if checkPos(x, y) and (self.serverCache[x + (y * rwidth)] or self.serverCacheAll) ~= color then
+			x, y = checkPos(x, y)
+			if x and (self.serverCache[x + (y * rwidth)] or self.serverCacheAll) ~= color then
 				self.renderingStack[self.rnd_idx] = {
 					1,
 					color or "ffffffff",
-					nRound(x),
-					nRound(y)
+					x,
+					y
 				}
 				self.rnd_idx = self.rnd_idx + 1
 				self.serverCache[x + (y * rwidth)] = color
@@ -1786,8 +1790,10 @@ function sc.display.server_onDataRequired(self, client)
 	self.scriptableObject.network:sendToClient(client, "client_onDataResponse", sc.display.server_createNetworkData(self))
 	sendFont(self, client)
 	self.serverCache = {}
+	
 	self.allow_update = true
 	self.force_update = true
+	self.forceNative_update = true
 end
 
 function sc.display.server_recvPress(self, p, caller)
@@ -2491,6 +2497,7 @@ function sc_display_client_optimize(self)
 end
 
 local math_sin = math.sin
+local basegraphic_doubleBuffering = basegraphic_doubleBuffering
 
 function sc.display.client_update(self, dt)
 	--debug_print("total_effects", total_effects)
@@ -2503,6 +2510,39 @@ function sc.display.client_update(self, dt)
 	]]
 
 	local ctick = getCurrentTick()
+
+	if self.bufferWait and self.isRendering then
+		debug_print("buffer flushing")
+
+		self.newEffects = {}
+		local isEffect = false
+		local tbl, tblI = basegraphic_doubleBuffering(self, nil, getWidth(self), getHeight(self), self.customFont, self.utf8support, true)
+		for i = 1, tblI, 3 do
+			if not sc_display_client_drawPixelForce(self, tbl[i], tbl[i + 1], tbl[i + 2]) then
+				self.lastLastClearColor2 = nil
+				isEffect = true
+			end
+		end
+
+		if isEffect then
+			debug_print("buffer flushing - isEffect!!")
+	
+			self.lastClearColor = nil
+			self.dispValue = nil
+
+			self.clientDrawingTimer = ctick
+			self.lastDrawTime = self.clientDrawingTimer
+	
+			applyNew(self)
+		else
+			debug_print("buffer flushing - no effect")
+		end
+
+
+		self.bufferWait = false
+		self.newEffects = nil
+	end
+	
 	local scriptableObject = self.scriptableObject
 	local quadTree = self.quadTree
 	local bufferedEffects = quadTree.bufferedEffects
@@ -2823,7 +2863,6 @@ local drawActions = {
 	[sc_display_drawType.optimize] = function (self) self.optimize_flag = true end,
 }
 
-local basegraphic_doubleBuffering = basegraphic_doubleBuffering
 function sc.display.client_drawStack(self, sendstack)
 	local startExecTimeStart = os_clock()
 
@@ -2877,12 +2916,14 @@ function sc.display.client_drawStack(self, sendstack)
 		return
 	end
 
+	debug_print("start render", self.isRendering, sendstack.force, self.skipAtLags, self.skipAtNotSight)
+
 	if sendstack.force then
 		self.dbuffPixels = {}
 		self.dbuffPixelsAll = nil
 	else
-		if self.skipAtNotSight and not self.isRendering then return end --если skipAtNotSight true, то картинка не будет обновляться когда ты на нее не смотриш
-		if self.skipAtLags and sc.restrictions and sc.deltaTime >= (1 / sc.restrictions.skipFps) then return end
+		if self.skipAtNotSight and not self.isRendering then debug_print("skipAtNotSight skipped") return end --если skipAtNotSight true, то картинка не будет обновляться когда ты на нее не смотриш
+		if self.skipAtLags and sc.restrictions and sc.deltaTime >= (1 / sc.restrictions.skipFps) then debug_print("skipAtLags skipped") return end
 	end
 
 	self.localLag = self.localLag + ((os_clock() - startExecTimeStart) * sc.clockLagMul)
@@ -2898,7 +2939,7 @@ function sc.display.client_drawStack(self, sendstack)
 	local clearColor = formatColor(stack[#stack][2])
 
 	self.newEffects = {}
-	local isEffect --если от всего стека был хоть какой-то смысл
+	local isEffect = false --если от всего стека был хоть какой-то смысл
 
 	if isEndClear and #stack == 1 then
 		debug_print("clear only render")
@@ -2915,7 +2956,8 @@ function sc.display.client_drawStack(self, sendstack)
 		end
 
 		self.oldRenderType = true
-	elseif self.isRendering and (sendstack.force or (self.forceNativeRender and ctick - self.forceNativeRender < 10)) then
+		self.bufferWait = false
+	elseif self.isRendering and (sendstack.forceNative or (self.forceNativeRender and ctick - self.forceNativeRender < 10)) then
 		debug_print("native render")
 
 		self.buffer1 = {}
@@ -2938,11 +2980,12 @@ function sc.display.client_drawStack(self, sendstack)
 		end
 		self.lastNativeRenderTime = os_clock() - startRnd
 		self.oldRenderType = true
+		self.bufferWait = false
 	else
 		debug_print("buffer render")
 
 		local startRnd = os_clock()
-		local tbl, tblI = basegraphic_doubleBuffering(self, stack, getWidth(self), getHeight(self), self.customFont, self.utf8support)
+		local tbl, tblI = basegraphic_doubleBuffering(self, stack, getWidth(self), getHeight(self), self.customFont, self.utf8support, self.isRendering)
 		for i = 1, tblI, 3 do
 			if not sc_display_client_drawPixelForce(self, tbl[i], tbl[i + 1], tbl[i + 2]) then
 				self.lastLastClearColor2 = nil
@@ -2951,12 +2994,15 @@ function sc.display.client_drawStack(self, sendstack)
 		end
 
 		local rendTime = os_clock() - startRnd
-		if not self.oldRenderType and self.lastNativeRenderTime and (self.lastNativeRenderTime * 3) < rendTime and not debug_disableForceNativeRender then
-			debug_print("force native render", self.lastNativeRenderTime, self.lastNativeRenderTime * 3, rendTime)
+		if not self.oldRenderType and self.lastNativeRenderTime and (self.lastNativeRenderTime * 2) < rendTime and not debug_disableForceNativeRender then
+			debug_print("force native render", self.lastNativeRenderTime, self.lastNativeRenderTime * 2, rendTime)
 			self.forceNativeRender = ctick
 		end
 
 		self.oldRenderType = false
+		if not self.isRendering then
+			self.bufferWait = true
+		end
 	end
 	
 	if isEffect then

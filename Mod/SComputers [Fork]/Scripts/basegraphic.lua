@@ -455,135 +455,128 @@ local function quadInCircle(qx, qy, qs, cx, cy, cr)
 end
 
 local formatColor = sc.formatColor
-function basegraphic_doubleBuffering(self, stack, width, height, font, utf8support)
+function basegraphic_doubleBuffering(self, stack, width, height, font, utf8support, flush)
 	local newstack = {}
 	local newstackI = 1
 	local maxBuf = (width * height) - 1
 	local buffer1, buffer2 = self.buffer1, self.buffer2
 
-	local function draw(_, x, y, color)
-		if x >= 0 and y >= 0 and x < width and y < height then
-			buffer1[math_floor(x) + (math_floor(y) * width)] = color
+	if stack then
+		local function draw(_, x, y, color)
+			if x >= 0 and y >= 0 and x < width and y < height then
+				buffer1[math_floor(x) + (math_floor(y) * width)] = color
+			end
 		end
-	end
 
-	local function drawCircle_putpixel(cx, cy, x, y, color)
-		local posDX_x = cx + x
-		local negDX_x = cx - x
-		local posDX_y = cx + y
-		local negDX_y = cx - y
-	
-		local posDY_y = cy + y
-		local negDY_y = cy - y
-		local posDY_x = cy + x
-		local negDY_x = cy - x
-	
-		draw(nil, posDX_x, posDY_y, color)
-		draw(nil, negDX_x, posDY_y, color)
-		draw(nil, posDX_x, negDY_y, color)
-		draw(nil, negDX_x, negDY_y, color)
-		draw(nil, posDX_y, posDY_x, color)
-		draw(nil, negDX_y, posDY_x, color)
-		draw(nil, posDX_y, negDY_x, color)
-		draw(nil, negDX_y, negDY_x, color)
-	end
+		local function drawCircle_putpixel(cx, cy, x, y, color)
+			local posDX_x = cx + x
+			local negDX_x = cx - x
+			local posDX_y = cx + y
+			local negDX_y = cx - y
+		
+			local posDY_y = cy + y
+			local negDY_y = cy - y
+			local posDY_x = cy + x
+			local negDY_x = cy - x
+		
+			draw(nil, posDX_x, posDY_y, color)
+			draw(nil, negDX_x, posDY_y, color)
+			draw(nil, posDX_x, negDY_y, color)
+			draw(nil, negDX_x, negDY_y, color)
+			draw(nil, posDX_y, posDY_x, color)
+			draw(nil, negDX_y, posDY_x, color)
+			draw(nil, posDX_y, negDY_x, color)
+			draw(nil, negDX_y, negDY_x, color)
+		end
 
-	local col
-	for _, v in ipairs(stack) do
-        col = formatColor(v[2], v[1] == 0)
+		local col
+		for _, v in ipairs(stack) do
+			col = formatColor(v[2], v[1] == 0)
 
-		if v[1] == 0 then
-			buffer1 = {}
-			self.buffer1 = buffer1
-			self.buffer1All = col
-		elseif v[1] == 1 then
-			buffer1[v[3] + (v[4] * width)] = col
-		elseif v[1] == 2 then
-			for ix = v[3], v[3] + (v[5] - 1) do
-				for iy = v[4], v[4] + (v[6] - 1) do
-					if ix == v[3] or iy == v[4] or ix == (v[3] + (v[5] - 1)) or iy == (v[4] + (v[6] - 1)) then
+			if v[1] == 0 then
+				buffer1 = {}
+				self.buffer1 = buffer1
+				self.buffer1All = col
+			elseif v[1] == 1 then
+				buffer1[v[3] + (v[4] * width)] = col
+			elseif v[1] == 2 then
+				for ix = v[3], v[3] + (v[5] - 1) do
+					for iy = v[4], v[4] + (v[6] - 1) do
+						if ix == v[3] or iy == v[4] or ix == (v[3] + (v[5] - 1)) or iy == (v[4] + (v[6] - 1)) then
+							buffer1[ix + (iy * width)] = col
+						end
+					end
+				end
+			elseif v[1] == 3 then
+				for ix = v[3], v[3] + (v[5] - 1) do
+					for iy = v[4], v[4] + (v[6] - 1) do
 						buffer1[ix + (iy * width)] = col
 					end
 				end
-			end
-		elseif v[1] == 3 then
-			for ix = v[3], v[3] + (v[5] - 1) do
-				for iy = v[4], v[4] + (v[6] - 1) do
-					buffer1[ix + (iy * width)] = col
-				end
-			end
-		elseif v[1] == 4 then
-			local x = v[3]
-			local y = v[4]
-			local r = v[5]
+			elseif v[1] == 4 then
+				local x = v[3]
+				local y = v[4]
+				local r = v[5]
 
-			local lx = 0
-			local ly = r
-			local d = 3 - 2 * r
-
-			drawCircle_putpixel(x, y, lx, ly, col)
-			while ly >= lx do
-				lx = lx + 1
-
-				if d > 0 then
-					ly = ly - 1
-					d = d + 4 * (lx - ly) + 10
-				else
-					d = d + 4 * lx + 6
-				end
+				local lx = 0
+				local ly = r
+				local d = 3 - 2 * r
 
 				drawCircle_putpixel(x, y, lx, ly, col)
-			end
-		elseif v[1] == 5 then
-			local nx, ny = v[3], v[4]
-			local x = math_floor(v[3])
-			local y = math_floor(v[4])
-			local r = v[5]
+				while ly >= lx do
+					lx = lx + 1
 
-			local cx, cy = math_min(r, 1024), math_min(r, 1024)
-			local px, py
+					if d > 0 then
+						ly = ly - 1
+						d = d + 4 * (lx - ly) + 10
+					else
+						d = d + 4 * lx + 6
+					end
 
-			local ccx, ccy
-			if x < 0 then ccx = -x end
-			if y < 0 then ccy = -y end
-			for ix = (ccx and math_max(-cx, ccx) or -cx), cx do
-				px = x + ix
-				if px >= 0 and px < width then
-					for iy = (ccy and math_max(-cy, ccy) or -cy), cy do
+					drawCircle_putpixel(x, y, lx, ly, col)
+				end
+			elseif v[1] == 5 then
+				local nx, ny = v[3], v[4]
+				local x = math_floor(v[3])
+				local y = math_floor(v[4])
+				local r = v[5]
+
+				local cx, cy = math_min(r, 1024), math_min(r, 1024)
+				local px, py
+				for ix = math_max(-cx, -x), math_min(cx, (width - x) - 1) do
+					px = x + ix
+					for iy = math_max(-cy, -y), math_min(cy, (height - y) - 1) do
 						py = y + iy
-						if py >= height then
-							break
-						elseif quadInCircle(px, py, 1, nx, ny, r) and py >= 0 then
+						if quadInCircle(px, py, 1, nx, ny, r) then
 							buffer1[px + (py * width)] = col
 						end
 					end
-					if px == true then --dubble break
-						break
-					end
 				end
+			elseif v[1] == 6 then
+				basegraphic_drawLine(v[3], v[4], v[5], v[6], col, width, height, buffer1)
+			elseif v[1] == 7 then
+				basegraphic_printText(font, utf8support, self, draw, draw, v[3], v[4], width, height, v[5], col)
 			end
-		elseif v[1] == 6 then
-			basegraphic_drawLine(v[3], v[4], v[5], v[6], col, width, height, buffer1)
-		elseif v[1] == 7 then
-			basegraphic_printText(font, utf8support, self, draw, draw, v[3], v[4], width, height, v[5], col)
 		end
 	end
 
-	local buffer1All = self.buffer1All
-	local buffer2All = self.buffer2All
-	for i = 0, maxBuf do
-		local col = buffer1[i] or buffer1All
-		if col ~= (buffer2[i] or buffer2All) then
-			newstack[newstackI] = math_floor(i % width)
-			newstackI = newstackI + 1
+	if flush then
+		local buffer1All = self.buffer1All
+		local buffer2All = self.buffer2All
+		for i = 0, maxBuf do
+			local col = buffer1[i] or buffer1All
+			if col ~= (buffer2[i] or buffer2All) then
+				newstack[newstackI] = math_floor(i % width)
+				newstackI = newstackI + 1
 
-			newstack[newstackI] = math_floor(i / width)
-			newstackI = newstackI + 1
+				newstack[newstackI] = math_floor(i / width)
+				newstackI = newstackI + 1
 
-			newstack[newstackI] = col
-			newstackI = newstackI + 1
+				newstack[newstackI] = col
+				newstackI = newstackI + 1
 
-			buffer2[i] = col
+				buffer2[i] = col
+			end
 		end
 	end
 
