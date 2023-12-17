@@ -1212,12 +1212,14 @@ function sc.display.server_update(self)
 
     local ctick = sm.game.getCurrentTick()
     if ctick % rate == 0 then self.allow_update = true end
-    if ctick % (40 * 5) == 0 then self.forceNative_update = true end
+    if ctick % (40 * 5) == 0 then
+		self.forceNative_update = true
+		self.serverCache = {}
+        self.serverCacheAll = nil
+	end
     if ctick % (40 * 2) == 0 then
         self.force_update = true
         self.allow_update = true
-        self.serverCache = {}
-        self.serverCacheAll = nil
         self.stackChecksum = nil
 
         debug_print("force setted")
@@ -1273,6 +1275,7 @@ function sc.display.server_update(self)
         ]]
 
         --sending
+		debug_print("sending", self.force_update, stackChecksum, self.stackChecksum, self.stackChecksum ~= stackChecksum)
         if self.force_update or
         not stackChecksum or
         not self.stackChecksum or
@@ -3015,7 +3018,7 @@ function sc.display.client_drawStack(self, sendstack)
         local rendTime = os_clock() - startRnd
         local dt2 = self.lastNativeRenderTime * 2
         if not self.oldRenderType and self.lastNativeRenderTime and dt2 < rendTime and not debug_disableForceNativeRender then
-            local add = constrain(math.ceil(rendTime / dt2) * 5, 10, 40 * 5)
+            local add = constrain(math.ceil(rendTime / dt2) * 5, 10, 40)
             debug_print("force native render", self.lastNativeRenderTime, dt2, rendTime, add)
             self.forceNativeRender = add
         end
