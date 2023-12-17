@@ -113,6 +113,7 @@ local effect_stop = emptyEffect.stop
 local effect_destroy = emptyEffect.destroy
 local effect_start = emptyEffect.start
 local effect_isDone = emptyEffect.isDone
+local effect_isPlaying = emptyEffect.isPlaying
 local effect_setScale = emptyEffect.setScale
 local effect_setOffsetPosition = emptyEffect.setOffsetPosition
 local effect_setOffsetRotation = emptyEffect.setOffsetRotation
@@ -520,6 +521,9 @@ function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale, wid
 
     if not nonBuf and root.bf_idx > 0 and not debug_disableEffectsBuffer then
         effect = table_remove(root.bufferedEffects)
+        if effect_isDone(effect) then
+            effect_start(effect)
+        end
         root.bf_idx = root.bf_idx - 1
     else
         --if total_effects < (1050000) then
@@ -1321,17 +1325,16 @@ function sc.display.server_update(self)
                         if h <= 0 then h = 1 end
                         score = (score * w * h) / 16
                     end
-                    self.lastComputer.lagScore = self.lastComputer.lagScore + (score * sc.restrictions.lagDetector)
-                    if self.lastComputer.lagScore > 120 then
-                        debug_print_force("lagScore > 120!!")
-                        cancel = true
-                        break
-                    end
                 end
                 ]]
                 local oldLagScore = self.lastComputer.lagScore
                 self.lastComputer.lagScore = self.lastComputer.lagScore + (self.rnd_idx * 0.0005 * sc.restrictions.lagDetector)
                 debug_print("lag score delta", self.lastComputer.lagScore - oldLagScore)
+
+                if self.lastComputer.lagScore > 120 then
+                    debug_print_force("lagScore > 120!!")
+                    cancel = true
+                end
             end
 
             if not cancel then
@@ -2590,6 +2593,23 @@ function sc.display.client_update(self, dt)
                 end
             end
         end
+
+        --[[
+        if quadTree.bf_idx >= minToRemove then
+            local effect
+            for i = 1, 250 do
+                effect = table_remove(bufferedEffects, 1)
+                if effect then
+                    if sm_exists(effect) then
+                        effect_stop(effect)
+                    end
+                    table_insert(bufferedEffects, effect)
+                else
+                    break
+                end
+            end
+        end
+        ]]
     end
 
     --debug_print("cursor works")
