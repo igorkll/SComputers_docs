@@ -676,10 +676,22 @@ end
 
 -------------------------------------------------------
 
-_G.internal_libs = {}
+sc.internal_libs = {}
+sc.internal_libs_folders = {}
+
 function sc.reg_internal_lib(name, tbl)
-    _G.internal_libs[name] = tbl
+    sc.internal_libs[name] = tbl
 end
+
+function sc.reg_lib_folder(path)
+    table.insert(sc.internal_libs_folders, path)
+end
+
+-------------------------------------------------------
+
+sc.reg_lib_folder("$CONTENT_3aeb81c2-71b9-45a1-9479-1f48f1e8ff21/Scripts/internal_libs")
+
+-------------------------------------------------------
 
 sm.sc = sc --для интеграций
 sm.sc_g = _G

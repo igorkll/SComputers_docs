@@ -66,24 +66,36 @@ function createSafeEnv(self, settings)
             sc.coroutineCheck()
             if name:find("%.") or name:find("%/") or name:find("%\\") then error("the library name cannot contain the characters: \"/.\\\"", 2) end
             if self.libcache[name] then return self.libcache[name] end
+
             if dlm and dlm.loadfile then
-                local code, err = dlm.loadfile("$CONTENT_3aeb81c2-71b9-45a1-9479-1f48f1e8ff21/Scripts/internal_libs/" .. name .. ".lua", _G)
-                if type(code) ~= "function" then
-                    error("load error: " .. tostring(err or "unknown"), 2)
+                local lastId = #sc.internal_libs_folders
+                for i, folder in ipairs(sc.internal_libs_folders) do
+                    local code, err = dlm.loadfile(folder .. "/" .. name .. ".lua", _G)
+                    if type(code) ~= "function" then
+                        if i == lastId then
+                            error("load error: " .. tostring(err or "unknown"), 2)
+                        end
+                    else
+                        local result = {pcall(code)}
+                        if not result[1] or type(result[2]) ~= "table" then
+                            error("exec error: " .. tostring(result[2] or "unknown"), 2)
+                        else
+                            self.libcache[name] = result[2]
+                            break
+                        end
+                    end
                 end
-
-                local result = {pcall(code)}
-                if not result[1] or type(result[2]) ~= "table" then
-                    error("exec error: " .. tostring(result[2] or "unknown"), 2)
-                end
-
-                self.libcache[name] = result[2]
             else
-                if not _G.internal_libs[name] then
-                    pcall(dofile, "$CONTENT_DATA/Scripts/internal_libs/" .. name .. ".lua")
+                if not sc.internal_libs[name] then
+                    for _, folder in ipairs(sc.internal_libs_folders) do
+                        if pcall(dofile, folder .. "/" .. name .. ".lua") then
+                            break
+                        end
+                    end
                 end
-                self.libcache[name] = sc.advDeepcopy(_G.internal_libs[name])
+                self.libcache[name] = sc.advDeepcopy(sc.internal_libs[name] or error("the \"" .. name .. "\" library was not found", 2))
             end
+            
             return self.libcache[name] or error("the \"" .. name .. "\" library was not found", 2)
         end,
 
