@@ -68,12 +68,15 @@ function createSafeEnv(self, settings)
             if self.libcache[name] then return self.libcache[name] end
 
             if dlm and dlm.loadfile then
+                --print("loading library", name, "WITH-DLM")
+
                 local lastId = #sc.internal_libs_folders
                 for i, folder in ipairs(sc.internal_libs_folders) do
                     local code, err = dlm.loadfile(folder .. "/" .. name .. ".lua", _G)
                     if type(code) ~= "function" then
                         if i == lastId then
-                            error("load error: " .. tostring(err or "unknown"), 2)
+                            --error("load error: " .. tostring(err or "unknown"), 2)
+                            error("the \"" .. name .. "\" library was not found", 2)
                         end
                     else
                         local result = {pcall(code)}
@@ -86,6 +89,8 @@ function createSafeEnv(self, settings)
                     end
                 end
             else
+                --print("loading library", name, "WITHOUT-DLM")
+
                 if not sc.internal_libs[name] then
                     for _, folder in ipairs(sc.internal_libs_folders) do
                         if pcall(dofile, folder .. "/" .. name .. ".lua") then
