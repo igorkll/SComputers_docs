@@ -2793,6 +2793,15 @@ function sc.display.client_update(self, dt)
     end
     ]]
 
+    if self.clearLastClearColor3 then
+        self.clearLastClearColor3 = self.clearLastClearColor3 - 1
+        if self.clearLastClearColor3 <= 0 then
+            self.old_backgroundChanged = false
+            self.lastClearColor3 = nil
+            self.clearLastClearColor3 = nil
+        end
+    end
+
     ------stylus
     --debug_print("stylus works")
     if scriptableObject.character then
@@ -2965,6 +2974,8 @@ function sc.display.client_drawStack(self, sendstack)
 
     self.newEffects = {}
     local isEffect = false --если от всего стека был хоть какой-то смысл
+    local backgroundChanged = clearColor ~= self.lastClearColor3
+    debug_print("background change detecter", clearColor, self.lastClearColor3, backgroundChanged, self.old_backgroundChanged)
 
     if isEndClear and #stack == 1 then
         debug_print("clear only render")
@@ -2982,7 +2993,7 @@ function sc.display.client_drawStack(self, sendstack)
 
         self.oldRenderType = true
         self.bufferWait = false
-    elseif self.isRendering and (clearColor ~= self.lastClearColor3 or sendstack.forceNative or (self.forceNativeRender and self.forceNativeRender > 0)) then
+    elseif self.isRendering and ((backgroundChanged and not self.old_backgroundChanged) or sendstack.forceNative or (self.forceNativeRender and self.forceNativeRender > 0)) then
         debug_print("native render")
 
         self.buffer1 = {}
@@ -3031,8 +3042,10 @@ function sc.display.client_drawStack(self, sendstack)
         end
     end
 
+    self.old_backgroundChanged = backgroundChanged
 	self.lastClearColor3 = clearColor
-    
+    self.clearLastClearColor3 = 2
+
     if isEffect then
         debug_print("isEffect!!")
 
