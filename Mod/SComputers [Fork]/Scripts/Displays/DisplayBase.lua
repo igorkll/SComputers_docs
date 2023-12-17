@@ -1,7 +1,6 @@
 -- debug
 debug_out = false
 debug_printeffects = false
-debug_disablecheck = false
 debug_disabletext = false
 debug_disableoptimize = false
 debug_raycast = false
@@ -1253,11 +1252,14 @@ function sc.display.server_update(self)
 
 
 
-    if self.needUpdate and self.allow_update then
+    if self.needUpdate and self.rnd_idx > 1 and self.allow_update then
         --debug_print("self.needUpdate")
-        local stackChecksum
-        if not debug_disablecheck then
-            stackChecksum = tableChecksum(self.renderingStack)
+        local stackChecksumVal
+        local function stackChecksum()
+            if not stackChecksumVal then
+                stackChecksumVal = tableChecksum(self.renderingStack)
+            end
+            return stackChecksumVal
         end
         --debug_print("stackChecksum", stackChecksum)
 
@@ -1275,11 +1277,11 @@ function sc.display.server_update(self)
         ]]
 
         --sending
-		debug_print("sending", self.force_update, stackChecksum, self.stackChecksum, self.stackChecksum ~= stackChecksum)
+		--debug_print("sending", self.force_update, stackChecksum, self.stackChecksum, self.stackChecksum ~= stackChecksum)
         if self.force_update or
-        not stackChecksum or
         not self.stackChecksum or
-        self.stackChecksum ~= stackChecksum then
+        self.stackChecksumLen ~= self.rnd_idx or
+        self.stackChecksum ~= stackChecksum() then
             --debug_print("self.needUpdate-sending")
 
             --[[
@@ -1297,118 +1299,112 @@ function sc.display.server_update(self)
             end
             ]]
 
-            if self.rnd_idx > 1 then
-                local cancel
-                if self.lastComputer and self.lastComputer.cdata and not self.lastComputer.cdata.unsafe and type(sc.restrictions.lagDetector) == "number" then
-                    --[[
-                    local oldLagScore = self.lastComputer.lagScore
-                    for i, v in ipairs(self.renderingStack) do
-                        local score = 0.0005
-                        local id = v[1]
-                        if id == 7 then
-                            score = score * #v[5]
-                        elseif id == 6 then
-                            score = score * 4
-                        elseif id == 5 or id == 4 then
-                            local r = v[5]
-                            if r <  1 then r = 1 end
-                            if r > 32 then r = 32 end
-                            score = score * 2 * r
-                        elseif id == 2 or id == 3 then
-                            local w, h = v[5], v[6]
-                            if w <= 0 then w = 1 end
-                            if h <= 0 then h = 1 end
-                            score = (score * w * h) / 16
-                        end
-                        self.lastComputer.lagScore = self.lastComputer.lagScore + (score * sc.restrictions.lagDetector)
-                        if self.lastComputer.lagScore > 120 then
-                            debug_print_force("lagScore > 120!!")
-                            cancel = true
-                            break
-                        end
+            local cancel
+            if self.lastComputer and self.lastComputer.cdata and not self.lastComputer.cdata.unsafe and type(sc.restrictions.lagDetector) == "number" then
+                --[[
+                local oldLagScore = self.lastComputer.lagScore
+                for i, v in ipairs(self.renderingStack) do
+                    local score = 0.0005
+                    local id = v[1]
+                    if id == 7 then
+                        score = score * #v[5]
+                    elseif id == 6 then
+                        score = score * 4
+                    elseif id == 5 or id == 4 then
+                        local r = v[5]
+                        if r <  1 then r = 1 end
+                        if r > 32 then r = 32 end
+                        score = score * 2 * r
+                    elseif id == 2 or id == 3 then
+                        local w, h = v[5], v[6]
+                        if w <= 0 then w = 1 end
+                        if h <= 0 then h = 1 end
+                        score = (score * w * h) / 16
                     end
-                    ]]
-                    local oldLagScore = self.lastComputer.lagScore
-                    self.lastComputer.lagScore = self.lastComputer.lagScore + (self.rnd_idx * 0.0005 * sc.restrictions.lagDetector)
-                    debug_print("lag score delta", self.lastComputer.lagScore - oldLagScore)
+                    self.lastComputer.lagScore = self.lastComputer.lagScore + (score * sc.restrictions.lagDetector)
+                    if self.lastComputer.lagScore > 120 then
+                        debug_print_force("lagScore > 120!!")
+                        cancel = true
+                        break
+                    end
+                end
+                ]]
+                local oldLagScore = self.lastComputer.lagScore
+                self.lastComputer.lagScore = self.lastComputer.lagScore + (self.rnd_idx * 0.0005 * sc.restrictions.lagDetector)
+                debug_print("lag score delta", self.lastComputer.lagScore - oldLagScore)
+            end
+
+            if not cancel then
+                self.renderingStack.force = self.force_update
+                self.renderingStack.forceNative = self.forceNative_update
+                self.renderingStack.endPack = true
+                --[[
+                local dist = RENDER_DISTANCE
+                if self.renderAtDistance or self.player then
+                    dist = nil
+                end
+                ]]
+                --local dist = nil --sending to all players
+
+                local whitelist
+                if self.player then
+                    whitelist = {[self.player.id] = true}
+                end
+                local maxDist
+                if self.skipAtNotSight and not self.force_update then
+                    maxDist = sc.restrictions.rend
                 end
 
-                if not cancel then
-                    self.renderingStack.force = self.force_update
-                    self.renderingStack.forceNative = self.forceNative_update
-                    self.renderingStack.endPack = true
-                    --[[
-                    local dist = RENDER_DISTANCE
-                    if self.renderAtDistance or self.player then
-                        dist = nil
-                    end
-                    ]]
-                    --local dist = nil --sending to all players
+                if not pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", self.renderingStack, maxDist, whitelist) then
+                    self.renderingStack.endPack = false
+                    
+                    local index = 1
+                    local count = 1024
+                    local cycles = 0
 
-                    local whitelist
-                    if self.player then
-                        whitelist = {[self.player.id] = true}
-                    end
-                    local maxDist
-                    if self.skipAtNotSight and not self.force_update then
-                        maxDist = sc.restrictions.rend
-                    end
+                    local datapack
+                    while true do
+                        --datapack = {unpack(self.renderingStack, index, index + (count - 1))}
+                        datapack = {unpack(self.renderingStack, index, index + (count - 1))}
 
-                    if not pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", self.renderingStack, maxDist, whitelist) then
-                        self.renderingStack.endPack = false
-                        
-                        local index = 1
-                        local count = 1024
-                        local cycles = 0
-
-                        local datapack
-                        while true do
-                            --datapack = {unpack(self.renderingStack, index, index + (count - 1))}
-                            datapack = {unpack(self.renderingStack, index, index + (count - 1))}
-
-                            index = index + count
-                            if datapack[#datapack] == self.renderingStack[#self.renderingStack] then
-                                datapack.endPack = true
-                                if pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", datapack, maxDist, whitelist) then
-                                    break
-                                else
-                                    index = index - count
-                                    count = math_floor((count / 2) + 0.5)
-                                end
-                            elseif not pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", datapack, maxDist, whitelist) then
+                        index = index + count
+                        if datapack[#datapack] == self.renderingStack[#self.renderingStack] then
+                            datapack.endPack = true
+                            if pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", datapack, maxDist, whitelist) then
+                                break
+                            else
                                 index = index - count
                                 count = math_floor((count / 2) + 0.5)
                             end
-
-                            cycles = cycles + 1
-                            if cycles > 100 then
-                                debug_print_force("cycles to many 100", pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", self.renderingStack, maxDist, whitelist))
-                                error("cycles to many 100")
-                                break
-                            end
+                        elseif not pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", datapack, maxDist, whitelist) then
+                            index = index - count
+                            count = math_floor((count / 2) + 0.5)
                         end
-                        debug_print("self.needUpdate-sending end")
+
+                        cycles = cycles + 1
+                        if cycles > 100 then
+                            debug_print_force("cycles to many 100", pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", self.renderingStack, maxDist, whitelist))
+                            error("cycles to many 100")
+                            break
+                        end
                     end
+                    debug_print("self.needUpdate-sending end")
                 end
-
-                self.stackChecksum = stackChecksum
-        
-                self.rnd_idx = 1
-                self.renderingStack = {}
-                
-                self.force_update = false
-                self.allow_update = false
-                self.forceNative_update = false
-
-                debug_print("RENDER!!!")
-            else
-                debug_print("render empty")
             end
-        else
-            debug_print("render wait", self.force_update, stackChecksum, self.stackChecksum)
+
+            self.stackChecksum = stackChecksum()
+            self.stackChecksumLen = self.rnd_idx
+            
+            self.force_update = false
+            self.allow_update = false
+            self.forceNative_update = false
+
+            debug_print("RENDER SENDED!!!")
         end
 
         self.needUpdate = false
+        self.rnd_idx = 1
+        self.renderingStack = {}
     end
 end
 
