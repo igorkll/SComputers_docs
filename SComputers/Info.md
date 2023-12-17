@@ -103,7 +103,7 @@ you can write your values there
 * _VERSION contains uses VM name
 
 ### clientInvoke removed methods(the following functions will be unavailable in clientInvoke/clientInvokeTo)
-* getComponents (and all aliases)
+* getComponents / getComponent (and all aliases)
 * reboot
 * setCode / getCode
 * setData / getData
@@ -115,7 +115,7 @@ you can write your values there
 * ninput / input / out
 * clientInvoke / clientInvokeTo
 * setComponentApi / getComponentApi
-* getMaxAvailableCpuTime / getDeltaTime / getUsedRam / getTotalRam / getUptime
+* getMaxAvailableCpuTime / getDeltaTimeTps / getUsedRam / getTotalRam / getUptime
 
 ### tablet features
 * The renderAtDistance screen function on the tablet will display the screen even if the tablet is not in your hand

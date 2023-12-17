@@ -1212,7 +1212,7 @@ function sc.display.server_update(self)
 
     local ctick = sm.game.getCurrentTick()
     if ctick % rate == 0 then self.allow_update = true end
-    if ctick % (40 * 4) == 0 then self.forceNative_update = true end
+    if ctick % (40 * 5) == 0 then self.forceNative_update = true end
     if ctick % (40 * 2) == 0 then
         self.force_update = true
         self.allow_update = true
@@ -1448,8 +1448,8 @@ function sc.display.server_createData(self)
     local function checkPos(x, y)
         x = nRound(x)
         y = nRound(y)
-        if x ~= x or x < 0 or x >= rwidth then return end
-        if y ~= y or y < 0 or y >= rheight then return end
+        if x ~= x or x < 0 or x >= rwidth then return end -- x ~= x is NAN check
+        if y ~= y or y < 0 or y >= rheight then return end -- y ~= y is NAN check
         return x, y
     end
 
@@ -1462,15 +1462,18 @@ function sc.display.server_createData(self)
     end
 
     local function checkRect(x, y, w, h)
-        w = math.floor(math.abs(w))
-        h = math.floor(math.abs(h))
+        local xneg, yneg = w < 0, h < 0
+		w = math_floor(math_abs(w))
+        h = math_floor(math_abs(h))
         if x + w > rwidth then
             w = w - ((x + w) - rwidth)
         end
         if y + h > rheight then
             h = h - ((y + h) - rheight)
         end
-        return w, h
+		if xneg then x = x - w end
+		if yneg then y = y - h end
+        return x, y, w, h
     end
 
     local data = {
@@ -1519,7 +1522,7 @@ function sc.display.server_createData(self)
         end,
         drawRect = function (x, y, w, h, c)
             x, y = checkRectPos(x, y)
-            w, h = checkRect(x, y, w, h)
+            x, y, w, h = checkRect(x, y, w, h)
 
             self.renderingStack[self.rnd_idx] = {
                 2,
@@ -1536,7 +1539,7 @@ function sc.display.server_createData(self)
         end,
         fillRect = function (x, y, w, h, c)
             x, y = checkRectPos(x, y)
-            w, h = checkRect(x, y, w, h)
+            x, y, w, h = checkRect(x, y, w, h)
 
             self.renderingStack[self.rnd_idx] = {
                 3,
@@ -1803,7 +1806,15 @@ end
 function sc.display.server_recvPress(self, p, caller)
     if type(p) == "number" then
         if self.lastComputer and (not self.lastComputer.cdata or not self.lastComputer.cdata.unsafe) and type(sc.restrictions.lagDetector) == "number" then
-            local add = p * sc.restrictions.lagDetector
+			local num = 0
+            for k, v in pairs(self.audience) do
+                num = num + 1
+            end
+			if num == 0 then
+				num = 1
+			end
+            
+            local add = (p / num) * sc.restrictions.lagDetector
             self.lastComputer.lagScore = self.lastComputer.lagScore + add
             debug_print("get lag score", add)
         end
@@ -2513,6 +2524,10 @@ function sc.display.client_update(self, dt)
     debug_print("allEffs", allEffs)
     ]]
 
+	if self.forceNativeRender then
+		self.forceNativeRender = self.forceNativeRender - (40 / (1 / dt))
+	end
+
     local ctick = getCurrentTick()
 
     if self.bufferWait and self.isRendering then
@@ -2556,8 +2571,8 @@ function sc.display.client_update(self, dt)
     if not debug_disableEffectsBuffer then
         --если картинка давно не обновлялась
         --то минимальное каличество для удаления эфектов 5000
-        --а если обновления идей сейчас то только если буферезированых минимум 50000
-        local minToRemove = (not self.lastDrawTime or ctick - self.lastDrawTime >= 40) and 5000 or 50000
+        --а если обновления идей сейчас то только если буферезированых минимум 10000
+        local minToRemove = (not self.lastDrawTime or ctick - self.lastDrawTime >= 40) and 5000 or 10000
         if quadTree.bf_idx >= minToRemove then
             local effect
             for i = 1, 250 do
@@ -2917,7 +2932,7 @@ function sc.display.client_drawStack(self, sendstack)
         return
     end
 
-    debug_print("start render", self.isRendering, sendstack.force, self.skipAtLags, self.skipAtNotSight)
+    debug_print("start render --------------------", self.isRendering, sendstack.force, self.skipAtLags, self.skipAtNotSight, self.forceNativeRender)
 
     if sendstack.force then
         self.dbuffPixels = {}
@@ -2937,7 +2952,13 @@ function sc.display.client_drawStack(self, sendstack)
     local startExecTime = os_clock()
 
     local isEndClear = stack[#stack][1] == 0
-    local clearColor = formatColor(stack[#stack][2])
+    local clearColor
+	for i, v in ipairs(stack) do
+		if v[1] == 0 then
+			clearColor = formatColor(v[2], true)
+			break
+		end
+	end
 
     self.newEffects = {}
     local isEffect = false --если от всего стека был хоть какой-то смысл
@@ -2958,7 +2979,7 @@ function sc.display.client_drawStack(self, sendstack)
 
         self.oldRenderType = true
         self.bufferWait = false
-    elseif self.isRendering and (sendstack.forceNative or (self.forceNativeRender and self.forceNativeRender - ctick > 0)) then
+    elseif self.isRendering and (clearColor ~= self.lastClearColor3 or sendstack.forceNative or (self.forceNativeRender and self.forceNativeRender > 0)) then
         debug_print("native render")
 
         self.buffer1 = {}
@@ -2994,9 +3015,9 @@ function sc.display.client_drawStack(self, sendstack)
         local rendTime = os_clock() - startRnd
         local dt2 = self.lastNativeRenderTime * 2
         if not self.oldRenderType and self.lastNativeRenderTime and dt2 < rendTime and not debug_disableForceNativeRender then
-            local add = constrain(math.ceil(rendTime / dt2) * 20, 10, 40 * 5)
+            local add = constrain(math.ceil(rendTime / dt2) * 5, 10, 40 * 5)
             debug_print("force native render", self.lastNativeRenderTime, dt2, rendTime, add)
-            self.forceNativeRender = ctick + add
+            self.forceNativeRender = add
         end
 
         self.oldRenderType = false
@@ -3004,6 +3025,8 @@ function sc.display.client_drawStack(self, sendstack)
             self.bufferWait = true
         end
     end
+
+	self.lastClearColor3 = clearColor
     
     if isEffect then
         debug_print("isEffect!!")

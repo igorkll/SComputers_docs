@@ -433,6 +433,16 @@ function createSafeEnv(self, settings)
             sc.coroutineCheck()
             return sc.getComponents(self, name, settings)
         end,
+        getComponent = function(name)
+            checkArg(1, name, "string")
+            sc.coroutineCheck()
+            local components = sc.getComponents(self, name, settings)
+            if #components > 0 then
+                return components[1]
+            else
+                error("the \"" .. name .. "\" component is missing", 2)
+            end
+        end,
         getMaxAvailableCpuTime = function ()
             return round(self.localScriptMode.cpulimit or sc.restrictions.cpu, 5)
         end,
@@ -440,6 +450,10 @@ function createSafeEnv(self, settings)
         getDeltaTime = function ()
             return sc.deltaTime or 0
         end,
+        getDeltaTimeTps = function ()
+            return sc.deltaTimeTps or 0
+        end,
+
         getSkippedTicks = function ()
             return self.skipped
         end,
@@ -593,6 +607,7 @@ function createUnsafeEnv(self, settings)
 end
 
 function removeServerMethods(env) --called before execution clientInvoke
+    env.getComponent = nil
     env.getComponents = nil
     env.reboot = nil
     env.setCode = nil
@@ -632,7 +647,7 @@ function removeServerMethods(env) --called before execution clientInvoke
     env.setComponentApi = nil
     env.getComponentApi = nil
     env.getMaxAvailableCpuTime = nil
-    env.getDeltaTime = nil
+    env.getDeltaTimeTps = nil
     env.getUsedRam = nil
     env.getTotalRam = nil
     env.getUptime = nil

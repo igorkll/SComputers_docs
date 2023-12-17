@@ -131,7 +131,9 @@ function servicetool:cl_onDataResponse(data)
     end
 end
 
-function servicetool:client_onFixedUpdate()
+function servicetool:client_onFixedUpdate(dt)
+    sc.deltaTimeTps = dt
+
     if self.gui and not self.gui:isActive() then
         self.gui:open()
     end
