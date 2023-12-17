@@ -562,12 +562,14 @@ function basegraphic_doubleBuffering(self, stack, width, height, font, utf8suppo
 		local buffer1All = self.buffer1All
 		local buffer2All = self.buffer2All
 		local col
+		local i2 = 1
 		for i = 0, (width * height) - 1 do
 			col = buffer1[i] or buffer1All
 			if col ~= (buffer2[i] or buffer2All) then
 				if not flush(self, math_floor(i % width), math_floor(i / width), col) then
 					isEffect = true
-					if optimize and i % 1024 == 0 then optimize(self) end
+					if optimize and i2 % 1024 == 0 then optimize(self) end
+					i2 = i2 + 1
 				end
 				buffer2[i] = col
 			end

@@ -1062,6 +1062,7 @@ local function applyNew(self)
         end
         showNewEffects(self)
     else
+        --[[
         if self.quadTree.splashEffect then
             effect_stop(self.quadTree.splashEffect)
         end
@@ -1069,6 +1070,8 @@ local function applyNew(self)
             effect_stop(self.quadTree.back_effect)
         end
         hideNewEffects(self)
+        ]]
+        quad_rootRealHide(self.quadTree)
     end
 end
 
@@ -2478,7 +2481,7 @@ function sc.display.client_update(self, dt)
 
     local ctick = getCurrentTick()
 
-    if self.bufferWait and self.isRendering then
+    if self.isRendering and self.bufferWait then
         debug_print("buffer flushing")
 
         self.newEffects = {}
