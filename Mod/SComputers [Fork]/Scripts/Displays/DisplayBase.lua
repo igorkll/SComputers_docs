@@ -1,5 +1,5 @@
 -- debug
-debug_out = true
+debug_out = false
 debug_printeffects = false
 debug_disablecheck = false
 debug_disabletext = false
@@ -3015,13 +3015,15 @@ function sc.display.client_drawStack(self, sendstack)
             isEffect = true
         end
 
-        local rendTime = os_clock() - startRnd
-        local dt2 = self.lastNativeRenderTime * 2
-        if not self.oldRenderType and self.lastNativeRenderTime and dt2 < rendTime and not debug_disableForceNativeRender then
-            local add = constrain(math.ceil(rendTime / dt2) * 5, 10, 40)
-            debug_print("force native render", self.lastNativeRenderTime, dt2, rendTime, add)
-            self.forceNativeRender = add
-        end
+		if self.lastNativeRenderTime then
+			local rendTime = os_clock() - startRnd
+			local dt2 = self.lastNativeRenderTime * 2
+			if not self.oldRenderType and dt2 < rendTime and not debug_disableForceNativeRender then
+				local add = constrain(math.ceil(rendTime / dt2) * 5, 10, 40)
+				debug_print("force native render", self.lastNativeRenderTime, dt2, rendTime, add)
+				self.forceNativeRender = add
+			end
+		end
 
         self.oldRenderType = false
         if not self.isRendering then
