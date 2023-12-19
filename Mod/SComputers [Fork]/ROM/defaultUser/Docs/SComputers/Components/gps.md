@@ -13,6 +13,8 @@ sidebar-label: 'gps'
 * the noise level is 1 degree and 1 block per 100 meters of distance
 * the minimum noise level is equal to the gps tag position at a distance of a meter(this noise is present even when measuring your own position)
 * don't forget that the getSelfGpsData and getTagsGpsData methods can only be used 1 time per tick
+* The noise on the turn is temporarily disabled, due to problems in the formulas
+* Creative GPS does not contain noise
 
 ### gps component
 * type - gps

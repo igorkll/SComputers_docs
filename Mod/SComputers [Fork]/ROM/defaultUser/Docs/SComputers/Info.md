@@ -103,7 +103,7 @@ you can write your values there
 * _VERSION contains uses VM name
 
 ### clientInvoke removed methods(the following functions will be unavailable in clientInvoke/clientInvokeTo)
-* getComponents (and all aliases)
+* getComponents / getComponent (and all aliases)
 * reboot
 * setCode / getCode
 * setData / getData
@@ -115,7 +115,7 @@ you can write your values there
 * ninput / input / out
 * clientInvoke / clientInvokeTo
 * setComponentApi / getComponentApi
-* getMaxAvailableCpuTime / getDeltaTime / getUsedRam / getTotalRam / getUptime
+* getMaxAvailableCpuTime / getDeltaTimeTps / getUsedRam / getTotalRam / getUptime
 
 ### tablet features
 * The renderAtDistance screen function on the tablet will display the screen even if the tablet is not in your hand
@@ -177,6 +177,7 @@ the creative engine method will always return true
 maxClicks, rotation, framecheck, skipAtNotSight, utf8support, renderAtDistance, skipAtLags, clickData(click list), clicksAllowed
 and resets the font
 * display.isAllow():boolean - returns true if this display is enabled, returns false if displays with this resolution are disabled in the mod configuration
+* display.getAudience():number - returns the number of people who are looking at the screen. can be used for optimization
 * display.forceFlush() - 
 it works like a regular flush, but updates the picture with 100% probability,
 ignoring setSkipAtNotSight/setSkipAtLags
