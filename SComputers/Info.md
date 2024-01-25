@@ -93,6 +93,8 @@ before the computer crashes (but it will crash anyway if you not delete the cras
 at the same time, it will be called before the crash and you will be able to "cancel" the crash
 using the "getCurrentComputer" method and interacting with the crashstate table
 if an exception occurs in this function, it can be caught only in the game logs/debug console
+* ATTENTION, now the "crashstate" table in the public API is a shadow of the real "crashstate" table. as a result, you can read from it, but writing to it will not lead to any result.
+to undo the computer crash from "callback_error", use the "reboot" method
 * if you declare the "callback_loop" function, it will be called on the next tick instead of calling the entire program
 * there is a SCI api for compatibility (env.SCI =env)
 * added the load method, which allows you to set the name of a piece of code and works as in a normal lua, but does not allow you to load bytecode
