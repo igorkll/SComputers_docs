@@ -39,6 +39,10 @@ function ll_Parser:parse(tokens)
     return self:parseChunk()
 end
 
+local function addInfo(self, tbl)
+    tbl.line = self.line
+    return tbl
+end
 
 function ll_Parser:parseChunk()
     local statements = {}
@@ -50,12 +54,12 @@ function ll_Parser:parseChunk()
         if self:match("return") then
             self:match("SEMICOLON")
             if self:available() then
-                local node = {type="return", values=self:parseExprList()}
+                local node = addInfo(self, {type="return", values=self:parseExprList()})
                 self:match("SEMICOLON")
                 if self:available() then error("Return statement must be the last statement in the block") end
                 statements[#statements+1] = node
             else
-                statements[#statements+1] = {type="return", values={nil}}
+                statements[#statements+1] = addInfo(self, {type="return", values={nil}})
             end
             parsed = true
         end
@@ -68,7 +72,7 @@ function ll_Parser:parseChunk()
         self:match("SEMICOLON")
     end
 
-    return {type="chunk", statements=statements}
+    return addInfo(self, {type="chunk", statements=statements})
 end
 
 function ll_Parser:parseBlock(token_type, ...)
@@ -82,12 +86,12 @@ function ll_Parser:parseBlock(token_type, ...)
         if self:match("return") then
             self:match("SEMICOLON")
             if not self:tokenOneOf(self:peek(), token_type, ...) then
-                local node = {type="return", values=self:parseExprList()}
+                local node = addInfo(self, {type="return", values=self:parseExprList()})
                 self:match("SEMICOLON")
                 if not self:tokenOneOf(self:peek(), token_type, ...) then error("Return statement must be the last statement in the block") end
                 statements[#statements+1] = node
             else
-                statements[#statements+1] = {type="return", values={nil}}
+                statements[#statements+1] = addInfo(self, {type="return", values={nil}})
             end
             parsed = true
         end
@@ -97,7 +101,7 @@ function ll_Parser:parseBlock(token_type, ...)
             if not self:tokenOneOf(self:peek(), token_type, ...) then
                 error("Break statement must be the last statement in the block")
             else
-                statements[#statements+1] = {type="break"}
+                statements[#statements+1] = addInfo(self, {type="break"})
             end
             parsed = true
         end
@@ -110,26 +114,26 @@ function ll_Parser:parseBlock(token_type, ...)
         self:match("SEMICOLON")
     end
 
-    return {type="block", statements=statements}
+    return addInfo(self, {type="block", statements=statements})
 end
 
 
 function ll_Parser:parseStatement()
-    if self:match("do") then return {type="do", body=self:parseBlock()} end
+    if self:match("do") then return addInfo(self, {type="do", body=self:parseBlock()}) end
 
-    if self:match("debugdmpenvstack") then return {type="debugdmpenvstack"} end
+    if self:match("debugdmpenvstack") then return addInfo(self, {type="debugdmpenvstack"}) end
 
     if self:match("while") then
         local expr = self:parseExpr()
         self:consume("do", "Expected 'do' after while")
-        return {type="while", expr=expr, body=self:parseBlock()}
+        return addInfo(self, {type="while", expr=expr, body=self:parseBlock()})
     end
 
     if self:match("repeat") then
         local body = self:parseBlock('until')
         --self:consume("until", "Expected 'until' after repeat body") --consumed by parseBlock
         local expr = self:parseExpr()
-        return {type="repeat", expr=expr, body=body}
+        return addInfo(self, {type="repeat", expr=expr, body=body})
     end
 
     if self:match("if") then
@@ -156,7 +160,7 @@ function ll_Parser:parseStatement()
 
         end
 
-        return {type="if", expr=expr, clauses=clauses, else_body=else_body}
+        return addInfo(self, {type="if", expr=expr, clauses=clauses, else_body=else_body})
     end
 
     if self:match("for") then
@@ -173,13 +177,13 @@ function ll_Parser:parseStatement()
             if self:match("COMMA") then
                 step = self:parseExpr()
             else
-                step = {type="literal", value=1}
+                step = addInfo(self, {type="literal", value=1})
             end
 
             self:consume("do", "Expected 'do' after for loop")
 
             local body = self:parseBlock()
-            return {type="for", var_name=var_name, start=start, end_loop=end_loop, step=step, body=body}
+            return addInfo(self, {type="for", var_name=var_name, start=start, end_loop=end_loop, step=step, body=body})
         end
 
         -- foreach loop
@@ -190,7 +194,7 @@ function ll_Parser:parseStatement()
         self:consume("do", "Expected 'do' after for loop")
 
         local body = self:parseBlock()
-        return {type="foreach", variables=ids, expressions=exprs, body=body}
+        return addInfo(self, {type="foreach", variables=ids, expressions=exprs, body=body})
     end
 
     if self:match("function") then
@@ -212,7 +216,7 @@ function ll_Parser:parseStatement()
             local name = self:consume("identifier", "Expected function name").lexeme
             local func_value = self:parseFunctionBody()
 
-            return {type="declare_local", names={name}, values={func_value}}
+            return addInfo(self, {type="declare_local", names={name}, values={func_value}})
         end
 
         local idlist = self:parseIdList()
@@ -224,7 +228,7 @@ function ll_Parser:parseStatement()
             init_values = {}
         end
 
-        return {type="declare_local", names=idlist, values=init_values}
+        return addInfo(self, {type="declare_local", names=idlist, values=init_values})
 
     end
 
@@ -255,7 +259,7 @@ function ll_Parser:parseStatement()
     self:consume("EQUALS", "Expected '=' after variable list")
     local init_values = self:parseExprList()
 
-    return {type="assign_expr", exprs=exprs, values=init_values}
+    return addInfo(self, {type="assign_expr", exprs=exprs, values=init_values})
 end
 
 function ll_Parser:parseIdList()
@@ -282,17 +286,17 @@ function ll_Parser:parseFunctionName()
     end
 
     if #names == 1 then
-        return {node={type="assign", name=names[1]}, method=method}
+        return addInfo(self, {node=addInfo(self, {type="assign", name=names[1]}), method=method})
     end
 
-    local tree = {type="get", from={type="variable", name=names[1]}, index={type="literal", value=names[2]}}
+    local tree = addInfo(self, {type="get", from=addInfo(self, {type="variable", name=names[1]}), index=addInfo(self, {type="literal", value=names[2]})})
     
     if #names > 2 then
         for i=3, #names do
-            tree = {type="get", from=tree, index={type="literal", value=names[i]}}
+            tree = addInfo(self, {type="get", from=tree, index={type="literal", value=names[i]}})
         end
     end
-    return {node={type="set", in_value=tree.from, index=tree.index}, method=method}
+    return addInfo(self, {node=addInfo(self, {type="set", in_value=tree.from, index=tree.index}), method=method})
 end
 
 function ll_Parser:parseExprList()
@@ -325,10 +329,10 @@ function ll_Parser:parseBinOp(min_prec)
         local next_prec = prec_data.assoc == 'left' and prec_data.prec + 1 or prec_data.prec
         local right = self:parseBinOp(next_prec)
 
-        left = {type="operation", operator=op_token.type, left=left, right=right}
+        left = addInfo(self, {type="operation", operator=op_token.type, left=left, right=right})
     end
 
-    return left
+    return addInfo(self, left)
 end
 
 
@@ -337,34 +341,34 @@ function ll_Parser:parseCall()
 
     while true do
         if self:match("OPEN_PAREN") then
-            left = {type="call", callee=left, args=self:parseArgs()}
+            left = addInfo(self, {type="call", callee=left, args=self:parseArgs()})
 
         elseif self:match("OPEN_BRACE") then
-            left = {type="call", callee=left, args={self:parseTableConstructor()}}
+            left = addInfo(self, {type="call", callee=left, args={self:parseTableConstructor()}})
 
         elseif self:match("string") then
-            left = {type="call", callee=left, args={{type='literal', value=self:prev().literal}}}
+            left = addInfo(self, {type="call", callee=left, args={addInfo(self, {type='literal', value=self:prev().literal})}})
 
         elseif self:match("COLON") then
             local idx = self:consume("identifier", "Expected function name after ':'").lexeme
             self:consume("OPEN_PAREN", "Expected '(' after function name")
             local args = self:parseArgs()
-            left = {type="get_call", callee=left, index=idx, args=args}
+            left = addInfo(self, {type="get_call", callee=left, index=idx, args=args})
 
         elseif self:match("DOT") then
             local idx = self:consume("identifier", "Expected field name after '.'")
-            left = {type="get", from=left, index={type="literal", value=idx.lexeme}}
+            left = addInfo(self, {type="get", from=left, index=addInfo(self, {type="literal", value=idx.lexeme})})
 
         elseif self:match("OPEN_SQUARE") then
             local idx = self:parseExpr()
             self:consume("CLOSE_SQUARE", "Expected ']' after indexing expression")
-            left = {type="get", from=left, index=idx}
+            left = addInfo(self, {type="get", from=left, index=idx})
         else
             break
         end
     end
 
-    return left
+    return addInfo(self, left)
 end
 
 function ll_Parser:parseArgs()
@@ -381,25 +385,25 @@ function ll_Parser:parseArgs()
 end
 
 function ll_Parser:parsePrimaryExpr()
-    if self:match("nil") then return {type="literal", value=nil} end
-    if self:match("string") then return {type="literal", value=self:prev().literal} end
-    if self:match("number") then return {type="literal", value=self:prev().literal} end
-    if self:match("true") then return {type="literal", value=true} end
-    if self:match("false") then return {type="literal", value=false} end
+    if self:match("nil") then return addInfo(self, {type="literal", value=nil}) end
+    if self:match("string") then return addInfo(self, {type="literal", value=self:prev().literal}) end
+    if self:match("number") then return addInfo(self, {type="literal", value=self:prev().literal}) end
+    if self:match("true") then return addInfo(self, {type="literal", value=true}) end
+    if self:match("false") then return addInfo(self, {type="literal", value=false}) end
     if self:match("function") then return self:parseFunctionBody() end
     if self:match("OPEN_BRACE") then return self:parseTableConstructor() end
 
-    if self:match("identifier") then return {type="variable", name=self:prev().lexeme} end
+    if self:match("identifier") then return addInfo(self, {type="variable", name=self:prev().lexeme}) end
     if self:match("OPEN_PAREN") then 
         local expr = self:parseExpr()
         self:consume("CLOSE_PAREN", "Expected ')' after grouping expression")
         return expr
     end
 
-    if self:match("not") then return {type="not", value=self:parseBinOp(40)} end
-    if self:match("MINUS") then return {type="uminus", value=self:parseBinOp(40)} end
-    if self:match("HASHTAG") then return {type="get_length", value=self:parseBinOp(40)} end
-    if self:match("VARARGS") then return {type="varargs"} end
+    if self:match("not") then return addInfo(self, {type="not", value=self:parseBinOp(40)}) end
+    if self:match("MINUS") then return addInfo(self, {type="uminus", value=self:parseBinOp(40)}) end
+    if self:match("HASHTAG") then return addInfo(self, {type="get_length", value=self:parseBinOp(40)}) end
+    if self:match("VARARGS") then return addInfo(self, {type="varargs"}) end
 
     print(self:peek().type)
     error("Expected expression")
@@ -426,7 +430,7 @@ function ll_Parser:parseFunctionBody()
     local body = self:parseBlock()
     body.type = 'chunk'
 
-    return {type="function", arg_names=arg_names, varargs=varargs, body=body}
+    return addInfo(self, {type="function", arg_names=arg_names, varargs=varargs, body=body})
 end
 
 function ll_Parser:parseTableConstructor()
@@ -444,12 +448,12 @@ function ll_Parser:parseTableConstructor()
 
     self:consume("CLOSE_BRACE", "Expected '}' after table constructor")
     
-    return {type="table", fields=fields}
+    return addInfo(self, {type="table", fields=fields})
 end
 
 function ll_Parser:parseTableField()
     if self:match("VARARGS") then
-        return {array_item=true, value={type='varargs'}}
+        return addInfo(self, {array_item=true, value=addInfo(self, {type='varargs'})})
     end
 
     if self:match("OPEN_SQUARE") then
@@ -464,7 +468,7 @@ function ll_Parser:parseTableField()
         local idx = self:consume("identifier", "Expected field name").lexeme
         self:consume("EQUALS", "Expected '=' after table field key")
         local value = self:parseExpr()
-        return {key={type="literal", value=idx}, value=value}
+        return {key=addInfo(self, {type="literal", value=idx}), value=value}
     end
 
     local value = self:parseExpr()
@@ -517,7 +521,7 @@ end
 
 function ll_Parser:peek(offset)
     local offset = offset or 0
-    if self.current+offset > #self.tokens then return {type="EOF"} end
+    if self.current+offset > #self.tokens then return addInfo(self, {type="EOF"}) end
     return self.tokens[self.current+offset]
 end
 

@@ -486,6 +486,7 @@ function ll_Interpreter:evaluate(node, environment)
     --    print(node.type, tableToString(node))
     --end
 
+    self.lastEval = node
     return self.evals[node.type](self, node, environment)
 end
 

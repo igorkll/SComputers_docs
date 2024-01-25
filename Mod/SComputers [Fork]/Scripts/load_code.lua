@@ -262,7 +262,7 @@ function load_code(self, chunk, chunkname, mode, env)
                 if result[1] then
                     return unpack(result, 2)
                 else
-                    error(ll_shorterr(result[2]), 2)
+                    error(ll_shorterr(result[2]) .. "   -   (line - " .. tostring(ll_Interpreter.lastEval.line or "unknown") .. ", eval - " .. tostring(ll_Interpreter.lastEval.type) .. ")", 2)
                 end
 			end
 		else
