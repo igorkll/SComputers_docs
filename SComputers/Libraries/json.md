@@ -11,3 +11,4 @@ sidebar-label: 'json'
 * json.decode(jsonstring)
 
 it may work better in some cases.
+this version of json is fully compatible with binary data
