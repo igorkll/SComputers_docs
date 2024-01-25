@@ -438,6 +438,7 @@ function createSafeEnv(self, settings)
         reboot = function ()
             if self.storageData.noSoftwareReboot then
                 error("this computer cannot be restarted programmatically", 2)
+                return
             end
             
             self.software_reboot_flag = true

@@ -236,6 +236,8 @@ function ScriptableComputer:sv_formatException()
 	else
 		self.crashstate.exceptionMsg = nil
 	end
+
+	self:sv_updateException()
 end
 
 function ScriptableComputer:server_onDestroy()
@@ -479,6 +481,15 @@ function ScriptableComputer:sv_disableComponentApi(notRemoveFlags)
 	end
 end
 
+function ScriptableComputer:sv_updateException()
+	for k, v in pairs(self.publicTable.public.crashstate) do
+		self.publicTable.public.crashstate[k] = nil
+	end
+	for k, v in pairs(self.crashstate) do
+		self.publicTable.public.crashstate[k] = v
+	end
+end
+
 function ScriptableComputer:sv_reset()
 	self:sv_createLocalScriptMode()
 	self.clientInvokes = {}
@@ -492,11 +503,12 @@ function ScriptableComputer:sv_reset()
 		public = {
 			registers = self.registers,
 			env = self.env,
-			crashstate = self.crashstate
+			crashstate = {}
 		},
 		self = self
 	}
 	self.storageData.noSoftwareReboot = nil
+	self:sv_updateException()
 	self:updateSharedData()
 end
 
@@ -516,6 +528,7 @@ function ScriptableComputer:sv_reboot(force, not_execute)
 	self.crashstate.exceptionMsg = nil
 	self.oldhasException = nil
 	self.oldexceptionMsg = nil
+	self:sv_updateException()
 
 	if self.isActive and not not_execute and not fromException then
 		self:sv_execute(true) --последняя итерация после отключения входа, чтобы отлавить выключения
