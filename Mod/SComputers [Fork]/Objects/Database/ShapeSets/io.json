@@ -104,7 +104,7 @@
             "y" : 1,
             "z" : 3
          },
-         "color" : "222222",
+         "color" : "525252",
          "physicsMaterial" : "Mechanical",
          "ratings" : {
             "buoyancy" : 3,
@@ -128,7 +128,7 @@
             "y" : 1,
             "z" : 3
          },
-         "color" : "7e2d00",
+         "color" : "525252",
          "physicsMaterial" : "Mechanical",
          "ratings" : {
             "buoyancy" : 3,
