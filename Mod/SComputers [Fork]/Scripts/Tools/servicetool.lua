@@ -115,7 +115,8 @@ function servicetool:client_onCreate()
     sm.gui.chatMessage("#f08c02Thank you for using SComputers :)#ffffff")
     --sm.gui.chatMessage("#f03c02be sure to read the documentation#ffffff: https://scrapmechanictools.com/modapis/SComputers/Info")
     sm.gui.chatMessage("#f03c02be sure to read the documentation#ffffff: https://github.com/igorkll/SComputers_docs/blob/main/SComputers/Info.md")
-    --sm.gui.chatMessage("current documentation is \"temporary\"")
+    sm.gui.chatMessage("#dea500SComputers discord server#ffffff: https://discord.gg/uJrsmUjaMG")
+    --sm.gui.chatMessage("current documentation is \"temporary\"") permanent link for the invitation: 
     --sm.gui.chatMessage("because the scrapmechanictool site has closed")
     
     self.network:sendToServer("sv_dataRequest")

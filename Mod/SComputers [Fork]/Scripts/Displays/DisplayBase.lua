@@ -8,6 +8,7 @@ debug_offset = false
 debug_disableEffectsBuffer = false
 debug_disableDBuff = false
 debug_disableForceNativeRender = false
+debug_disableUpdateColor = false
 
 --settings
 mul_ray_fov = 2
@@ -297,18 +298,7 @@ local function quadInRect(qx, qy, qs, rx, ry, rw, rh)
     return (qx >= rx and qx + qs <= rx + rw) and (qy >= ry and qy + qs <= ry + rh)
 end
 
-local function quadInCircle(qx, qy, qs, cx, cy, cr)
-    local lx = qx - cx
-    local ly = qy - cy
-
-    local cr_sq = cr*cr
-
-    local pointIn = function (dx, dy)
-        return dx*dx + dy*dy <= cr_sq
-    end
-
-    return pointIn(lx, ly) and pointIn(lx + qs, ly) and pointIn(lx, ly + qs) and pointIn(lx + qs, ly + qs)
-end
+local quadInCircle = quadInCircle
 
 local function quadIntersectsRect(qx, qy, qs, rx, ry, rw, rh)
     return (qx < rx + rw and qx + qs > rx) and (qy < ry + rh and qy + qs > ry)
@@ -408,6 +398,8 @@ local function raw_set_color(effect, color)
 end
 
 function quad_updateEffectColor(self, force)
+    if debug_disableUpdateColor then return end
+
     --if not self.effect or not sm_exists(self.effect) then return end
     local color = self.color
 
@@ -481,7 +473,7 @@ local quad_alt_hideRot = sm_quat_fromEuler(sm_vec3_new(0, 90, 0))
 local quad_alt_visibleRot = sm_quat_fromEuler(sm_vec3_new(0, 180 + 90, 0))
 
 
-function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale, wide)
+function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale, wide, uuid)
     --local attemptRemove
 
     --::attempt::
@@ -536,9 +528,9 @@ function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale, wid
             --print("create_id", effect.id)
 
             if display.scriptableObject and display.scriptableObject.data.glass then
-                effect_setParameter(effect, "uuid", sc_display_shapesUuidGlass)
+                effect_setParameter(effect, "uuid", uuid or sc_display_shapesUuidGlass)
             else
-                effect_setParameter(effect, "uuid", sc_display_shapesUuid)
+                effect_setParameter(effect, "uuid", uuid or sc_display_shapesUuid)
             end
             
             --effect:start()
@@ -841,11 +833,7 @@ function quad_treeSetColor(self, tx, ty, color)
             if not self.children then quad_split(self) end
 
             local Q_hsize = 2 / self.size
-
-            local i = math_floor((tx - self.x) * Q_hsize) + 2 * math_floor((ty - self.y) * Q_hsize)
-            if quad_treeSetColor(self.children[i + 1], tx, ty, color) then
-                return true
-            end
+            return quad_treeSetColor(self.children[math_floor((tx - self.x) * Q_hsize) + 2 * math_floor((ty - self.y) * Q_hsize) + 1], tx, ty, color)
         else
             if self.color ~= color then
                 self.color = color
@@ -894,7 +882,6 @@ function quad_treeFillCircle(self, x, y, r, color)
     local ssize = self.size
 
     if quadIntersectsCircle(sx, sy, ssize, x, y, r) then
-
         if quadInCircle(sx, sy, ssize, x, y, r) then
             if self.children then
                 quad_destroyChildren(self)
@@ -2868,7 +2855,7 @@ function sc.display.client_drawStack(self, sendstack)
         if sendstack.oops then
             local eff = quad_createEffect(self.quadTree, 0, 0, self.quadTree.sizeX, self.quadTree.sizeY, nil, true)
             --effect_setParameter(eff, "uuid", oopsUuid)
-            effect_setParameter(eff, "uuid", sc_display_shapesUuid)
+            --effect_setParameter(eff, "uuid", sc_display_shapesUuid)
             effect_setParameter(eff, "color", oopsColor)
             if self.scriptableObject.character then
                 effectsData[eff.id][8] = sm_quat_fromEuler(sm_vec3_new(180, 90, 0))

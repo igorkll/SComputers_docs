@@ -40,6 +40,12 @@ local sm_color_new = sm.color.new
 local sm_vec3_new = sm.vec3.new
 local sm_quat_new = sm.quat.new
 
+local pcall = pcall
+local unpack = unpack
+local error = error
+local sm_game_getCurrentTick = sm.game.getCurrentTick
+local composite = sm.interactable.connectionType.composite
+
 -------------------------------------------------------
 
 
@@ -434,7 +440,7 @@ function sc.formatColor(data, default, advancedDefault)
 	elseif t == "string" then
 		return sm_color_new(data)
 	elseif t == "number" then
-		return sm.color.new(hexToRGB(data))
+		return sm_color_new(hexToRGB(data))
 	end
 
 	if advancedDefault then
@@ -449,6 +455,7 @@ function sc.formatColorStr(data, default, advancedDefault)
 	return tostring(formatColor(data, default, advancedDefault))
 end
 
+local table_insert = table.insert
 function sc.display.optimizeFont(chars, width, height)
 	local optimized = {}
 
@@ -459,7 +466,7 @@ function sc.display.optimizeFont(chars, width, height)
 			for ix = 1, width do
 				local z = w:sub(ix, ix)
 				if z == "1" then
-					table.insert(pixels, { ix-1, iy-1 })
+					table_insert(pixels, { ix-1, iy-1 })
 				end
 			end
 		end
@@ -521,8 +528,14 @@ do
 	end
 end
 
+local sc_coroutineCheck = sc.coroutineCheck
+local sc_advDeepcopy = sc.advDeepcopy
+
+local getChildren = sm.interactable.getChildren
+local getParents = sm.interactable.getParents
+
 function sc.getComponents(self, name, settings)
-	sc.coroutineCheck()
+	sc_coroutineCheck()
 
 	settings = settings or {}
 
@@ -532,67 +545,68 @@ function sc.getComponents(self, name, settings)
 			if lname == name then
 				for i, data in ipairs(tbl) do
 					data.type = lname
-					table.insert(components, data)
+					table_insert(components, data)
 				end
 			end
 		end
 	end
 
-	if not self.interactable then return components end
+	local lInteractable = self.interactable
+	if not lInteractable then return components end
 
 	----------------
 
-	local connectType = sm.interactable.connectionType.composite
+	local connectType = composite
 	local findMethod
 	local componentDatas
 
 	if name == "keyboard" then
-		findMethod = self.interactable.getParents
+		findMethod = lInteractable.getParents
 		componentDatas = sc.keyboardDatas
 	elseif name == "synthesizer" then
-		findMethod = self.interactable.getChildren
+		findMethod = lInteractable.getChildren
 		componentDatas = sc.synthesizerDatas
 	elseif name == "holoprojector" then
-		findMethod = self.interactable.getChildren
+		findMethod = lInteractable.getChildren
 		componentDatas = sc.holoDatas
 	elseif name == "camera" then
-		findMethod = self.interactable.getParents
+		findMethod = lInteractable.getParents
 		componentDatas = sc.camerasDatas
 	elseif name == "disk" then
-		findMethod = self.interactable.getChildren
+		findMethod = lInteractable.getChildren
 		componentDatas = sc.hardDiskDrivesDatas
 	elseif name == "port" then
-		findMethod = self.interactable.getChildren
+		findMethod = lInteractable.getChildren
 		componentDatas = sc.networkPortsDatas
 	elseif name == "radar" then
-		findMethod = self.interactable.getChildren
+		findMethod = lInteractable.getChildren
 		componentDatas = sc.radarsDatas
 	elseif name == "motor" then
-		findMethod = self.interactable.getChildren
+		findMethod = lInteractable.getChildren
 		componentDatas = sc.motorsDatas
 	elseif name == "display" then
-		findMethod = self.interactable.getChildren
+		findMethod = lInteractable.getChildren
 		componentDatas = sc.displaysDatas
 	elseif name == "antenna" then
-		findMethod = self.interactable.getChildren
+		findMethod = lInteractable.getChildren
 		componentDatas = sc.antennasApis
 	end
 
 	local function addComponents(interactable, api)
 		if self.componentCache[interactable.id] then
-			table.insert(components, self.componentCache[interactable.id])
+			table_insert(components, self.componentCache[interactable.id])
 			return
 		end
 
 		local newapi = {}
+		local checkTick
 		for key, value in pairs(api) do
 			local api_type = api.type
 			if type(value) == "function" then
-				local checkTick
 				newapi[key] = function (...)
-					sc.coroutineCheck()
+					sc_coroutineCheck()
 
-					local ctick = sm.game.getCurrentTick()
+					local ctick = sm_game_getCurrentTick()
 					if checkTick ~= ctick then
 						checkTick = ctick
 
@@ -600,23 +614,22 @@ function sc.getComponents(self, name, settings)
 							error("the \"" .. (api_type or "unknown") .. "\" component has been removed", 2)
 						end
 
-						if not sc.restrictions.disCompCheck then
+						if ctick % 20 == 0 and not sc.restrictions.disCompCheck then
 							local find
-							for _, children in ipairs(self.interactable:getChildren()) do
+							for _, children in ipairs(getChildren(lInteractable)) do
 								if children == interactable then
 									find = true
 									break
 								end
 							end
 							if not find then
-								for _, parent in ipairs(self.interactable:getParents()) do
+								for _, parent in ipairs(getParents(lInteractable)) do
 									if parent == interactable then
 										find = true
 										break
 									end
 								end
 							end
-
 							if not find then
 								error("the \"" .. (api_type or "unknown") .. "\" component has been disconnected", 2)
 							end
@@ -627,7 +640,7 @@ function sc.getComponents(self, name, settings)
 						error("the \"" .. (api_type or "unknown") .. "\" component was turned off", 2)
 					end
 
-					local result = {pcall(api[key], ...)} --кастомные(пользовательские) компоненты на основе компа могут динамически изменять свой API
+					local result = {pcall(api[key], ...)} --кастомные(пользовательские) компоненты на основе компа могут динамически изменять свой API. по этому api[key] а не value
 					if result[1] then
 						return unpack(result, 2)
 					else
@@ -635,11 +648,11 @@ function sc.getComponents(self, name, settings)
 					end
 				end
 			else
-				newapi[key] = sc.advDeepcopy(value)
+				newapi[key] = sc_advDeepcopy(value)
 			end
 		end
 		self.componentCache[interactable.id] = newapi
-		table.insert(components, newapi)
+		table_insert(components, newapi)
 	end
 
 	local function reg(interactable)
@@ -651,16 +664,16 @@ function sc.getComponents(self, name, settings)
 			addComponents(interactable, data.sc_component.api)
 		end
 	end
-	for k, v in pairs(self.interactable:getChildren(connectType)) do
-		reg(v)
+	for k, v in pairs(getChildren(lInteractable, connectType)) do
+		pcall(reg, v)
 	end
-	for k, v in pairs(self.interactable:getParents(connectType)) do
-		reg(v)
+	for k, v in pairs(getParents(lInteractable, connectType)) do
+		pcall(reg, v)
 	end
 
 	if findMethod then
-		for k, v in pairs(findMethod(self.interactable, connectType)) do
-			local data = componentDatas[v:getId()]
+		for k, v in pairs(findMethod(lInteractable, connectType)) do
+			local data = componentDatas[v.id]
 			if data then
 				data.type = name
 				addComponents(v, data)

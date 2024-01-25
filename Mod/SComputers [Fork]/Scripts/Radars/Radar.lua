@@ -15,6 +15,11 @@ function Radar.server_onCreate(self)
 	sc.radar.server_onCreate(self.radar)
 end
 
+function Radar.server_onFixedUpdate(self)
+	sc.creativeCheck(self, self.data and self.data.creative)
+	sc.radar.server_onTick(self.radar)
+end
+
 function Radar.server_onDestroy(self)
 	sc.radar.server_onDestroy(self.radar)
 end

@@ -441,18 +441,17 @@ function basegraphic_drawLine(x, y, x1, y1, color, width, height, buffer1)
 end
 local basegraphic_drawLine = basegraphic_drawLine
 
-local function quadInCircle(qx, qy, qs, cx, cy, cr)
+local function pointIn(dx, dy, cr_sq)
+	return dx*dx + dy*dy <= cr_sq
+end
+
+function quadInCircle(qx, qy, qs, cx, cy, cr)
 	local lx = qx - cx
 	local ly = qy - cy
-
 	local cr_sq = cr*cr
-
-	local pointIn = function (dx, dy)
-		return dx*dx + dy*dy <= cr_sq
-	end
-
-	return pointIn(lx, ly) and pointIn(lx + qs, ly) and pointIn(lx, ly + qs) and pointIn(lx + qs, ly + qs)
+	return pointIn(lx, ly, cr_sq) and pointIn(lx + qs, ly, cr_sq) and pointIn(lx, ly + qs, cr_sq) and pointIn(lx + qs, ly + qs, cr_sq)
 end
+local quadInCircle = quadInCircle
 
 local formatColor = sc.formatColor
 function basegraphic_doubleBuffering(self, stack, width, height, font, utf8support, flush, optimize)

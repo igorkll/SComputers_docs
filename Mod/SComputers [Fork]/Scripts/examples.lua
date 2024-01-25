@@ -629,14 +629,24 @@ disk = getDisks()[1]
 if input(colors.sm.Red[2]) then
     disk.clear()
 
-    local img = image.new(32, 32, sm.color.new(0, 0, 0))
-    img:fromCameraAll(getCameras()[1], "drawDepth")
+    local img = image.new(display.getWidth(), display.getHeight(), sm.color.new(0, 0, 0))
+    img:fromCameraAll(getCameras()[1], "drawAdvanced")
     img:save(disk, "/image")
-elseif input(colors.sm.Green[2]) then
-    local img = image.load(disk, "/image")
-    display.clear()
-    img:draw(display)
+
+    display.clear("0000ff")
+    display.drawText(1, 1, "photo maked!")
     display.forceFlush()
+elseif input(colors.sm.Green[2]) then
+    if disk.hasFile("/image") then
+        local img = image.load(disk, "/image")
+        display.clear()
+        img:draw(display)
+        display.forceFlush()
+    else
+        display.clear("0000ff")
+        display.drawText(1, 1, "no photo")
+        display.forceFlush()
+    end
 end
 
 function callback_loop()
@@ -644,7 +654,7 @@ function callback_loop()
         display.clear()
         display.forceFlush()
     end
-end
+end    
 ]]
     elseif name == "eScar" then
         str = 

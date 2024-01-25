@@ -282,6 +282,10 @@ function sc.radar.server_makeCasts(self) --> table[hResol, vResol]
 	return result
 end
 
+function sc.radar.server_onTick(self)
+	
+end
+
 function sc.radar.server_onCreate(self)
 	sc.radarsDatas[self.scriptableObject.interactable:getId()] = sc.radar.createData(self)
 end

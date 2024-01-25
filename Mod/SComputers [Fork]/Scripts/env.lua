@@ -507,9 +507,44 @@ function createSafeEnv(self, settings)
         env.coroutine = sc.deepcopy(coroutine)
     end
 
-    ---------------- links
+    ---------------- compatibility with new versions of lua
 
     env.table.unpack = env.unpack
+    
+    function env.math.tointeger(x)
+        local num = tonumber(x)
+        if num then
+            local v1, v2 = math.modf(num)
+            if v2 == 0 then
+                return v1
+            end
+        end
+    end
+
+    function env.math.type(x)
+        if type(x) == "number" then
+            local v1, v2 = math.modf(x)
+            if v2 == 0 then
+                return "integer"
+            else
+                return "float"
+            end
+        end
+    end
+
+    function env.math.ult(m, n)
+        local _, v1 = math.modf(m)
+        local _, v2 = math.modf(n)
+        if v1 ~= 0 then
+            error("bad argument #1 to 'ult' (number has no integer representation)", 2)
+        end
+        if v2 ~= 0 then
+            error("bad argument #2 to 'ult' (number has no integer representation)", 2)
+        end
+        return m < n
+    end
+
+    ---------------- links
 
     env._G = env
     env._ENV = env
