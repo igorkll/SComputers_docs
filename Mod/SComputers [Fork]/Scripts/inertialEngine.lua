@@ -76,7 +76,7 @@ function inertialEngine:server_onCreate()
                 setGravity = function(number)
                     checkArg(1, number, "number")
                     if number > 1 then number = 1 end
-                    if number > -1 then number = -1 end
+                    if number < -1 then number = -1 end
                     self.gravity = number
                 end,
                 getGravity = function()
@@ -149,7 +149,7 @@ function inertialEngine:server_onRefresh()
     self:server_onCreate()
 end
 
-function inertialEngine:server_onFixedUpdate(_, dt)
+function inertialEngine:server_onFixedUpdate(dt)
     if self.creative then
         self.batteries = math.huge
         self.gasolines = math.huge
@@ -179,24 +179,10 @@ function inertialEngine:server_onFixedUpdate(_, dt)
         if not self.raw_mode then
             self:sv_moveToPos()
         else
-            local gravity = sm.vec3.new(0,0,(sm.physics.getGravity()*(1.047494 - self.gravity)) * dt)
-            if not self.gravTimer or os.clock() - self.gravTimer > 0.01 then
-                for k, body in pairs(self.shape.body:getCreationBodies()) do
-                    local drag = sm.vec3.new(0,0,0)
-                    if self.shapes and self.shapes[k] then
-                        if (self.shapes[k] - body.worldPosition):length() < 0.0025 then
-                            drag = (self.shapes[k] - body.worldPosition) * 2
-                        else
-                            drag = (self.shapes[k] - body.worldPosition) / 2
-                        end
-                        drag.x = 0
-                        drag.y = 0
-                    end 
-                    sm.physics.applyImpulse(body, (gravity + drag) * body.mass, true)
-                    self.shapes[k] = body.worldPosition
-                end
-                self.gravTimer = os.clock()
-            end
+            local cof = 0.26
+            local val = cof - (self.gravity * cof)
+            print(self.gravity, val)
+            sm.physics.applyImpulse(self.shape.body, sm.vec3.new(0, 0, val) * self:sv_getCreationMass(), true)
         end
 
         if self.tick % 40 == 0 and not self.creative then
@@ -206,6 +192,14 @@ function inertialEngine:server_onFixedUpdate(_, dt)
     end
 
     sc.creativeCheck(self, self.creative)
+end
+
+function inertialEngine:sv_getCreationMass()
+    local mass = 0
+    for i, body in ipairs(self.shape.body:getCreationBodies()) do
+        mass = mass + body.mass
+    end
+    return mass
 end
 
 function inertialEngine:sv_reset()
