@@ -14,6 +14,9 @@ function inertialEngine:server_onCreate()
     self.tick = 0
     self.creative = self.data and self.data.creative
     self.stableMode = 1
+    self.gravity = 1
+    self.raw_mode = false
+    self.shapes = {}
     self:sv_reset()
 
     self.interactable.publicData = {
@@ -47,17 +50,7 @@ function inertialEngine:server_onCreate()
                 end,
                 addPosition = function (offset)
                     checkArg(1, offset, "Vec3")
-                    local vec = sc.advDeepcopy(self.targetRotation)
-
-                    local add1 = fromEulerVec(vec) * offset
-                    add1.z = 0
-
-                    vec.z = 0
-                    local add2 = fromEulerVec(vec) * offset
-                    add2.x = 0
-                    add2.y = 0
-
-                    self.targetPosition = self.targetPosition + add1 + add2
+                    self.targetPosition = self.targetPosition + self:reOffset(offset)
                 end,
                 setStableMode = function (mode)
                     checkArg(1, mode, "number")
@@ -67,11 +60,40 @@ function inertialEngine:server_onCreate()
                     self.stableMode = mode
                     self:recreatePID()
                 end,
-
                 getOffset = function()
                     return mathDist(self.targetPosition, self.shape.worldPosition)
                 end,
+
+                -- sporling API
+                setRawMovement = function(state)
+                    checkArg(1, state, "boolean")
+                    self.raw_mode = state
+                end,
+                isRawMovement = function()
+                    return self.raw_mode
+                end,
+
+                setGravity = function(number)
+                    checkArg(1, number, "number")
+                    if number > 1 then number = 1 end
+                    if number > -1 then number = -1 end
+                    self.gravity = number
+                end,
+                getGravity = function()
+                    return self.gravity
+                end,
+
                 raw_rotation = function(vec)
+                    if not self.active then
+                        return
+                    end
+
+                    local tick = sm.game.getCurrentTick()
+                    if tick == self.old_tick and not sc.restrictions.disableCallLimit then
+                        error("raw_rotation can only be used 1 time per tick on one inertialEngine", 2)
+                    end
+                    self.old_tick = tick
+
                     if vec.x < -8 then vec.x = -8 end
                     if vec.x > 8 then vec.x = 8 end
 
@@ -82,6 +104,28 @@ function inertialEngine:server_onCreate()
                     if vec.z > 8 then vec.z = 8 end
 
                     sm.physics.applyTorque(self.shape.body, self.shape.worldRotation * (vec * self.shape.body.mass), true)
+                end,
+                raw_move = function(vec)
+                    if not self.active then
+                        return
+                    end
+
+                    local tick = sm.game.getCurrentTick()
+                    if tick == self.old_tick2 and not sc.restrictions.disableCallLimit then
+                        error("raw_move can only be used 1 time per tick on one inertialEngine", 2)
+                    end
+                    self.old_tick2 = tick
+
+                    if vec.x < -5 then vec.x = -5 end
+                    if vec.x > 5 then vec.x = 5 end
+
+                    if vec.y < -5 then vec.y = -5 end
+                    if vec.y > 5 then vec.y = 5 end
+
+                    if vec.z < -5 then vec.z = -5 end
+                    if vec.z > 5 then vec.z = 5 end
+
+                    sm.physics.applyImpulse(self.shape.body, self:reOffset(vec, self:getSelfRotation()) * self.shape.body.mass, true)
                 end
             }
         }
@@ -90,11 +134,22 @@ function inertialEngine:server_onCreate()
     sc.creativeCheck(self, self.creative)
 end
 
+function inertialEngine:reOffset(offset, rotation)
+    local vec = sc.advDeepcopy(rotation or self.targetRotation)
+    local add1 = fromEulerVec(vec) * offset
+    add1.z = 0
+    vec.z = 0
+    local add2 = fromEulerVec(vec) * offset
+    add2.x = 0
+    add2.y = 0
+    return add1 + add2
+end
+
 function inertialEngine:server_onRefresh()
     self:server_onCreate()
 end
 
-function inertialEngine:server_onFixedUpdate()
+function inertialEngine:server_onFixedUpdate(_, dt)
     if self.creative then
         self.batteries = math.huge
         self.gasolines = math.huge
@@ -121,7 +176,28 @@ function inertialEngine:server_onFixedUpdate()
         ]]
 
         self:sv_stable()
-        self:sv_moveToPos()
+        if not self.raw_mode then
+            self:sv_moveToPos()
+        else
+            local gravity = sm.vec3.new(0,0,(sm.physics.getGravity()*(1.047494 - self.gravity)) * dt)
+            if not self.gravTimer or os.clock() - self.gravTimer > 0.01 then
+                for k, body in pairs(self.shape.body:getCreationBodies()) do
+                    local drag = sm.vec3.new(0,0,0)
+                    if self.shapes and self.shapes[k] then
+                        if (self.shapes[k] - body.worldPosition):length() < 0.0025 then
+                            drag = (self.shapes[k] - body.worldPosition) * 2
+                        else
+                            drag = (self.shapes[k] - body.worldPosition) / 2
+                        end
+                        drag.x = 0
+                        drag.y = 0
+                    end 
+                    sm.physics.applyImpulse(body, (gravity + drag) * body.mass, true)
+                    self.shapes[k] = body.worldPosition
+                end
+                self.gravTimer = os.clock()
+            end
+        end
 
         if self.tick % 40 == 0 and not self.creative then
             self:sv_removeItem(sm.interactable.connectionType.electricity)
