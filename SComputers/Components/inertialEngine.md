@@ -27,8 +27,8 @@ note that the addPosition method perceives as a rotation for processing movement
 * inertialEngine.getOffset():number - returns the distance in meters from the actual location to the target point
 * inertialEngine.setRawMovement(state) - sets the raw movement mode. in this mode, the "addPosition" method will not affect the position of the creation, and the movements will need to be carried out using the "raw_move" method
 * inertialEngine.isRawMovement()
-* inertialEngine.raw_rotation(vec3) - makes the rotation pulse relative to the current rotation. it cannot be called more than once per tick, the maximum value of the vector element is 8
-* inertialEngine.raw_move(vec3) - makes the pulse relative to the current rotation. it cannot be called more than once per tick, the maximum value of the vector element is 10000
+* inertialEngine.raw_rotation(vec3) - makes the rotation pulse relative to the current rotation. it cannot be called more than once per tick, the maximum value of the vector element is 8. Note that the momentum is multiplied by the mass of the creation
+* inertialEngine.raw_move(vec3) - makes the pulse relative to the current rotation. it cannot be called more than once per tick, the maximum value of the vector element is 5. Note that the momentum is multiplied by the mass of the creation
 
 
 ### stable modes
