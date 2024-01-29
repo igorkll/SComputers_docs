@@ -5,22 +5,22 @@
       "title" : "[FORK ONLY] World Antenna"
    },
    "0cafe1bc-fd95-4b89-97fb-af1da059a4ab" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Big Display (16x16)"
    },
    "0e026670-4897-47c2-a129-7061ab8adf84" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Display 3x3 (256x256)"
    },
    "10e2710c-eff7-4b03-a5a1-dd849283b997" : {
-      "description" : "Changes what the computers can do and not. This is useful if you have a annoying friend in your world and wan't to lag your world.",
+      "description" : "allows you to change the mod settings, be careful!",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Permission Tool"
    },
    "12e55219-7478-4e7d-a6e6-b39e5daa160a" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Display 3x3 (64x64)"
    },
@@ -30,27 +30,27 @@
       "title" : "[FORK ONLY] Tablet 64"
    },
    "17e9e663-501a-46e4-bdfc-40a365910cf4" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Display 4x3 (64x48)"
    },
    "18a8e622-2c01-41c0-9b60-c0d8d88c09d8" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Long Display 4x1 (128x32)"
    },
    "1a09438d-c8b4-49c5-9d2d-aa12935b2c49" : {
-      "description" : "this computers contains SSD disk on 64KB space",
+      "description" : "this computers contains SSD disk on 64KB space.",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
-      "title" : "[FORK ONLY] Scriptable Computer with SSD"
+      "title" : "[FORK ONLY] Lua Computer with SSD"
    },
    "1b4281c6-4393-4ca7-94b8-8f199eba4668" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Display (128x128)"
    },
    "2b6b6b6f-7c7d-4f6a-9c8d-774a084b1cfb" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "Big Display (32x32)"
    },
@@ -60,9 +60,9 @@
       "title" : "[FORK ONLY] Sound Synthesizer"
    },
    "356ecbf5-d4fa-480f-8409-15d9d8add6a5" : {
-      "description" : "This is the main part you will be allways using for Modded Computers. They are basicly the brains of the Computer that controls all the connected interactables.",
+      "description" : "this part can execute lua code! just connect all the necessary components and upload the code to it.",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
-      "title" : "Scriptable Computer"
+      "title" : "Lua Computer"
    },
    "3aa0151f-a3d6-48b1-9a7e-2328aa1bfe36" : {
       "description" : "screen: 32x32\nssd: none\nyou can carry it in your hand and use it when you need it. executes code like a computer, has a 32 by 32 screen",
@@ -75,37 +75,37 @@
       "title" : "[FORK ONLY] Holoprojector"
    },
    "3d37b254-dbaa-4be2-9a0d-ce1e24315c08" : {
-      "description" : "Changes what the computers can do and not. This is useful if you have a annoying friend in your world and wan't to lag your world.",
+      "description" : "allows you to change the mod settings, be careful!",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] #f002a8Creative Pocket Permission Tool#eeeeee"
    },
    "d933ab9f-0007-4398-ad30-9aab6bac8b0a" : {
-      "description" : "Radius: 128 blocks. A antenna is used if you wan't like internet. Antenna's dosen't need to be connected to another network port or antenna. They are routed by values. Great for projects like creating your own internet.",
+      "description" : "the antenna is able to transmit data through network ports at a distance.\nRadius: 128 blocks.",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Small Antenna"
    },
    "43f8c2f7-cd4f-47c5-ab3a-cbef548e340b" : {
-      "description" : "Radius: 1000 blocks. A antenna is used if you wan't like internet. Antenna's dosen't need to be connected to another network port or antenna. They are routed by values. Great for projects like creating your own internet.",
+      "description" : "the antenna is able to transmit data through network ports at a distance.\nRadius: 1000 blocks. ",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "Antenna"
    },
    "45151dd5-109a-4f0c-83fb-0fd35afd9020" : {
-      "description" : "Use a Hard Drive (128 KB) that can be used to store files and folders.",
+      "description" : "Hard Drive (128 KB)",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "HDD (128 KB)"
    },
    "46271f6f-e61a-4173-b121-e37a1f56a904" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "Big Display (64x64)"
    },
    "4b7651fe-c958-4836-bcfd-11bddabbda73" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Display 3x3 (16x16)"
    },
    "5052380b-83b0-404f-936b-3f40c8c261b3" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Very Very Big Display (16x16)"
    },
@@ -120,32 +120,32 @@
       "title" : "Big Radar"
    },
    "57f5bbeb-3dd1-4c63-bc17-a172b4f1baf6" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Very Very Big Display (64x64)"
    },
    "596660f2-1d92-468a-97c6-e7cdb9087095" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Long Display 4x1 (64x16)"
    },
    "5c6f9472-d88d-47ad-9cf8-faac8b008480" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Display 3x3 (128x128)"
    },
    "623318f9-dbef-4fa4-80c6-f279d0780af1" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Display 4x3 (128x96)"
    },
    "65f5fc73-32f7-428f-b0a8-4a99243f4d0d" : {
-      "description" : "Radius: 16 blocks. A antenna is used if you wan't like internet. Antenna's dosen't need to be connected to another network port or antenna. They are routed by values. Great for projects like creating your own internet.",
+      "description" : "the antenna is able to transmit data through network ports at a distance.\nRadius: 16 blocks. ",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Nfc Antenna"
    },
    "66355447-8900-412c-b03c-12c85e0587ef" : {
-      "description" : "max velocity: 10-000\nmax strength: 10-000\nIncase if you wan't advanced robots you can make it using the Stepper Motor!",
+      "description" : "max velocity: 10-000\nmax strength: 10-000\nIt can be used to create automatic machinery and huge robots!",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "#f002a8Creative Stepper Motor#eeeeee"
    },
@@ -174,7 +174,7 @@
    },
 
    "663bab7b-8e5b-4e1d-9843-3679e4961526" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "Small Display (16x16)"
    },
@@ -199,7 +199,7 @@
       "title" : "[FORK ONLY] Internet Bridge"
    },
    "6bf0ba41-8e3d-4abb-9d88-a044ab584f6d" : {
-      "description" : "Use a SSD Drive (64 KB) that can be used to store files and folders",
+      "description" : "SSD Drive (64 KB)",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] SSD (64 KB)"
    },
@@ -219,12 +219,12 @@
       "title" : "[FORK ONLY] Vertical Terminal"
    },
    "7a8ce597-9f4b-4386-a50d-fe26edafe4a3" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Display 3x2 (128x96)"
    },
    "7abd8ee7-f1ac-4b32-924c-f8322f58a8e7" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "Big Display (128x128)"
    },
@@ -239,17 +239,17 @@
       "title" : "[FORK ONLY] Sci-Fi Keyboard"
    },
    "84d67c26-5923-49f0-a564-df24eae2f7d5" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Display (16x16)"
    },
    "861f514f-5913-4538-852c-fa05aa5e265f" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "Small Display (32x32)"
    },
    "884284ba-ef36-487d-9e8a-553794c032da" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Display 3x2 (64x48)"
    },
@@ -264,17 +264,17 @@
       "title" : "[FORK ONLY] Address Led"
    },
    "9604ecbd-abff-4bcd-b77e-ce3421379a4f" : {
-      "description" : "requires the connection of a container with batteries\nmax velocity: 500\nmax strength: 1000\nIncase if you wan't advanced robots you can make it using the Stepper Motor!",
+      "description" : "requires the connection of a container with batteries\nmax velocity: 500\nmax strength: 1000\nIt can be used to create automatic machinery and huge robots!",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Stepper Motor"
    },
    "98093804-6af8-4862-91fc-b0fdbb72f3dc" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Very Very Big Display (1024x1024)"
    },
    "99195c6c-951a-4f2e-87d4-39708a7334b1" : {
-      "description" : "max velocity: 10-000\nmax strength: 10-000\nIncase if you wan't advanced robots you can make it using the Stepper Motor!",
+      "description" : "max velocity: 10-000\nmax strength: 10-000\nIt can be used to create automatic machinery and huge robots!",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] #f002a8Creative Mini Stepper Motor#eeeeee"
    },
@@ -289,7 +289,7 @@
       "title" : "Extra Big Radar"
    },
    "a37ec8a8-1251-40d1-b79a-b7dc166fec52" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Very Very Big Display (256x256)"
    },
@@ -299,47 +299,47 @@
       "title" : "Small Radar"
    },
    "abb7eb4d-67d1-400d-a1e6-48e3ae50b0e7" : {
-      "description" : "Changes what the computers can do and not. This is useful if you have a annoying friend in your world and wan't to lag your world.",
+      "description" : "allows you to change the mod settings, be careful!",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "#f002a8Creative Permission Tool#eeeeee"
    },
    "abcd9bdb-c3b7-4818-b5b5-09e08ae059a0" : {
-      "description" : "Use a SSD Drive (64 KB) that can be used to store files and folders",
+      "description" : "SSD Drive (64 KB)",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] SSD (64 KB)"
    },
    "ad8d37df-4d4d-4548-af40-daaca65a301f" : {
-      "description" : "A output that can the computer to give a boolean, string or whatever you want to.",
+      "description" : "reads data from the computer register, outputs a logical or numeric signal",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "Composite Reader"
    },
    "ae6c7083-445b-4458-af07-006b3d4856fb" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Very Very Big Display (128x128)"
    },
    "b58ed71c-5758-4e6e-9856-aae43da6baea" : {
-      "description" : "Reads data from a parent.",
+      "description" : "writes a number to the computer register. use a 'getreg' to read a value. even when using a logical signal, a number will be written to the register",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "Composite Writer"
    },
    "6ed15b2a-6407-4330-9b54-acdd855e33da" : {
-      "description" : "#ff0000ATTENTION: THIS DISK DOES NOT SAVE DATA AFTER RE-ENTRY AND ON THE BLUEPRINT#eeeeee\nUse a Hard Drive (1 MB) that can be used to store files and folders.",
+      "description" : "#ff0000ATTENTION: THIS DISK DOES NOT SAVE DATA AFTER RE-ENTRY AND ON THE BLUEPRINT#eeeeee\nHard Drive (1 MB)",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] #f002a8CREATIVE HDD (1 MB)#eeeeee"
    },
    "b5dcd494-3e09-4d4d-ad4a-82fa09afbede" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Big Display (512x512)"
    },
    "b5efb918-088d-4a75-a3a1-a652e49d7511" : {
-      "description" : "requires the connection of a container with batteries\nmax velocity: 75\nmax strength: 75\nIncase if you wan't advanced robots you can make it using the Stepper Motor!",
+      "description" : "requires the connection of a container with batteries\nmax velocity: 75\nmax strength: 75\nIt can be used to create automatic machinery and huge robots!",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Mini Stepper Motor"
    },
    "b9a1f72d-4099-4c3a-a97a-7d273fa0780f" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Long Display 16x1 (128x8)"
    },
@@ -354,12 +354,12 @@
       "title" : "[FORK ONLY] CREATIVE GPS"
    },
    "c400e00a-c636-4aa3-8669-23405c527eb6" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Big Display (1024x1024)"
    },
    "c76d8f28-0d16-45e0-988c-5ab88506108a" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Very Very Big Display (32x32)"
    },
@@ -369,47 +369,47 @@
       "title" : "[FORK ONLY] Big Speaker (Synthesizer)"
    },
    "c977cf5d-9ce9-4382-8edf-ea97d22c70d0" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Small Display (64x64)"
    },
    "cb0fa796-b709-439f-8c0d-9045e7107dfd" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "Display (32x32)"
    },
    "cdf96cb3-3582-43e0-9452-86e774e3c75c" : {
-      "description" : "Transfers data from a port to another port!",
+      "description" : "allows you to transfer data to another network port. It can also be used together with the antenna",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "Network Port"
    },
    "d62b97d9-6387-4ec5-8b52-e23b04bade07" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Very Very Big Display 16x12 (128x96)"
    },
    "db358391-f914-4e08-af92-5de0c7e32976" : {
-      "description" : "Changes what the computers can do and not. This is useful if you have a annoying friend in your world and wan't to lag your world.",
+      "description" : "allows you to change the mod settings, be careful!",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Pocket Permission Tool"
    },
    "dcf0971b-58c5-49fd-abae-3f1d173c5a6c" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Very Very Big Display (512x512)"
    },
    "e0e439e8-5103-4aa7-b74c-858ce6e1e1d4" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "Display (64x64)"
    },
    "e99397c7-f055-45a7-92f2-b6850dc6d073" : {
-      "description" : "Its a Raycasting camera. Connect it to the computer and have a display connected. Write the code and then you have a display showing the pov of the camera!\nbut only in SComputers, the camera can detect the type of object and uuid (for the balance, of determining the uuid, it works at a distance of up to 16 blocks)",
+      "description" : "The camera allows you to capture a picture and display it on a monitor or save it to disk\nbut only in SComputers, the camera can detect the type of object and uuid (for the balance, of determining the uuid, it works at a distance of up to 16 blocks)",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "Camera (Raycasted)"
    },
    "ec9c9673-177a-47ee-9611-be9ec97427bc" : {
-      "description" : "Use a SSD Drive (64 KB) that can be used to store files and folders",
+      "description" : "SSD Drive (64 KB)",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] SSD (64 KB)"
    },
@@ -419,22 +419,22 @@
       "title" : "[FORK ONLY] Speaker (Synthesizer)"
    },
    "f54eb0b7-9041-47e4-ba34-3abdad87112e" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Display 3x3 (32x32)"
    },
    "f5a29be5-c614-4a2b-8b0a-958248b00a8d" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Very Very Big Display 16x12 (64x48)"
    },
    "92361ece-e595-4f82-b89d-a427d3070374" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Big Display (256x256)"
    },
    "fb43bd75-7e24-4054-bb65-ce247fb3400b" : {
-      "description" : "A Display that you can connect to a computer and show whatever you want to!",
+      "description" : "displays allow you to display various information. whether it's a picture from the camera or the temperature of the reactor. the displays in SComputers are much more optimized than in the original mod",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "[FORK ONLY] Realistic Display (128x96)"
    },

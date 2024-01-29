@@ -1,6 +1,10 @@
 servicetool = class()
 servicetool.instance = nil
 
+local noWarnings = true
+local noCheatCommand = true
+local noSafeCommand = true
+
 ------------------------------------------------------------------
 
 function servicetool:server_onCreate()
@@ -42,20 +46,22 @@ end
 function servicetool:sv_print_vulnerabilities()
     local vulnerabilities = {}
 
-    if not sc.restrictions.adminOnly then
-        table.insert(vulnerabilities, "any player can change the configuration of the mod(adminOnly: false)")
-    end
-    if sc.restrictions.allowChat then
-        table.insert(vulnerabilities, "computers can output messages to chat(printON)")
-    end
-    if sc.restrictions.scriptMode ~= "safe" then
-        table.insert(vulnerabilities, "computers can control the game(unsafe mode)")
-    end
-    if sc.restrictions.disCompCheck then
-        table.insert(vulnerabilities, "component connectivity check is disabled")
-    end
-    if sc.restrictions.disableCallLimit then
-        table.insert(vulnerabilities, "call limits are disabled, this allows you to burden some SComputers mechanics")
+    if not noWarnings then
+        if not sc.restrictions.adminOnly then
+            table.insert(vulnerabilities, "any player can change the configuration of the mod(adminOnly: false)")
+        end
+        if sc.restrictions.allowChat then
+            table.insert(vulnerabilities, "computers can output messages to chat(printON)")
+        end
+        if sc.restrictions.scriptMode ~= "safe" then
+            table.insert(vulnerabilities, "computers can control the game(unsafe mode)")
+        end
+        if sc.restrictions.disCompCheck then
+            table.insert(vulnerabilities, "component connectivity check is disabled")
+        end
+        if sc.restrictions.disableCallLimit then
+            table.insert(vulnerabilities, "call limits are disabled, this allows you to burden some SComputers mechanics")
+        end
     end
 
     if sc.shutdownFlag then
@@ -84,7 +90,9 @@ end
 function servicetool:sv_safe(data)
     local isHost = data.player == vnetwork.host
     if not sc.restrictions.adminOnly or isHost then
-        self.network:sendToClients("cl_disToggleCheat")
+        if not noCheatCommand then
+            self.network:sendToClients("cl_disToggleCheat")
+        end
         if isHost then -- clients can block theirselves
             sc.restrictions.adminOnly = true
         end
@@ -122,6 +130,10 @@ function servicetool:client_onCreate()
     self.network:sendToServer("sv_dataRequest")
     self.timeout = 40
     servicetool.instance = self
+
+    if noCheatCommand then
+        _G.allowToggleCheat = true
+    end
 end
 
 function servicetool:cl_onDataResponse(data)
@@ -181,8 +193,10 @@ function servicetool:cl_disToggleCheat()
 end
 
 function servicetool:cl_print_vulnerabilities(vulnerabilities)
-    if _G.allowToggleCheat then
-        table.insert(vulnerabilities, "you can activate cheats (which may lead to accidental activation)")
+    if not noWarnings then
+        if _G.allowToggleCheat then
+            table.insert(vulnerabilities, "you can activate cheats (which may lead to accidental activation)")
+        end
     end
 
     local oldVulnerabilitiesCount = #vulnerabilities
@@ -196,7 +210,7 @@ function servicetool:cl_print_vulnerabilities(vulnerabilities)
             sm.gui.chatMessage(tostring(index) .. ". " .. value .. ".")
         end
 
-        if oldVulnerabilitiesCount > 0 then
+        if not noSafeCommand and oldVulnerabilitiesCount > 0 then
             sm.gui.chatMessage("#ffff00the host can enter /sv_scomputers_safe to automatically bring security back to normal#ffffff")
         end
     end
@@ -221,6 +235,8 @@ function servicetool:cl_createGui()
 end
 
 function servicetool:cl_allow()
+    print("SComputers ALLOWED")
+
     if not self.vul_printed then
         self.network:sendToServer("sv_print_vulnerabilities")
         self.vul_printed = true
@@ -234,6 +250,8 @@ function servicetool:cl_allow()
 end
 
 function servicetool:cl_notAllow()
+    print("SComputers NOT-ALLOWED")
+    
     if not self.vul_printed then
         self.network:sendToServer("sv_print_vulnerabilities")
         self.vul_printed = true
@@ -292,9 +310,13 @@ if not commandsBind then
             if sm.isHost then
                 oldBindCommand("/computers", {}, "cl_onChatCommand", "opens the SComputers configuration menu")
             end
-            oldBindCommand("/cl_scomputers_cheat", {}, "cl_onChatCommand", "enables/disables cheat-buttons in the \"Creative Permission-tool\"")
-            oldBindCommand("/cl_scomputers_version", {}, "cl_onChatCommand", "show scomputers version")
-            oldBindCommand("/sv_scomputers_safe", {}, "cl_onChatCommand", "returns SComputers parameters to safe")
+            if not noCheatCommand then
+                oldBindCommand("/cl_scomputers_cheat", {}, "cl_onChatCommand", "enables/disables cheat-buttons in the \"Creative Permission-tool\"")
+            end
+            --oldBindCommand("/cl_scomputers_version", {}, "cl_onChatCommand", "show scomputers version")
+            if not noSafeCommand then
+                oldBindCommand("/sv_scomputers_safe", {}, "cl_onChatCommand", "returns SComputers parameters to safe")
+            end
 
             added = true
         end
