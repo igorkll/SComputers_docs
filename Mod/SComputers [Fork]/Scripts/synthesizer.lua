@@ -8,9 +8,19 @@ synthesizer.colorHighlight = sm.color.new(0x00beffff)
 synthesizer.poseWeightCount = 1
 synthesizer.componentType = "synthesizer"
 
-local maxBeeps = 2
+local maxBeeps = 4
+local maxLoops = 4
+local loopsList = {}
+
+local function checkNum(num)
+    if num < 1 or num > maxLoops then
+        error("invalid cycle number", 3)
+    end
+end
 
 function synthesizer:server_onCreate()
+    self.loopData = {}
+
     sc.synthesizerDatas[self.interactable.id] = {
         clear = function ()
             self.beeps = nil
@@ -36,6 +46,38 @@ function synthesizer:server_onCreate()
         end,
         stop = function ()
             self.stopFlag = true
+        end,
+
+        -- loop api
+        getLoopsCount = function()
+            return maxLoops
+        end,
+        getLoopsWhilelist = function()
+            return sc.advDeepcopy(loopsList)
+        end,
+        startLoop = function(number, loopname, params)
+            checkArg(1, number, "number")
+            checkArg(2, loopname, "string")
+            checkArg(3, params, "table")
+            checkNum(number)
+            for i, v in ipairs(loopsList) do
+                if v == loopname then
+                    self.loopData[number] = {loopname, params}
+                    self.flushLoops = true
+                    return
+                end
+            end
+            error("unknown loop effect", 2)
+        end,
+        stopLoop = function(number)
+            checkArg(1, number, "number")
+            checkNum(number)
+            self.loopData[number] = {}
+            self.flushLoops = true
+        end,
+        stopLoops = function()
+            self.loopData = {}
+            self.flushLoops = true
         end
     }
 end
@@ -68,13 +110,24 @@ function synthesizer:server_onFixedUpdate()
 
         self.flushFlag = nil
     end
+
+    if self.flushLoops then
+        self:sv_flushLoops()
+        self.flushLoops = nil
+    end
 end
+
+function synthesizer:sv_flushLoops()
+    
+end
+
 
 
 
 function synthesizer:client_onCreate()
     self.effects = {}
     self.effectsCache = {}
+    self.network:sendToServer("sv_flushLoops")
 end
 
 function synthesizer:client_onDestroy()

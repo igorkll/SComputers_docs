@@ -17,3 +17,4 @@ sidebar-label: 'synthesizer'
 * getLoopsWhilelist():table - returns a table with the available cyclic effects to playing
 * startLoop(number, loopname, params) - triggers a cyclic effect with the specified name, parameters, and number
 * stopLoop(number) - stops the cycle with the specified number (from 1 to 4)
+* stopLoops() - stops all cycles
