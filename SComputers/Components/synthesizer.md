@@ -34,7 +34,7 @@ function callback_loop()
 
     synthesizer.setLoopParams(1, {
         rpm = 0.8,
-        load = math.sin(math.rad(getUptime()))
+        load = math.abs(math.sin(math.rad(getUptime())))
     })
 end
 ```
