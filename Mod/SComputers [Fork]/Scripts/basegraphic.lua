@@ -453,8 +453,19 @@ function quadInCircle(qx, qy, qs, cx, cy, cr)
 end
 local quadInCircle = quadInCircle
 
+function basegraphic_doFont(self, val)
+	if val[1] == -1 then
+		self.customFont = nil
+	elseif val[1] == -2 then
+		self.customFont = {width = val[2], height = val[3], chars = {}}
+	elseif val[1] == -3 then
+		self.customFont.chars[val[2]] = val[3]
+	end
+end
+local basegraphic_doFont = basegraphic_doFont
+
 local formatColor = sc.formatColor
-function basegraphic_doubleBuffering(self, stack, width, height, font, utf8support, flush, optimize, rectFlush)
+function basegraphic_doubleBuffering(self, stack, width, height, utf8support, flush, optimize, rectFlush)
 	local buffer1, buffer2 = self.buffer1, self.buffer2
 
 	if stack then
@@ -487,7 +498,9 @@ function basegraphic_doubleBuffering(self, stack, width, height, font, utf8suppo
 
 		local col
 		for _, v in ipairs(stack) do
-			col = formatColor(v[2], v[1] == 0)
+			if v[1] >= 0 then
+				col = formatColor(v[2], v[1] == 0)
+			end
 
 			if v[1] == 0 then
 				buffer1 = {}
@@ -551,7 +564,9 @@ function basegraphic_doubleBuffering(self, stack, width, height, font, utf8suppo
 			elseif v[1] == 6 then
 				basegraphic_drawLine(v[3], v[4], v[5], v[6], col, width, height, buffer1)
 			elseif v[1] == 7 then
-				basegraphic_printText(font, utf8support, self, draw, draw, v[3], v[4], width, height, v[5], col)
+				basegraphic_printText(self.customFont, utf8support, self, draw, draw, v[3], v[4], width, height, v[5], col)
+			else
+				basegraphic_doFont(self, v)
 			end
 		end
 	end

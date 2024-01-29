@@ -1152,25 +1152,6 @@ function sc.display.server_init(self)
     reset(self)
 end
 
-local function sendFont(self, client)
-    local function send(name, arg)
-        if client then
-            self.scriptableObject.network:sendToClient(client, name, arg)
-        else
-            self.scriptableObject.network:sendToClients(name, arg)
-        end
-    end
-
-    if self.customFont then
-        send("client_onDataResponse", {fontdata = {width = self.customFont.width, height = self.customFont.height}})
-        for name, data in pairs(self.customFont.chars) do
-            send("client_onDataResponse", {fontdata = {name = name, data = data}})
-        end
-    else
-        send("client_onDataResponse", {fontdata = {remove = true}})
-    end
-end
-
 local function isAllow(self)
     return self.width * self.height <= (sc.restrictions.maxDisplays * sc.restrictions.maxDisplays)
 end
@@ -1226,8 +1207,6 @@ function sc.display.server_update(self)
     if self.needSendData then
         --debug_print("self.needSendData")
         self.scriptableObject.network:sendToClients("client_onDataResponse", sc.display.server_createNetworkData(self))
-        sendFont(self)
-
         self.needSendData = false
     end
 
@@ -1588,26 +1567,43 @@ function sc.display.server_createData(self)
 
         setFont = function (font)
             checkArg(1, font, "table", "nil")
+
             if font then
                 basegraphic_checkFont(font)
-                self.customFont = {
+                self.sv_customFont = {
                     width = font.width,
                     height = font.height,
                     chars = sc.display.optimizeFont(font.chars, font.width, font.height)
                 }
+
+                self.renderingStack[self.rnd_idx] = {
+                    -2,
+                    font.width,
+                    font.height
+                }
+                self.rnd_idx = self.rnd_idx + 1
+
+                for k, v in pairs(self.sv_customFont.chars) do
+                    self.renderingStack[self.rnd_idx] = {
+                        -3,
+                        k,
+                        v
+                    }
+                    self.rnd_idx = self.rnd_idx + 1
+                end
             else
-                self.customFont = nil
+                self.renderingStack[self.rnd_idx] = {-1}
+                self.rnd_idx = self.rnd_idx + 1
+                self.sv_customFont = nil
             end
-            self.needSendData = true
-            self.stackChecksum = nil
         end,
 
         getFontWidth = function ()
-            return (self.customFont and self.customFont.width) or font_width
+            return (self.sv_customFont and self.sv_customFont.width) or font_width
         end,
 
         getFontHeight = function ()
-            return (self.customFont and self.customFont.height) or font_height
+            return (self.sv_customFont and self.sv_customFont.height) or font_height
         end,
 
         setClicksAllowed = function (c)
@@ -1663,6 +1659,10 @@ function sc.display.server_createData(self)
                     else
                         rwidth = width
                         rheight = height
+                    end
+
+                    if not forceRotate then
+                        self.api.clear()
                     end
                 end
             else
@@ -1720,7 +1720,6 @@ function sc.display.server_onDataRequired(self, client)
     --self.dbuffPixelsAll = nil
 
     self.scriptableObject.network:sendToClient(client, "client_onDataResponse", sc.display.server_createNetworkData(self))
-    sendFont(self, client)
     self.serverCache = {}
 
     self.allow_update = true
@@ -2464,7 +2463,7 @@ function sc.display.client_update(self, dt)
 
         self.newEffects = {}
         local isEffect = false
-        if basegraphic_doubleBuffering(self, nil, getWidth(self), getHeight(self), self.customFont, self.utf8support, sc_display_client_drawPixelForce, sc_display_client_optimize, sc_display_client_fillRect) then
+        if basegraphic_doubleBuffering(self, nil, getWidth(self), getHeight(self), self.utf8support, sc_display_client_drawPixelForce, sc_display_client_optimize, sc_display_client_fillRect) then
             self.lastLastClearColor2 = nil
             isEffect = true
         end
@@ -2778,6 +2777,7 @@ end
 
 function sc.display.client_onDataResponse(self, data)
     debug_print("client_onDataResponse", data)
+    --[[
     local font_data = data.fontdata
     if font_data then
         if not sm_isHost then
@@ -2796,6 +2796,7 @@ function sc.display.client_onDataResponse(self, data)
         end
         return
     end
+    ]]
 
     self.quadTree.rotation = data.rotation
     if data.rotation ~= self.old_rotation then
@@ -2830,6 +2831,8 @@ local drawActions = {
     [sc_display_drawType.drawText] = function (self, t) return sc_display_client_drawText(self, t[3], t[4], t[5], t[2]) end,
     [sc_display_drawType.optimize] = function (self) self.optimize_flag = true end,
 }
+
+local basegraphic_doFont = basegraphic_doFont
 
 function sc.display.client_drawStack(self, sendstack)
     local startExecTimeStart = os_clock()
@@ -2939,15 +2942,21 @@ function sc.display.client_drawStack(self, sendstack)
 
         local startRnd = os_clock()
         for _, v in ipairs(stack) do
-            v[2] = formatColor(v[2], v[1] == 0)
+            if v[1] >= 0 then
+                v[2] = formatColor(v[2], v[1] == 0)
+            end
     
             if v[1] ~= 0 and v[1] ~= 8 then
                 self.lastLastClearColor2 = nil
             end
     
             --если хоть что-то не вернуло значения, значит эфект от стека был
-            if not drawActions[v[1]](self, v) and v[1] ~= 8 then
-                isEffect = true
+            if drawActions[v[1]] then
+                if not drawActions[v[1]](self, v) and v[1] ~= 8 then
+                    isEffect = true
+                end
+            else
+                basegraphic_doFont(self, v)
             end
         end
         self.lastNativeRenderTime = os_clock() - startRnd
@@ -2961,7 +2970,7 @@ function sc.display.client_drawStack(self, sendstack)
         debug_print("buffer render")
 
         local startRnd = os_clock()
-        if basegraphic_doubleBuffering(self, stack, getWidth(self), getHeight(self), self.customFont, self.utf8support, self.isRendering and sc_display_client_drawPixelForce, sc_display_client_optimize, self.isRendering and sc_display_client_fillRect) then
+        if basegraphic_doubleBuffering(self, stack, getWidth(self), getHeight(self), self.utf8support, self.isRendering and sc_display_client_drawPixelForce, sc_display_client_optimize, self.isRendering and sc_display_client_fillRect) then
             self.lastLastClearColor2 = nil
             isEffect = true
         end

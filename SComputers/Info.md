@@ -198,7 +198,7 @@ you should turn it on if the picture is constantly updated and skipping one flus
 , or turn it off if each rendering is important
 * display.setRotation/display.getRotation
 by default: 0
-sets the orientation of the screen, please note that the old content will not be redrawed
+sets the orientation of the screen, clears the screen when using
 * display.getFontWidth - returns the width of the current font
 * display.getFontHeight - returns the height of the current font
 * display.setFont - sets a custom font
