@@ -22,6 +22,15 @@ local function checkNum(num)
     end
 end
 
+local function formatParams(data)
+    local tbl = {}
+    tbl.load = data.load
+    tbl.rpm = data.rpm
+    if type(tbl.load) ~= "number" then tbl.load = nil end
+    if type(tbl.rpm) ~= "number" then tbl.rpm = nil end
+    return tbl
+end
+
 function synthesizer:server_onCreate()
     self.loopData = {}
     self.flushLoops = true
@@ -175,7 +184,6 @@ function synthesizer:cl_flushParams(data)
 end
 
 function synthesizer:cl_flushLoops(data)
-    print(data)
     local alt = {}
     for i, effect in pairs(self.currentLoops) do
         if not data[i] or self.oldEffectsName[i] ~= data[i][1] then
