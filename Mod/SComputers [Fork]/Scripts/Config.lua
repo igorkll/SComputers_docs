@@ -330,7 +330,7 @@ sc.originalRestrictions = {
 	ibridge = true,
 	disableCallLimit = true,
 	lagDetector = 0,
-	screenRate = 1
+	screenRate = 2
 }
 
 sc.restrictions = nil
