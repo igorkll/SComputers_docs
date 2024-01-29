@@ -17,7 +17,7 @@ for i = 1, 5 do
 end
 
 local function checkNum(num)
-    if num < 1 or num > maxLoops then
+    if num < 1 or num > maxLoops or num % 1 ~= 0 then
         error("invalid cycle number", 3)
     end
 end
@@ -77,12 +77,23 @@ function synthesizer:server_onCreate()
         stopLoop = function(number)
             checkArg(1, number, "number")
             checkNum(number)
-            self.loopData[number] = {}
+            self.loopData[number] = nil
             self.flushLoops = number
         end,
         stopLoops = function()
             self.loopData = {}
             self.flushLoops = true
+        end,
+        setLoopParams = function(number, params)
+            checkArg(1, number, "number")
+            checkArg(2, params, "table")
+            checkNum(number)
+            if not self.loopData[number] then
+                error("the loop effect number " .. math.floor(number) .. " is not running", 2)
+            end
+            self.loopData[number][2] = params
+            if not self.flushParams then self.flushParams = {} end
+            self.flushParams[number] = params
         end
     }
 end
@@ -120,6 +131,11 @@ function synthesizer:server_onFixedUpdate()
         self:sv_flushLoops(self.flushLoops)
         self.flushLoops = nil
     end
+
+    if self.flushParams then
+        self.network:sendToClients("cl_flushParams", self.flushParams)
+        self.flushParams = nil
+    end
 end
 
 function synthesizer:sv_flushLoops(num)
@@ -152,6 +168,16 @@ function synthesizer:client_onDestroy()
     end
 end
 
+function synthesizer:cl_flushParams(data)
+    for i, ldat in pairs(data) do
+        for k, v in pairs(ldat) do
+            if self.currentLoops[i] then
+                self.currentLoops[i]:setParameter(k, v)
+            end
+        end
+    end
+end
+
 function synthesizer:cl_flushLoops(data)
     for i, effect in pairs(self.currentLoops) do
         if not data.num or data.num == i then
@@ -160,10 +186,10 @@ function synthesizer:cl_flushLoops(data)
         end
     end
 
-    for i, data in pairs(data) do
+    for i, ldat in pairs(data) do
         if not data.num or data.num == i then
-            local effect = sm.effect.createEffect(data[1], self.interactable)
-            for k, v in pairs(data[2] or {}) do
+            local effect = sm.effect.createEffect(ldat[1], self.interactable)
+            for k, v in pairs(ldat[2] or {}) do
                 effect:setParameter(k, v)
             end
             effect:setAutoPlay(true)
