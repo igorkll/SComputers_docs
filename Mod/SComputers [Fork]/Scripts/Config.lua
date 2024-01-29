@@ -311,6 +311,28 @@ sc.forServerRestrictions = { --FOR SERVERS
 	screenRate = 4
 }
 
+sc.originalRestrictions = {
+	acreative = nil,
+	adrop = false,
+	disCompCheck = true,
+	scriptMode = "safe",
+	adminOnly = true,
+	vm = sc.getDefaultVM(),
+	allowChat = true,
+	allowDist = true,
+	optSpeed = false,
+	rays = 0,
+	skipFps = 20,
+	rend = 15,
+	cpu = (1 / 40) * 20, --max 4 ticks
+	saving = 10,
+	maxDisplays = 128,
+	ibridge = true,
+	disableCallLimit = true,
+	lagDetector = 0,
+	screenRate = 1
+}
+
 sc.restrictions = nil
 sc.restrictionsKey = "ScriptableComputer-Restrictions"
 

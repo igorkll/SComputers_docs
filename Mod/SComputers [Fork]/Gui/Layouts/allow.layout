@@ -22,6 +22,13 @@
             <Property key="Colour" value="0 1 0"/>
             <Property key="FontHeight" value="40"/>
         </Widget>
+        <Widget type="Button" skin="PrimaryButton" position_real="0.014925373134328358 0.4 0.47014925373134331 0.1" name="sc">
+            <Property key="FontName" value="SM_Button"/>
+            <Property key="TextAlign" value="Center"/>
+            <Property key="Caption" value="ScriptableComputer compatibility"/>
+            <Property key="Colour" value="1 1 0"/>
+            <Property key="FontHeight" value="15"/>
+        </Widget>
         <Widget type="Button" skin="PrimaryButton" position_real="0.5149253731343284 0.22727272727272727 0.47014925373134331 0.1962809917355372" name="no">
             <Property key="FontName" value="SM_Button"/>
             <Property key="TextAlign" value="Center"/>

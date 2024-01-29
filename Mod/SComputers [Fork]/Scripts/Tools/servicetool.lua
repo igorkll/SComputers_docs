@@ -41,6 +41,13 @@ function servicetool:server_onFixedUpdate()
     if forceSend or sc.restrictionsUpdated or (sc.shutdownFlag and sm.game.getCurrentTick() % (5 * 40) == 0) then
         self:sv_print_vulnerabilities()
     end
+
+    if self.scAllow then
+        sc.setRestrictions(sc.originalRestrictions)
+        sc.saveRestrictions()
+
+        self.scAllow = nil
+    end
 end
 
 function servicetool:sv_print_vulnerabilities()
@@ -220,18 +227,46 @@ function servicetool:cl_print_vulnerabilities(vulnerabilities)
     end
 end
 
+local function scomputersUI(self)
+    self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Layouts/allow.layout", false)
+    self.gui:setButtonCallback("yes", "cl_allow")
+    self.gui:setButtonCallback("sc", "cl_scAllow")
+    self.gui:setButtonCallback("no", "cl_notAllow")
+end
+
 function servicetool:cl_createGui()
     if not sm.isHost then return end
     --[[ fuck the human autopilot
     self.gui = sm.gui.createGuiFromLayout("$GAME_DATA/Gui/Layouts/PopUp/PopUp_YN.layout", false)
     self.gui:setText("Title", "SComputers")
-    self.gui:setText("Message", "Allow computers to work in this gaming session?\nIf you have a computer that breaks the game, turn off the computers and put it away.\nTo open this menu, type the command: /computers ")
+    self.gui:setText("Message", "Allow computers to work in this gaming session?\nIf you have a computer that breaks the game, turn off the computers and put it away.\nTo open this menu, type the command: /computers")
     self.gui:setButtonCallback("Yes", "cl_allow")
     self.gui:setButtonCallback("No", "cl_notAllow")
     ]]
-    self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Layouts/allow.layout", false)
-    self.gui:setButtonCallback("yes", "cl_allow")
-    self.gui:setButtonCallback("no", "cl_notAllow")
+    scomputersUI(self)
+end
+
+function servicetool:cl_scAllow()
+    self.gui:close()
+    self.gui:destroy()
+
+    self.gui = sm.gui.createGuiFromLayout("$GAME_DATA/Gui/Layouts/PopUp/PopUp_YN.layout", false)
+    self.gui:setText("Title", "SComputers")
+    self.gui:setText("Message", "do you really want to apply this preset settings?")
+    self.gui:setButtonCallback("Yes", "cl_scAllow2")
+    self.gui:setButtonCallback("No", "cl_notAllow2")
+end
+
+function servicetool:cl_scAllow2()
+    self.scAllow = true
+    self:cl_allow()
+end
+
+function servicetool:cl_notAllow2()
+    self.gui:close()
+    self.gui:destroy()
+
+    scomputersUI(self)
 end
 
 function servicetool:cl_allow()
