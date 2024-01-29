@@ -454,7 +454,7 @@ end
 local quadInCircle = quadInCircle
 
 local formatColor = sc.formatColor
-function basegraphic_doubleBuffering(self, stack, width, height, font, utf8support, flush, optimize)
+function basegraphic_doubleBuffering(self, stack, width, height, font, utf8support, flush, optimize, rectFlush)
 	local buffer1, buffer2 = self.buffer1, self.buffer2
 
 	if stack then
@@ -562,9 +562,28 @@ function basegraphic_doubleBuffering(self, stack, width, height, font, utf8suppo
 		local buffer2All = self.buffer2All
 		local col
 		local i2 = 1
-		for i = 0, (width * height) - 1 do
+		local i = 0
+		while i < width * height do
+			::continue::
 			col = buffer1[i] or buffer1All
 			if col ~= (buffer2[i] or buffer2All) then
+				--[[
+				if rectFlush then
+					local rectSize = 0
+					local oldI = i
+					while col == (buffer1[i + 1] or buffer1All) and i % width ~= 0 do
+						i = i + 1
+						rectSize = rectSize + 1
+					end
+					if rectSize > 0 then
+						isEffect = true
+						rectFlush(self, math_floor(oldI % width), math_floor(oldI / width), rectSize, 1, col)
+						if optimize and i2 % 64 == 0 then optimize(self) end
+						i2 = i2 + 1
+						goto continue
+					end
+				end
+				]]
 				if not flush(self, math_floor(i % width), math_floor(i / width), col) then
 					isEffect = true
 					if optimize and i2 % 1024 == 0 then optimize(self) end
@@ -572,6 +591,7 @@ function basegraphic_doubleBuffering(self, stack, width, height, font, utf8suppo
 				end
 				buffer2[i] = col
 			end
+			i = i + 1
 		end
 		return isEffect
 	end

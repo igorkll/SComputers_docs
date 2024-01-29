@@ -9,8 +9,7 @@ debug_disableEffectsBuffer = false
 debug_disableDBuff = false
 debug_disableForceNativeRender = false
 debug_disableUpdateColor = false
-
---settings
+debug_noNativeRender = false
 mul_ray_fov = 2
 
 --code
@@ -53,11 +52,6 @@ local constrain, mathDist = constrain, mathDist
 
 sc.display.PIXEL_SCALE = 0.0072
 sc.display.RENDER_DISTANCE = 15
-sc.display.SKIP_RENDER_DT = 1 / 30
-sc.display.SKIP_RENDER_DT_ALL = 1 / 20
-sc.display.deltaTime = 0
-
-sc.display.quad = {}
 
 local oopsUuid = sm.uuid.new("c3931873-eadc-4e46-a575-0a369ae01202")
 local cursorUuid = sm.uuid.new("77e46b76-0b2e-4a00-86e4-d030b8d9b59d")
@@ -106,8 +100,6 @@ local sc_display_PIXEL_SCALE = sc.display.PIXEL_SCALE
 local formatColor = sc.formatColor
 --local formatColorStr = sc.formatColorStr
 
-local effectsData = {}
-
 local emptyEffect = sm.effect.createEffect(sc.getEffectName())
 local effect_setParameter = emptyEffect.setParameter
 local effect_stop = emptyEffect.stop
@@ -121,8 +113,8 @@ local effect_setOffsetRotation = emptyEffect.setOffsetRotation
 --effect_stop(emptyEffect)
 effect_destroy(emptyEffect)
 
-local function effect_destroyAndUnreg(effect)
-    effectsData[effect.id] = nil
+local function effect_destroyAndUnreg(root, effect)
+    root.effectsData[effect.id] = nil
     effect_destroy(effect)
 end
 
@@ -256,8 +248,8 @@ local quad_findChild
 local quad_treeSetColor
 local quad_treeFillRect
 local quad_treeFillCircle
-local quad_treeShow
-local quad_treeHide
+--local quad_treeShow
+--local quad_treeHide
 local quad_rootRealShow
 local quad_rootRealHide
 local sc_display_client_clear
@@ -278,8 +270,6 @@ local oopsColor = sm_color_new("ffff00ff")
 local font_chars = sc.display.font.optimized
 local font_width = sc.display.font.width
 local font_height = sc.display.font.height
-
-local total_effects = 0
 
 --[[
 local function pointInQuad(x, y, qx, qy, qs)
@@ -369,6 +359,7 @@ function quad_createRoot(display, x, y, size, maxX, maxY)
         color = nil,
         display = display,
         bufferedEffects = {},
+        effectsData = {},
         bf_idx = 0,
         allEffects = {}
     }
@@ -437,14 +428,12 @@ function quad_destroy(self, removeAll)
         
         --effect_stop(self.back_effect)
         if self.back_effect then
-            effect_destroyAndUnreg(self.back_effect)
+            effect_destroyAndUnreg(self, self.back_effect)
         end
-        total_effects = total_effects - 1
         for effect in pairs(self.allEffects) do
             if effect and sm_exists(effect) then
-                total_effects = total_effects - 1
                 --effect_stop(effect)
-                effect_destroyAndUnreg(effect)
+                effect_destroyAndUnreg(self, effect)
             end
         end
         self.allEffects = {}
@@ -513,9 +502,9 @@ function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale, wid
 
     if not nonBuf and root.bf_idx > 0 and not debug_disableEffectsBuffer then
         effect = table_remove(root.bufferedEffects)
-        if effect_isDone(effect) then
-            effect_start(effect)
-        end
+        --if effect_isDone(effect) then
+        --    effect_start(effect)
+        --end
         root.bf_idx = root.bf_idx - 1
     else
         --if total_effects < (1050000) then
@@ -541,8 +530,6 @@ function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale, wid
             if not nonBuf then
                 root.allEffects[effect] = true
             end
-
-            total_effects = total_effects + 1
 
             --[[
             if effect and sm_exists(effect) then
@@ -623,7 +610,7 @@ function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale, wid
 
     effect_setOffsetPosition(effect, offset)
 
-    local tbl = {nil, nil, display.scriptableObject.data or {}, sizeX, sizeY, offset} --два поле раньше испрользовались, но теперь мне тупо лень меня индексы повсюды. НАДА ПЕРЕПИСАТЬ КОД СРАНЫХ ЭКРАНОВ ПОЛНОСТЬЮ
+    local tbl = {nil, nil, display.scriptableObject.data or {}, sizeX, sizeY, offset}
     if chr then
         tbl[7] = quad_alt_hideRot
         tbl[8] = quad_alt_visibleRot
@@ -631,15 +618,15 @@ function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale, wid
         tbl[7] = quad_hideRot
         tbl[8] = quad_visibleRot
     end
-    local datatbl = effectsData[effect.id]
+    local datatbl = root.effectsData[effect.id]
     if datatbl then
         for k, v in pairs(tbl) do
             datatbl[k] = v
         end
     else
-        effectsData[effect.id] = tbl
+        root.effectsData[effect.id] = tbl
     end
-    quad_effectShow(effect)
+    quad_effectShow(root, effect)
     
     return effect
 end
@@ -649,11 +636,10 @@ function quad_destroyEffect(self)
 
     if effect and sm_exists(effect) then
         if debug_disableEffectsBuffer then
-            effect_destroyAndUnreg(effect)
-            total_effects = total_effects - 1
+            effect_destroyAndUnreg(self.root, effect)
             self.root.allEffects[effect] = nil
         else
-            quad_effectHide(effect)
+            quad_effectHide(self.root, effect)
             self.root.bf_idx = self.root.bf_idx + 1
             self.root.bufferedEffects[self.root.bf_idx] = effect
         end
@@ -664,9 +650,9 @@ end
 
 local hideOffset = sm_vec3_new(10000000, 10000000, 10000000)
 
-function quad_effectHide(effect)
+function quad_effectHide(root, effect)
     if effect and sm_exists(effect) then
-        local data = effectsData[effect.id]
+        local data = root.effectsData[effect.id]
         if data[3] and data[3].noRotateEffects then
             effect_setOffsetPosition(effect, hideOffset)
         else
@@ -675,9 +661,9 @@ function quad_effectHide(effect)
     end
 end
 
-function quad_effectShow(effect)
+function quad_effectShow(root, effect)
     if effect and sm_exists(effect) then
-        local data = effectsData[effect.id]
+        local data = root.effectsData[effect.id]
         if data[3] and data[3].noRotateEffects then
             effect_setOffsetPosition(effect, data[6])
         else
@@ -913,6 +899,7 @@ function quad_treeFillCircle(self, x, y, r, color)
     end
 end
 
+--[[
 function quad_treeShow(self)
     if self.children then
         local children = self.children
@@ -938,6 +925,7 @@ function quad_treeHide(self)
         quad_effectHide(self.effect)
     end
 end
+]]
 
 function quad_rootRealShow(self, noRecurse)
     --[[
@@ -1090,7 +1078,7 @@ local function random_hide_show(self, probabilityNum, allow)
     for effect in pairs(self.quadTree.allEffects) do
         if sm_exists(effect) then
             if probabilityNum > 0 and probability(probabilityNum) then
-                edata = effectsData[effect.id]
+                edata = self.quadTree.effectsData[effect.id]
                 --если писклесь хотябы по одной оси меньше или равно 2
                 --это позволит рендерить изображения в сильно упрошенном виде
                 if edata[4] <= 2 or edata[5] <= 2 then
@@ -1205,12 +1193,11 @@ function sc.display.server_update(self)
 
     local ctick = sm.game.getCurrentTick()
     if ctick % rate == 0 then self.allow_update = true end
-    if ctick % (40 * 5) == 0 then
+    if ctick % (40 * 4) == 0 then
 		self.forceNative_update = true
 		self.serverCache = {}
         self.serverCacheAll = nil
-	end
-    if ctick % (40 * 2) == 0 then
+
         self.force_update = true
         self.allow_update = true
         self.stackChecksum = nil
@@ -1371,7 +1358,7 @@ function sc.display.client_destroy(self)
     local quadTree = self.quadTree
 
     if self.splashEffect and sm_exists(self.splashEffect) then
-        effect_destroyAndUnreg(self.splashEffect)
+        effect_destroyAndUnreg(quadTree, self.splashEffect)
     end
     quad_destroy(quadTree, true)
 end
@@ -1811,8 +1798,6 @@ function sc_display_client_clear(self, color, removeAll)
         end
         self.quadTree = root
         quadTree = root
-
-        --total_effects = 1 --в мире можно быть много дисплеев
     end
 
     -------------------------
@@ -1936,6 +1921,12 @@ function sc_display_client_fillRect(self, x, y, w, h, color)
         return true
     end
     ]]
+end
+
+function sc_display_client_rawFillRect(self, x, y, w, h, color)
+    self.dbuffPixels = {}
+    self.dbuffPixelsAll = nil
+    quad_treeFillRect(self.quadTree, math_floor(x), math_floor(y), math_floor(w), math_floor(h), color)
 end
 
 sc.display.client_fillRect = sc_display_client_fillRect
@@ -2473,7 +2464,7 @@ function sc.display.client_update(self, dt)
 
         self.newEffects = {}
         local isEffect = false
-        if basegraphic_doubleBuffering(self, nil, getWidth(self), getHeight(self), self.customFont, self.utf8support, sc_display_client_drawPixelForce, sc_display_client_optimize) then
+        if basegraphic_doubleBuffering(self, nil, getWidth(self), getHeight(self), self.customFont, self.utf8support, sc_display_client_drawPixelForce, sc_display_client_optimize, sc_display_client_fillRect) then
             self.lastLastClearColor2 = nil
             isEffect = true
         end
@@ -2503,7 +2494,7 @@ function sc.display.client_update(self, dt)
     local allEffects = quadTree.allEffects
 
     if debug_printeffects then
-        debug_print("total_effects", total_effects, quadTree.bf_idx)
+        debug_print("total_effects", quadTree.bf_idx)
     end
     
     if not debug_disableEffectsBuffer then
@@ -2519,9 +2510,7 @@ function sc.display.client_update(self, dt)
                     quadTree.bf_idx = quadTree.bf_idx - 1
                     if effect and sm_exists(effect) then
                         --effect_stop(effect)
-                        effect_destroyAndUnreg(effect)
-                        total_effects = total_effects - 1
-
+                        effect_destroyAndUnreg(quadTree, effect)
                         allEffects[effect] = nil
                     end
                 else
@@ -2552,7 +2541,7 @@ function sc.display.client_update(self, dt)
     if scriptableObject.character and self.clicksAllowed and self.tablet_posX and self.tablet_posY and not quadTree.splashEffect then
         if self.cursor then
             if sm_exists(self.cursor) then
-                effect_setOffsetPosition(self.cursor, effectsData[self.cursor.id][6] - sm_vec3_new((self.tablet_posX / self.width) * 0.95, (self.tablet_posY / self.height) * 0.95, 0))
+                effect_setOffsetPosition(self.cursor, self.quadTree.effectsData[self.cursor.id][6] - sm_vec3_new((self.tablet_posX / self.width) * 0.95, (self.tablet_posY / self.height) * 0.95, 0))
                 effect_setParameter(self.cursor, "color", sm_color_new(0.6, (0.5 + (math_sin(math_rad(ctick * 4)) / 2)) * 0.6, 0))
             else
                 self.cursor = nil
@@ -2570,9 +2559,8 @@ function sc.display.client_update(self, dt)
         end
     elseif self.cursor then
         --effect_stop(self.cursor)
-        effect_destroyAndUnreg(self.cursor)
+        effect_destroyAndUnreg(quadTree, self.cursor)
         self.cursor = nil
-        total_effects = total_effects - 1
     end
 
     --debug_print("dispValue works")
@@ -2605,7 +2593,7 @@ function sc.display.client_update(self, dt)
         debug_print("effects optimization")
 
         self.newEffects = {}
-        quad_optimize(quadTree)
+        sc_display_client_optimize(self)
         applyNew(self)
         self.newEffects = nil
     end
@@ -2849,7 +2837,7 @@ function sc.display.client_drawStack(self, sendstack)
     sendstack = sendstack or self.scriptableObject.sendData
     if sendstack then
         if self.quadTree.splashEffect and sm_exists(self.quadTree.splashEffect) then
-            effect_destroyAndUnreg(self.quadTree.splashEffect)
+            effect_destroyAndUnreg(self.quadTree, self.quadTree.splashEffect)
             self.quadTree.splashEffect = nil
         end
         if sendstack.oops then
@@ -2858,8 +2846,8 @@ function sc.display.client_drawStack(self, sendstack)
             --effect_setParameter(eff, "uuid", sc_display_shapesUuid)
             effect_setParameter(eff, "color", oopsColor)
             if self.scriptableObject.character then
-                effectsData[eff.id][8] = sm_quat_fromEuler(sm_vec3_new(180, 90, 0))
-                quad_effectShow(eff)
+                self.quadTree.effectsData[eff.id][8] = sm_quat_fromEuler(sm_vec3_new(180, 90, 0))
+                quad_effectShow(self, eff)
             end
             self.quadTree.splashEffect = eff
             applyNew(self)    
@@ -2912,17 +2900,13 @@ function sc.display.client_drawStack(self, sendstack)
     end
 
     local ctick = getCurrentTick()
-
     local startExecTime = os_clock()
 
     local isEndClear = stack[#stack][1] == 0
     local clearColor
-	for i, v in ipairs(stack) do
-		if v[1] == 0 then
-			clearColor = formatColor(v[2], true)
-			break
-		end
-	end
+    if stack[1] and stack[1][1] == 0 then
+        clearColor = formatColor(stack[1][2], true)
+    end
 
     self.newEffects = {}
     local isEffect = false --если от всего стека был хоть какой-то смысл
@@ -2945,7 +2929,7 @@ function sc.display.client_drawStack(self, sendstack)
 
         self.oldRenderType = true
         self.bufferWait = false
-    elseif self.isRendering and ((backgroundChanged and not self.old_backgroundChanged) or sendstack.forceNative or (self.forceNativeRender and self.forceNativeRender > 0)) then
+    elseif not debug_noNativeRender and self.isRendering and ((backgroundChanged and not self.old_backgroundChanged) or sendstack.forceNative or (self.forceNativeRender and self.forceNativeRender > 0)) then
         debug_print("native render")
 
         self.buffer1 = {}
@@ -2969,11 +2953,15 @@ function sc.display.client_drawStack(self, sendstack)
         self.lastNativeRenderTime = os_clock() - startRnd
         self.oldRenderType = true
         self.bufferWait = false
+
+        if self.lastNativeRenderTime > 1/40 then
+            self.forceNativeRender = nil
+        end
     else
         debug_print("buffer render")
 
         local startRnd = os_clock()
-        if basegraphic_doubleBuffering(self, stack, getWidth(self), getHeight(self), self.customFont, self.utf8support, self.isRendering and sc_display_client_drawPixelForce, sc_display_client_optimize) then
+        if basegraphic_doubleBuffering(self, stack, getWidth(self), getHeight(self), self.customFont, self.utf8support, self.isRendering and sc_display_client_drawPixelForce, sc_display_client_optimize, self.isRendering and sc_display_client_fillRect) then
             self.lastLastClearColor2 = nil
             isEffect = true
         end

@@ -1,0 +1,7 @@
+[Eng]
+SComputers power toys is an addon for SComputers that adds small radars with the characteristics of the largest.
+Various new details will be added to this addon soon.
+
+[Rus]
+SComputers power toys - это дополнение для SComputers, которое добавляет маленькие радары с характеристиками самых больших.
+В ближайшее время в это дополнение будут добавлены различные новые детали.

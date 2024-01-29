@@ -181,7 +181,6 @@ function inertialEngine:server_onFixedUpdate(dt)
         else
             local cof = 0.26
             local val = cof - (self.gravity * cof)
-            print(self.gravity, val)
             sm.physics.applyImpulse(self.shape.body, sm.vec3.new(0, 0, val) * self:sv_getCreationMass(), true)
         end
 
