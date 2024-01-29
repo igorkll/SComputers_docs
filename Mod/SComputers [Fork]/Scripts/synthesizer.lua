@@ -11,6 +11,10 @@ synthesizer.componentType = "synthesizer"
 local maxBeeps = 4
 local maxLoops = 4
 local loopsList = {}
+for i = 1, 5 do
+    table.insert(loopsList, "ElectricEngine - Level " .. i)
+    table.insert(loopsList, "GasEngine - Level " .. i)
+end
 
 local function checkNum(num)
     if num < 1 or num > maxLoops then
@@ -20,6 +24,7 @@ end
 
 function synthesizer:server_onCreate()
     self.loopData = {}
+    self.flushLoops = true
 
     sc.synthesizerDatas[self.interactable.id] = {
         clear = function ()
@@ -58,12 +63,12 @@ function synthesizer:server_onCreate()
         startLoop = function(number, loopname, params)
             checkArg(1, number, "number")
             checkArg(2, loopname, "string")
-            checkArg(3, params, "table")
+            checkArg(3, params, "table", "nil")
             checkNum(number)
             for i, v in ipairs(loopsList) do
                 if v == loopname then
                     self.loopData[number] = {loopname, params}
-                    self.flushLoops = true
+                    self.flushLoops = number
                     return
                 end
             end
@@ -73,7 +78,7 @@ function synthesizer:server_onCreate()
             checkArg(1, number, "number")
             checkNum(number)
             self.loopData[number] = {}
-            self.flushLoops = true
+            self.flushLoops = number
         end,
         stopLoops = function()
             self.loopData = {}
@@ -112,13 +117,18 @@ function synthesizer:server_onFixedUpdate()
     end
 
     if self.flushLoops then
-        self:sv_flushLoops()
+        self:sv_flushLoops(self.flushLoops)
         self.flushLoops = nil
     end
 end
 
-function synthesizer:sv_flushLoops()
-    
+function synthesizer:sv_flushLoops(num)
+    if type(num) == "number" then
+        self.loopData.num = num
+    else
+        self.loopData.num = nil
+    end
+    self.network:sendToClients("cl_flushLoops", self.loopData)
 end
 
 
@@ -127,6 +137,7 @@ end
 function synthesizer:client_onCreate()
     self.effects = {}
     self.effectsCache = {}
+    self.currentLoops = {}
     self.network:sendToServer("sv_flushLoops")
 end
 
@@ -134,6 +145,31 @@ function synthesizer:client_onDestroy()
     for _, data in ipairs(self.effects) do
         data.effect:stop()
         data.effect:destroy()
+    end
+
+    for _, effect in pairs(self.currentLoops) do
+        effect:destroy()
+    end
+end
+
+function synthesizer:cl_flushLoops(data)
+    for i, effect in pairs(self.currentLoops) do
+        if not data.num or data.num == i then
+            effect:destroy()
+            self.currentLoops[i] = nil
+        end
+    end
+
+    for i, data in pairs(data) do
+        if not data.num or data.num == i then
+            local effect = sm.effect.createEffect(data[1], self.interactable)
+            for k, v in pairs(data[2] or {}) do
+                effect:setParameter(k, v)
+            end
+            effect:setAutoPlay(true)
+            effect:start()
+            self.currentLoops[i] = effect
+        end
     end
 end
 
@@ -156,6 +192,10 @@ function synthesizer:client_onFixedUpdate()
     end
 
     local num = #self.effects == 0 and 0 or 1
+    for _, effect in pairs(self.currentLoops) do
+        num = 1
+        break
+    end
 
     if not self.pose then self.pose = 0 end
     self.pose = self.pose + ((num - self.pose) * 0.3)
