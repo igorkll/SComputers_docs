@@ -68,7 +68,7 @@ function synthesizer:server_onCreate()
             for i, v in ipairs(loopsList) do
                 if v == loopname then
                     self.loopData[number] = {loopname, params}
-                    self.flushLoops = number
+                    self.flushLoops = true
                     return
                 end
             end
@@ -78,7 +78,7 @@ function synthesizer:server_onCreate()
             checkArg(1, number, "number")
             checkNum(number)
             self.loopData[number] = nil
-            self.flushLoops = number
+            self.flushLoops = true
         end,
         stopLoops = function()
             self.loopData = {}
@@ -128,7 +128,7 @@ function synthesizer:server_onFixedUpdate()
     end
 
     if self.flushLoops then
-        self:sv_flushLoops(self.flushLoops)
+        self:sv_flushLoops()
         self.flushLoops = nil
     end
 
@@ -138,12 +138,7 @@ function synthesizer:server_onFixedUpdate()
     end
 end
 
-function synthesizer:sv_flushLoops(num)
-    if type(num) == "number" then
-        self.loopData.num = num
-    else
-        self.loopData.num = nil
-    end
+function synthesizer:sv_flushLoops()
     self.network:sendToClients("cl_flushLoops", self.loopData)
 end
 
@@ -154,6 +149,7 @@ function synthesizer:client_onCreate()
     self.effects = {}
     self.effectsCache = {}
     self.currentLoops = {}
+    self.oldEffectsName = {}
     self.network:sendToServer("sv_flushLoops")
 end
 
@@ -170,8 +166,8 @@ end
 
 function synthesizer:cl_flushParams(data)
     for i, ldat in pairs(data) do
-        for k, v in pairs(ldat) do
-            if self.currentLoops[i] then
+        if self.currentLoops[i] then
+            for k, v in pairs(ldat) do
                 self.currentLoops[i]:setParameter(k, v)
             end
         end
@@ -179,23 +175,29 @@ function synthesizer:cl_flushParams(data)
 end
 
 function synthesizer:cl_flushLoops(data)
+    print(data)
+    local alt = {}
     for i, effect in pairs(self.currentLoops) do
-        if not data.num or data.num == i then
+        if not data[i] or self.oldEffectsName[i] ~= data[i][1] then
             effect:destroy()
             self.currentLoops[i] = nil
+            self.oldEffectsName[i] = nil
+        else
+            alt[i] = effect
         end
     end
 
     for i, ldat in pairs(data) do
-        if not data.num or data.num == i then
-            local effect = sm.effect.createEffect(ldat[1], self.interactable)
-            for k, v in pairs(ldat[2] or {}) do
-                effect:setParameter(k, v)
-            end
+        local effect = alt[i] or sm.effect.createEffect(ldat[1], self.interactable)
+        for k, v in pairs(ldat[2] or {}) do
+            effect:setParameter(k, v)
+        end
+        if effect:isDone() then
             effect:setAutoPlay(true)
             effect:start()
-            self.currentLoops[i] = effect
         end
+        self.currentLoops[i] = effect
+        self.oldEffectsName[i] = ldat[1]
     end
 end
 
