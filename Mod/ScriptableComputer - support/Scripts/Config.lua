@@ -82,6 +82,13 @@ sc.radarDetectedBodies = {}
 sc.display = {}
 sc.networking = {}
 
+sc.disableFilesystemMenu = true
+sc.useOriginalSettings = true
+sc.enableDefault = true
+sc.noCommands = true
+
+
+
 function sc.shutdown()
 end
 
@@ -362,7 +369,11 @@ function sc.loadRestrictions()
 	local data = sm.storage.load(sc.restrictionsKey)
 	if data then
 		sc.restrictions = data
-		for key, value in pairs(sc.defaultRestrictions) do
+		local restrictions = sc.defaultRestrictions
+		if sc.useOriginalSettings then
+			restrictions = sc.originalRestrictions
+		end
+		for key, value in pairs(restrictions) do
 			if sc.restrictions[key] == nil then
 				sc.restrictions[key] = value
 			end

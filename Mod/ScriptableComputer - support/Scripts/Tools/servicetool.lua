@@ -5,6 +5,11 @@ local noWarnings = true
 local noCheatCommand = true
 local noSafeCommand = true
 
+if sc.enableDefault then
+    _G.computersAllow = true
+    _G.updateToolSettings = true
+end
+
 ------------------------------------------------------------------
 
 function servicetool:server_onCreate()
@@ -342,15 +347,17 @@ if not commandsBind then
     local function bindCommandHook(command, params, callback, help)
         oldBindCommand(command, params, callback, help)
         if not added then
-            if sm.isHost then
-                oldBindCommand("/computers", {}, "cl_onChatCommand", "opens the SComputers configuration menu")
-            end
-            if not noCheatCommand then
-                oldBindCommand("/cl_scomputers_cheat", {}, "cl_onChatCommand", "enables/disables cheat-buttons in the \"Creative Permission-tool\"")
-            end
-            --oldBindCommand("/cl_scomputers_version", {}, "cl_onChatCommand", "show scomputers version")
-            if not noSafeCommand then
-                oldBindCommand("/sv_scomputers_safe", {}, "cl_onChatCommand", "returns SComputers parameters to safe")
+            if not sc.noCommands then
+                if sm.isHost then
+                    oldBindCommand("/computers", {}, "cl_onChatCommand", "opens the SComputers configuration menu")
+                end
+                if not noCheatCommand then
+                    oldBindCommand("/cl_scomputers_cheat", {}, "cl_onChatCommand", "enables/disables cheat-buttons in the \"Creative Permission-tool\"")
+                end
+                --oldBindCommand("/cl_scomputers_version", {}, "cl_onChatCommand", "show scomputers version")
+                if not noSafeCommand then
+                    oldBindCommand("/sv_scomputers_safe", {}, "cl_onChatCommand", "returns SComputers parameters to safe")
+                end
             end
 
             added = true

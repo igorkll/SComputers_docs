@@ -66,7 +66,11 @@ function hdd:client_onCreate()
 end
 
 function hdd:client_onInteract(_, state)
-	if state then
+	if state and not sc.disableFilesystemMenu then
 		fsmanager_open(self)
 	end
+end
+
+function hdd:client_canInteract()
+	return not sc.disableFilesystemMenu
 end
