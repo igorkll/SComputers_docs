@@ -82,12 +82,6 @@ sc.radarDetectedBodies = {}
 sc.display = {}
 sc.networking = {}
 
-sc.disableFilesystemMenu = false
-sc.disableFilesystemMenu = false
-
-
-
-
 function sc.shutdown()
 end
 

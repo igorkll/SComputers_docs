@@ -1,0 +1,17 @@
+{
+   "partList" : [
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "color" : "FFFFFF",
+         "physicsMaterial" : "Default",
+         "renderable" : "$MOD_DATA/Objects/Renderables/PixelShape.rend",
+         "rotationSet" : "Default",
+         "showInInventory" : false,
+         "uuid" : "41d7c8b2-e2de-4c29-b842-5efd8af37ae6"
+      }
+   ]
+}
