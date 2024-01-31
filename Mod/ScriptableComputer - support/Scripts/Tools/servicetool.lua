@@ -5,11 +5,6 @@ local noWarnings = true
 local noCheatCommand = true
 local noSafeCommand = true
 
-if sc.enableDefault then
-    _G.computersAllow = true
-    _G.updateToolSettings = true
-end
-
 ------------------------------------------------------------------
 
 function servicetool:server_onCreate()
@@ -17,6 +12,11 @@ function servicetool:server_onCreate()
     sc.init()
     sc.warningsCheck()
     self.sendRestrictions = true
+
+    if sc.enableByDefault then
+        _G.computersAllow = true
+        _G.updateToolSettings = true
+    end
 end
 
 function servicetool:server_onFixedUpdate()

@@ -84,7 +84,7 @@ sc.networking = {}
 
 sc.disableFilesystemMenu = true
 sc.useOriginalSettings = true
-sc.enableDefault = true
+sc.enableByDefault = true
 sc.noCommands = true
 
 
