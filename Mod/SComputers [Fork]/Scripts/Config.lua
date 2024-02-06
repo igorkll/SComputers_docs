@@ -633,6 +633,7 @@ function sc.getComponents(self, name, settings)
 
 		local newapi = {}
 		local checkTick
+		local forceCheck = true
 		
 		for key, value in pairs(api) do
 			local api_type = api.type
@@ -648,7 +649,9 @@ function sc.getComponents(self, name, settings)
 							error("the \"" .. (api_type or "unknown") .. "\" component has been removed", 2)
 						end
 
-						if ctick % 20 == 0 and not sc.restrictions.disCompCheck then
+						if (ctick % 20 == 0 or forceCheck) and not sc.restrictions.disCompCheck then
+							forceCheck = false
+
 							local find
 							for _, children in ipairs(getChildren(lInteractable)) do
 								if children == interactable then
@@ -687,6 +690,8 @@ function sc.getComponents(self, name, settings)
 		end
 
 		local function ferr()
+			forceCheck = true
+			checkTick = nil
 			error("there is no access to the component", 3)
 		end
 
@@ -699,23 +704,25 @@ function sc.getComponents(self, name, settings)
 			end
 
 			---------------- connect check
-			local find
-			for _, children in ipairs(getChildren(lInteractable)) do
-				if children == interactable then
-					find = true
-					break
-				end
-			end
-			if not find then
-				for _, parent in ipairs(getParents(lInteractable)) do
-					if parent == interactable then
+			if not sc.restrictions.disCompCheck then
+				local find
+				for _, children in ipairs(getChildren(lInteractable)) do
+					if children == interactable then
 						find = true
 						break
 					end
 				end
-			end
-			if not find then
-				ferr()
+				if not find then
+					for _, parent in ipairs(getParents(lInteractable)) do
+						if parent == interactable then
+							find = true
+							break
+						end
+					end
+				end
+				if not find then
+					ferr()
+				end
 			end
 
 			---------------- enable check
