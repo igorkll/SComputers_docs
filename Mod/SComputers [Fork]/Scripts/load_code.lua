@@ -1,6 +1,6 @@
 local pcall, unpack, error, pairs, type = pcall, unpack, error, pairs, type
 
-function addServiceCode(self, code, env) --спизженно с: https://github.com/Ocawesome101/oc-cynosure/blob/dev/base/load.lua
+function addServiceCode(self, code, env, serviceTable) --спизженно с: https://github.com/Ocawesome101/oc-cynosure/blob/dev/base/load.lua
     local computer = self
     local yieldName = self.yieldName
     local yieldArg = self.yieldArg
@@ -114,6 +114,11 @@ function addServiceCode(self, code, env) --спизженно с: https://github
         env[yieldName] = local_yield
     end
 
+    if serviceTable then
+        serviceTable.yield = local_yield
+        serviceTable.yieldArg = yieldArg
+    end
+
     --------------------------------
 
     local patterns = {
@@ -199,14 +204,28 @@ function addServiceCode(self, code, env) --спизженно с: https://github
 end
 
 
+local function createAdditionalInfo(names, values)
+    local str = "  -  ("
+    for i, lstr in ipairs(names) do
+        if type(values[i]) == "string" then
+            str = str .. lstr .. "-\"" .. tostring(values[i] or "unknown") .. "\""
+        else
+            str = str .. lstr .. "-'" .. tostring(values[i] or "unknown") .. "'"
+        end
+        if i ~= #names then
+            str = str .. ", "
+        end
+    end
+    return str .. ")"
+end
 
-
-function load_code(self, chunk, chunkname, mode, env)
-    checkArg(1, self,      "table")
-    checkArg(2, chunk,     "string")
-    checkArg(3, chunkname, "string", "nil")
-    checkArg(4, mode,      "string", "nil")
-    checkArg(5, env,       "table",  "nil")
+function load_code(self, chunk, chunkname, mode, env, serviceTable)
+    checkArg(1, self,         "table")
+    checkArg(2, chunk,        "string")
+    checkArg(3, chunkname,    "string", "nil")
+    checkArg(4, mode,         "string", "nil")
+    checkArg(5, env,          "table",  "nil")
+    checkArg(6, serviceTable, "table",  "nil")
 
     mode = mode or "bt"
     env = env or _G
@@ -235,10 +254,16 @@ function load_code(self, chunk, chunkname, mode, env)
         --vm == "luaInLua" был убран, для того чтобы если не получилось использовать целевую VM компьютеры переключились на luaInLua
         --такая ситуация может вазникнуть если DLM был удален или на хосте стоит DLM а на клиентах его нет, и если бы эта проверка была то на
         --клиентах мод бы тоже пытался использовать DLM и clientInvoke в unsafe-mode был сламался
+
+        if chunkname and chunkname:sub(1, 1) == "=" then
+            chunkname = chunkname:sub(2, #chunkname)
+        end
+
+        local tunnel = {}
         local function getScriptTree(script)
 			local ran, tokens = pcall(ll_Scanner.scan, ll_Scanner, script)
 			if ran then
-				local ran, tree = pcall(ll_Parser.parse, ll_Parser, tokens)
+				local ran, tree = pcall(ll_Parser.parse, ll_Parser, tokens, chunkname, tunnel, serviceTable)
 				return ran, tree
 			else
 				return ran, tokens
@@ -262,7 +287,11 @@ function load_code(self, chunk, chunkname, mode, env)
                 if result[1] then
                     return unpack(result, 2)
                 else
-                    error(ll_shorterr(result[2]) .. "   -   (line - " .. tostring(ll_Interpreter.lastEval.line or "unknown") .. ", eval - " .. tostring(ll_Interpreter.lastEval.type) .. ")", 2)
+                    local str = tostring(ll_shorterr(result[2]) or "unknown error")
+                    if tunnel.lastEval then
+                        str = str .. createAdditionalInfo({"line", "eval", "name"}, {tunnel.lastEval.line, tunnel.lastEval.type, tunnel.lastEval.chunkname})
+                    end
+                    error(str, 2)
                 end
 			end
 		else
@@ -307,10 +336,11 @@ function safe_load_code(self, chunk, chunkname, mode, env)
         return nil, preloadErr
     end
 
-    chunk, env = addServiceCode(self, chunk, env) --env may be a error
+    local serviceTable = {}
+    chunk, env = addServiceCode(self, chunk, env, serviceTable) --env may be a error
     if not chunk then
         return nil, env
     end
     
-    return load_code(self, chunk, chunkname, mode, env)
+    return load_code(self, chunk, chunkname, mode, env, serviceTable)
 end

@@ -72,7 +72,7 @@ local sc = {
 }
 _G.sc = sc
 
-sc.version = "2.4a"
+sc.version = "2.5a"
 
 sc.deltaTime = 0
 sc.maxcodelen = 32 * 1024
@@ -83,8 +83,9 @@ sc.display = {}
 sc.networking = {}
 
 sc.disableFilesystemMenu = false
-sc.disableFilesystemMenu = false
-
+sc.useOriginalSettings = false
+sc.enableByDefault = false
+sc.noCommands = false
 
 
 
@@ -368,7 +369,11 @@ function sc.loadRestrictions()
 	local data = sm.storage.load(sc.restrictionsKey)
 	if data then
 		sc.restrictions = data
-		for key, value in pairs(sc.defaultRestrictions) do
+		local restrictions = sc.defaultRestrictions
+		if sc.useOriginalSettings then
+			restrictions = sc.originalRestrictions
+		end
+		for key, value in pairs(restrictions) do
 			if sc.restrictions[key] == nil then
 				sc.restrictions[key] = value
 			end
@@ -628,6 +633,7 @@ function sc.getComponents(self, name, settings)
 
 		local newapi = {}
 		local checkTick
+		
 		for key, value in pairs(api) do
 			local api_type = api.type
 			if type(value) == "function" then
@@ -679,6 +685,45 @@ function sc.getComponents(self, name, settings)
 				newapi[key] = sc_advDeepcopy(value)
 			end
 		end
+
+		local function ferr()
+			error("there is no access to the component", 3)
+		end
+
+		newapi[1] = function ()
+			sc_coroutineCheck()
+
+			---------------- exists check
+			if not sm_exists(interactable) then
+				ferr()
+			end
+
+			---------------- connect check
+			local find
+			for _, children in ipairs(getChildren(lInteractable)) do
+				if children == interactable then
+					find = true
+					break
+				end
+			end
+			if not find then
+				for _, parent in ipairs(getParents(lInteractable)) do
+					if parent == interactable then
+						find = true
+						break
+					end
+				end
+			end
+			if not find then
+				ferr()
+			end
+
+			---------------- enable check
+			if api[-1] then
+				ferr()
+			end
+		end
+
 		self.componentCache[interactable.id] = newapi
 		table_insert(components, newapi)
 	end

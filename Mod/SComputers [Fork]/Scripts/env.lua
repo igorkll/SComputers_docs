@@ -498,6 +498,11 @@ function createSafeEnv(self, settings)
         end,
         getTotalRam = function ()
             return self.cdata.ram
+        end,
+
+        isComponentAvailable = function(componentTable)
+            checkArg(1, componentTable, "table")
+            return not not pcall(componentTable[1])
         end
 	}
 
@@ -632,7 +637,9 @@ function createSafeEnv(self, settings)
     end
 
     env.math.randomseed = nil --this method is not in the game, but if it is added, it STILL should not be in SComputers
-    env.string.rep = customRep --in the case of ("str").rep(), the "tweaks" method in the methods.lua file will work
+    if isTweaksAvailable() then
+        env.string.rep = customRep --in the case of ("str").rep(), the "tweaks" method in the "methods.lua" file will work
+    end
 
 	return env
 end
@@ -660,6 +667,7 @@ function createUnsafeEnv(self, settings)
 end
 
 function removeServerMethods(env) --called before execution clientInvoke
+    env.isComponentAvailable = nil
     env.getComponent = nil
     env.getComponents = nil
     env.reboot = nil

@@ -43,6 +43,10 @@ function customRep(s, n, sep)
     end
 end
 
+function isTweaksAvailable()
+	return not not sc.getApi("getmetatable")
+end
+
 function tweaks()
 	local getmetatable = sc.getApi("getmetatable")
 	if getmetatable then

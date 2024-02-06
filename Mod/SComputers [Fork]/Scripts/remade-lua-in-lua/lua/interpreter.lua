@@ -470,6 +470,7 @@ ll_Interpreter.operations = {
     end
 }
 
+local globalStep = 0
 function ll_Interpreter:evaluate(node, environment)
     local iter = self.interations + 1
     if iter >= self.MAX_ITERATIONS then
@@ -486,7 +487,19 @@ function ll_Interpreter:evaluate(node, environment)
     --    print(node.type, tableToString(node))
     --end
 
-    self.lastEval = node
+    if node.tunnel then
+        node.tunnel.lastEval = node
+    end
+    if node.serviceTable then
+        if node.serviceTable.yield then
+            if globalStep % 128 == 0 then
+                node.serviceTable.yield(node.serviceTable.yieldArg)
+                globalStep = 1
+            else
+                globalStep = globalStep + 1
+            end
+        end
+    end
     return self.evals[node.type](self, node, environment)
 end
 

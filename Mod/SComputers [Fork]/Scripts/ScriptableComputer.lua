@@ -472,6 +472,7 @@ function ScriptableComputer:sv_disableComponentApi(notRemoveFlags)
 		for key, value in pairs(self.old_publicData.sc_component.api) do
 			self.old_publicData.sc_component.api[key] = nil
 		end
+		self.old_publicData.sc_component.api[-1] = true
 		self.old_publicData.sc_component.api = nil
 		self.old_publicData.sc_component.name = nil
 		self.old_publicData.sc_component = nil

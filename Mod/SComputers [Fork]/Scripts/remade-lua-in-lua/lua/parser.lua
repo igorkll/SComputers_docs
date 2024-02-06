@@ -31,16 +31,22 @@ ll_Parser = {
 ---Parses tokens and returns a tree
 ---@param tokens table "Array table of tokens"
 ---@return table "Tree"
-function ll_Parser:parse(tokens)
+function ll_Parser:parse(tokens, chunkname, tunnel, serviceTable)
     self.current = 1
     self.line = 1
     self.tokens = tokens
+    self.chunkname = chunkname
+    self.tunnel = tunnel
+    self.serviceTable = serviceTable
 
     return self:parseChunk()
 end
 
 local function addInfo(self, tbl)
     tbl.line = self.line
+    tbl.chunkname = self.chunkname
+    tbl.tunnel = self.tunnel
+    tbl.serviceTable = self.serviceTable
     return tbl
 end
 
