@@ -168,9 +168,7 @@ end
 
 local tcCache = {}
 local function tableChecksum(input, blkey)
-	if tcCache[input] then return tcCache[input] end
-
-	local value, input_type, orig_input = 5132, type(input), input
+	local value, input_type = 5132, type(input)
 	if input_type == "table" then
 		local ldop = 0
 		for k, v in pairs(input) do
@@ -183,9 +181,9 @@ local function tableChecksum(input, blkey)
 	elseif input_type == "number" then
 		value = (input + 17) * 2
 	elseif input_type == "Vec3" then
-		value = value + (input.x * 2)
-		value = value - (input.y * 4)
-		value = value + (input.z * 8)
+		value = value + (input.x * 3)
+		value = value - (input.y * 14)
+		value = value - (input.z * 7)
 	elseif input_type == "Color" then
 		value = value + (input.r * 2)
 		value = value - (input.g * 4)
@@ -199,11 +197,16 @@ local function tableChecksum(input, blkey)
 	elseif input_type == "nil" then
 		value = value - 984
 	else
-		input = tostring(input)
-		for i = 1, #input do
-			value = value + ((string_byte(input, i) + i) * i)
+		local strInput = tostring(input)
+		if tcCache[strInput] then
+			return tcCache[strInput]
 		end
-		tcCache[orig_input] = value
+
+		for i = 1, #strInput do
+			value = value + ((string_byte(strInput, i) + i) * i)
+		end
+
+		tcCache[strInput] = value
 	end
 	
 	return value
@@ -212,7 +215,9 @@ _G.tableChecksum = tableChecksum
 _G.tcCache = tcCache
 
 function tableEquals(tbl1, tbl2)
-	--print(tableChecksum(tbl1), tableChecksum(tbl2), tableChecksum(tbl1) == tableChecksum(tbl2))
+	if #tbl1 ~= #tbl2 then
+		return false
+	end
 	return tableChecksum(tbl1) == tableChecksum(tbl2)
 end
 

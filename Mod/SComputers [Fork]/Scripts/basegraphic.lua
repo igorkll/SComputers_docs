@@ -65,8 +65,8 @@ function basegraphic_checkFont(font)
 end
 
 function basegraphic_printText(font, utf8support, self, drawPixel, drawPixelForce, x, y, width, height, text, color)
-    x = math_floor(x)
-	y = math_floor(y)
+    --x = math_floor(x)
+	--y = math_floor(y)
 
     local font_width = font and font.width or font_width
 	local font_height = font and font.height or font_height
@@ -175,10 +175,10 @@ end
 local basegraphic_printText = basegraphic_printText
 
 function basegraphic_drawLine(x, y, x1, y1, color, width, height, buffer1)
-	x = math_floor(x)
-	y = math_floor(y)
-	x1 = math_floor(x1)
-	y1 = math_floor(y1)
+	--x = math_floor(x)
+	--y = math_floor(y)
+	--x1 = math_floor(x1)
+	--y1 = math_floor(y1)
 
 	local sign_x, sign_y
 
@@ -471,7 +471,7 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 	if stack then
 		local function draw(_, x, y, color)
 			if x >= 0 and y >= 0 and x < width and y < height then
-				buffer1[math_floor(x) + (math_floor(y) * width)] = color
+				buffer1[x + (y * width)] = color
 			end
 		end
 
@@ -480,7 +480,6 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 			local negDX_x = cx - x
 			local posDX_y = cx + y
 			local negDX_y = cx - y
-		
 			local posDY_y = cy + y
 			local negDY_y = cy - y
 			local posDY_x = cy + x
@@ -550,11 +549,10 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 				local y = math_floor(v[4])
 				local r = v[5]
 
-				local cx, cy = math_min(r, 1024), math_min(r, 1024)
 				local px, py
-				for ix = math_max(-cx, -x), math_min(cx, (width - x) - 1) do
+				for ix = math_max(-r, -x), math_min(r, (width - x) - 1) do
 					px = x + ix
-					for iy = math_max(-cy, -y), math_min(cy, (height - y) - 1) do
+					for iy = math_max(-r, -y), math_min(r, (height - y) - 1) do
 						py = y + iy
 						if quadInCircle(px, py, 1, nx, ny, r) then
 							buffer1[px + (py * width)] = col
@@ -579,7 +577,7 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 		local i2 = 1
 		local i = 0
 		while i < width * height do
-			::continue::
+			--::continue::
 			col = buffer1[i] or buffer1All
 			if col ~= (buffer2[i] or buffer2All) then
 				--[[
@@ -599,7 +597,7 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 					end
 				end
 				]]
-				if not flush(self, math_floor(i % width), math_floor(i / width), col) then
+				if not flush(self, i % width, math_floor(i / width), col) then
 					isEffect = true
 					if optimize and i2 % 1024 == 0 then optimize(self) end
 					i2 = i2 + 1

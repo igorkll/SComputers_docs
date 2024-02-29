@@ -466,8 +466,9 @@ local black = "000000ff"
 local white = "ffffffff"
 
 local type = type
+local t
 function sc.formatColor(data, default, advancedDefault)
-	local t = type(data)
+	t = type(data)
 	if t == "Color" then
 		return data
 	elseif t == "string" then

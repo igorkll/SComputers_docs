@@ -3,7 +3,7 @@ debug_out = false
 debug_printeffects = false
 debug_disabletext = false
 debug_disableoptimize = false
-debug_raycast = false
+debug_raycast = true
 debug_offset = false
 debug_disableEffectsBuffer = false
 debug_disableDBuff = false
@@ -82,7 +82,6 @@ local string_byte = string.byte
 --local table_pack = table.pack
 
 local sm_exists = sm.exists
-local ipairs = ipairs
 local pairs = pairs
 local print = print
 local type = type
@@ -131,6 +130,7 @@ local sm_physics_filter_dynamicBody = sm.physics.filter.dynamicBody
 local sm_physics_filter_staticBody = sm.physics.filter.staticBody
 local filter_body = sm_physics_filter_dynamicBody + sm_physics_filter_staticBody
 
+local displayRaycastQuad = sm_quat_fromEuler(sm_vec3_new(90, 180, 0))
 local function cl_displayRaycast(self, position, r)
     if _G.raycastCache and (getCurrentTick() - _G.raycastCache.time) < 20 then
         return _G.raycastCache.shapes
@@ -170,7 +170,7 @@ local function cl_displayRaycast(self, position, r)
     ]]
 
     ----createRays
-    local rotation = sm_camera_getRotation() * sm_quat_fromEuler(sm_vec3_new(90, 180, 0))
+    local rotation = sm_camera_getRotation() * displayRaycastQuad
 
     local resolutionX, resolutionY = sc.restrictions.rays, sc.restrictions.rays
     local distance = r
@@ -378,7 +378,7 @@ function quad_createRoot(display, x, y, size, maxX, maxY)
     --node.uroot = node
     return node
 end
-
+--[[
 local function raw_set_color(effect, color)
     --local colorChecksum = tableChecksum(color)
     --if effectsData[effect.id][1] ~= color then
@@ -387,6 +387,7 @@ local function raw_set_color(effect, color)
     --    effectsData[effect.id][1] = color
     --end
 end
+]]
 
 function quad_updateEffectColor(self, force)
     if debug_disableUpdateColor then return end
@@ -402,7 +403,8 @@ function quad_updateEffectColor(self, force)
             self.effect = quad_createEffect(self.root, self.x, self.y, self.sizeX, self.sizeY)
         end
 
-        raw_set_color(self.effect, color)
+        --raw_set_color(self.effect, color)
+        return effect_setParameter(self.effect, "color", color)
     else
         if self.effect and sm_exists(self.effect) then
             --effect_destroy(self.effect)
@@ -460,7 +462,7 @@ end
 
 local quad_alt_hideRot = sm_quat_fromEuler(sm_vec3_new(0, 90, 0))
 local quad_alt_visibleRot = sm_quat_fromEuler(sm_vec3_new(0, 180 + 90, 0))
-
+local vec3_011 = sm_vec3_new(0, 1, 1)
 
 function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale, wide, uuid)
     --local attemptRemove
@@ -595,7 +597,7 @@ function quad_createEffect(root, x, y, sizeX, sizeY, z, nonBuf, nativeScale, wid
         offset.z = x
         offset.x = z
         offset.y = -y
-        offset = offset + sm_vec3_new(0, 1, 1)
+        offset = offset + vec3_011
     else
         local loff = quad_displayOffset
         if display.scriptableObject.data and display.scriptableObject.data.zpos then
@@ -654,9 +656,9 @@ function quad_effectHide(root, effect)
     if effect and sm_exists(effect) then
         local data = root.effectsData[effect.id]
         if data[3] and data[3].noRotateEffects then
-            effect_setOffsetPosition(effect, hideOffset)
+            return effect_setOffsetPosition(effect, hideOffset)
         else
-            effect_setOffsetRotation(effect, data[7])
+            return effect_setOffsetRotation(effect, data[7])
         end
     end
 end
@@ -665,9 +667,9 @@ function quad_effectShow(root, effect)
     if effect and sm_exists(effect) then
         local data = root.effectsData[effect.id]
         if data[3] and data[3].noRotateEffects then
-            effect_setOffsetPosition(effect, data[6])
+            return effect_setOffsetPosition(effect, data[6])
         else
-            effect_setOffsetRotation(effect, data[8])
+            return effect_setOffsetRotation(effect, data[8])
         end
     end
 end
@@ -738,7 +740,7 @@ function quad_optimize(self)
 
 
             self.color = color
-            quad_updateEffectColor(self)
+            return quad_updateEffectColor(self)
 
             --if self.root.display.isRendering then
             --    quad_effectShow(self.effect)
@@ -823,7 +825,7 @@ function quad_treeSetColor(self, tx, ty, color)
         else
             if self.color ~= color then
                 self.color = color
-                quad_updateEffectColor(self)
+                return quad_updateEffectColor(self)
             end
         end
     else
@@ -857,7 +859,7 @@ function quad_treeFillRect(self, x, y, w, h, color)
             quad_treeFillRect(children[1], x, y, w, h, color)
             quad_treeFillRect(children[2], x, y, w, h, color)
             quad_treeFillRect(children[3], x, y, w, h, color)
-            quad_treeFillRect(children[4], x, y, w, h, color)
+            return quad_treeFillRect(children[4], x, y, w, h, color)
         end
     end
 end
@@ -1035,7 +1037,7 @@ local function applyNew(self)
         if self.quadTree.back_effect and effect_isDone(self.quadTree.back_effect) then
             effect_start(self.quadTree.back_effect)
         end
-        showNewEffects(self)
+        return showNewEffects(self)
     else
         --[[
         if self.quadTree.splashEffect then
@@ -1046,7 +1048,7 @@ local function applyNew(self)
         end
         hideNewEffects(self)
         ]]
-        quad_rootRealHide(self.quadTree)
+        return quad_rootRealHide(self.quadTree)
     end
 end
 
@@ -1278,11 +1280,11 @@ function sc.display.server_update(self)
                                     break
                                 else
                                     index = index - count
-                                    count = math_floor((count / 2) + 0.5)
+                                    count = nRound(count / 2)
                                 end
                             elseif not pcall(vnetwork.sendToClients, self.scriptableObject, "client_onReceiveDrawStack", datapack, maxDist, whitelist) then
                                 index = index - count
-                                count = math_floor((count / 2) + 0.5)
+                                count = nRound(count / 2)
                             end
 
                             cycles = cycles + 1
@@ -1380,6 +1382,7 @@ function sc.display.server_createData(self)
         return x, y, w, h
     end
 
+    local temp
     local data = {
         isAllow = function ()
             return isAllow(self)
@@ -1413,15 +1416,18 @@ function sc.display.server_createData(self)
         end,
         drawPixel = function (x, y, color)
             x, y = checkPos(x, y)
-            if x and (self.serverCache[x + (y * rwidth)] or self.serverCacheAll) ~= color then
-                self.renderingStack[self.rnd_idx] = {
-                    1,
-                    color or "ffffffff",
-                    x,
-                    y
-                }
-                self.rnd_idx = self.rnd_idx + 1
-                self.serverCache[x + (y * rwidth)] = color
+            if x then
+                temp = x + (y * rwidth)
+                if (self.serverCache[temp] or self.serverCacheAll) ~= color then
+                    self.renderingStack[self.rnd_idx] = {
+                        1,
+                        color or "ffffffff",
+                        x,
+                        y
+                    }
+                    self.rnd_idx = self.rnd_idx + 1
+                    self.serverCache[temp] = color
+                end
             end
         end,
         drawRect = function (x, y, w, h, c)
@@ -1466,8 +1472,8 @@ function sc.display.server_createData(self)
             self.renderingStack[self.rnd_idx] = {
                 4,
                 c or "ffffffff",
-                nRound(x) + 0.5, -- +0.5 because center of pixel
-                nRound(y) + 0.5, -- +0.5 because center of pixel
+                nRound(x),
+                nRound(y),
                 nRound(r)
             }
             self.rnd_idx = self.rnd_idx + 1
@@ -1815,7 +1821,8 @@ function sc_display_client_clear(self, color, removeAll)
     --end
 
     if self.quadTree.back_effect then
-        raw_set_color(self.quadTree.back_effect, color)
+        --raw_set_color(self.quadTree.back_effect, color)
+        effect_setParameter(self.quadTree.back_effect, "color", color)
     end
 
     self.dbuffPixels = {}
@@ -1823,7 +1830,7 @@ function sc_display_client_clear(self, color, removeAll)
 
     self.buffer1 = {}
     self.buffer2 = {}
-    self.buffer1All = nil
+    self.buffer1All = color
     self.buffer2All = nil
 end
 
@@ -1840,8 +1847,8 @@ function sc_display_client_drawPixelForce(self, x, y, color)
 end
 
 function sc_display_client_drawPixel(self, x, y, color)
-    x = math_floor(x)
-    y = math_floor(y)
+    --x = math_floor(x)
+    --y = math_floor(y)
 
     if x >= 0 and x < getWidth(self) and y >= 0 and y < getHeight(self) then
         return sc_display_client_drawPixelForce(self, x, y, color)
@@ -1899,7 +1906,8 @@ end
 function sc_display_client_fillRect(self, x, y, w, h, color)
     self.dbuffPixels = {}
     self.dbuffPixelsAll = nil
-    quad_treeFillRect(self.quadTree, math_floor(x), math_floor(y), math_floor(w), math_floor(h), color)
+    --quad_treeFillRect(self.quadTree, math_floor(x), math_floor(y), math_floor(w), math_floor(h), color)
+    return quad_treeFillRect(self.quadTree, x, y, w, h, color)
 
     --[[
     local realAction = false
@@ -1922,11 +1930,13 @@ function sc_display_client_fillRect(self, x, y, w, h, color)
     ]]
 end
 
+--[[
 function sc_display_client_rawFillRect(self, x, y, w, h, color)
     self.dbuffPixels = {}
     self.dbuffPixelsAll = nil
     quad_treeFillRect(self.quadTree, math_floor(x), math_floor(y), math_floor(w), math_floor(h), color)
 end
+]]
 
 sc.display.client_fillRect = sc_display_client_fillRect
 
@@ -1954,9 +1964,9 @@ local function drawCircle_putpixel(self, cx, cy, x, y, color)
 end
 
 function sc_display_client_drawCircle(self, x, y, r, color)
-    x = math_floor(x)
-    y = math_floor(y)
-    r = math_floor(r)
+    --x = math_floor(x)
+    --y = math_floor(y)
+    --r = math_floor(r)
 
     local lx = 0
     local ly = r
@@ -2052,10 +2062,10 @@ function sc_display_client_drawLine(self, x, y, x1, y1, color)
     local width = getWidth(self)
     local height = getHeight(self)
     
-    x = math_floor(x)
-    y = math_floor(y)
-    x1 = math_floor(x1)
-    y1 = math_floor(y1)
+    --x = math_floor(x)
+    --y = math_floor(y)
+    --x1 = math_floor(x1)
+    --y1 = math_floor(y1)
 
     local sign_x, sign_y
 
@@ -2360,7 +2370,7 @@ local string_sub = string.sub
 local string_len = string.len
 local basegraphic_printText = basegraphic_printText
 local function sc_display_client_drawText(self, x, y, text, color)
-    basegraphic_printText(self.customFont, self.utf8support, self, sc_display_client_drawPixel, sc_display_client_drawPixelForce, x, y, getWidth(self), getHeight(self), text, color)
+    return basegraphic_printText(self.customFont, self.utf8support, self, sc_display_client_drawPixel, sc_display_client_drawPixelForce, x, y, getWidth(self), getHeight(self), text, color)
     --[[
     x = math_floor(x)
     y = math_floor(y)
@@ -2436,7 +2446,7 @@ local function sc_display_client_drawText(self, x, y, text, color)
 end
 
 function sc_display_client_optimize(self)
-    quad_optimize(self.quadTree)
+    return quad_optimize(self.quadTree)
 end
 
 local math_sin = math.sin
@@ -2858,6 +2868,7 @@ function sc.display.client_drawStack(self, sendstack)
 
         if sendstack.endPack then
             if self.savestack then
+                debug_print("slow stack copying (end)")
                 local lstack = self.savestack
                 local lidx = self.savestack_idx
                 for i = 1, #sendstack do
@@ -2866,9 +2877,11 @@ function sc.display.client_drawStack(self, sendstack)
                 end
                 self.savestack_idx = lidx
             else
+                debug_print("fast stack copying (end)")
                 self.savestack = sendstack
             end
         else
+            debug_print("slow stack copying")
             if not self.savestack then self.savestack = {} self.savestack_idx = 1 end
             local lstack = self.savestack
             local lidx = self.savestack_idx
@@ -2941,7 +2954,10 @@ function sc.display.client_drawStack(self, sendstack)
         self.buffer1All = nil
 
         local startRnd = os_clock()
-        for _, v in ipairs(stack) do
+        local v
+        for i = 1, #stack do
+            v = stack[i]
+            
             if v[1] >= 0 then
                 v[2] = formatColor(v[2], v[1] == 0)
             end
@@ -2970,7 +2986,7 @@ function sc.display.client_drawStack(self, sendstack)
         debug_print("buffer render")
 
         local startRnd = os_clock()
-        if basegraphic_doubleBuffering(self, stack, getWidth(self), getHeight(self), self.utf8support, self.isRendering and sc_display_client_drawPixelForce, sc_display_client_optimize, self.isRendering and sc_display_client_fillRect) then
+        if basegraphic_doubleBuffering(self, stack, getWidth(self), getHeight(self), self.utf8support, self.isRendering and sc_display_client_drawPixelForce, sc_display_client_optimize, sc_display_client_fillRect) then
             self.lastLastClearColor2 = nil
             isEffect = true
         end
@@ -2979,7 +2995,7 @@ function sc.display.client_drawStack(self, sendstack)
 			local rendTime = os_clock() - startRnd
 			local dt2 = self.lastNativeRenderTime * 2
 			if not self.oldRenderType and dt2 < rendTime and not debug_disableForceNativeRender then
-				local add = constrain(math.ceil(rendTime / dt2) * 5, 10, 40)
+				local add = constrain(math_ceil(rendTime / dt2) * 5, 10, 40)
 				debug_print("force native render", self.lastNativeRenderTime, dt2, rendTime, add)
 				self.forceNativeRender = add
 			end

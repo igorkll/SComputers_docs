@@ -238,11 +238,10 @@ end
 
 function smartCall(nativePart, func, ...)
     if nativePart ~= func then
-        print(nativePart)
         local self, tunnel
-        print(pcall(function ()
+        pcall(function ()
             self, tunnel = nativePart[2], nativePart[1]
-        end))
+        end)
 
         if self then
             ll_Interpreter.internalData[self.env[self.yieldName]] = true --а нехер перезаписывать __internal_yield, крашеры ебаные
