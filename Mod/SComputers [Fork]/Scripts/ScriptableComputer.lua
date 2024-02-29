@@ -585,7 +585,7 @@ function ScriptableComputer:sv_execute(endtick)
 		end
 		
 		self:sv_init_yield()
-		local ran, err = pcall(func)
+		local ran, err = smartCall(self.scriptFunc, func)
 		do
 			local lok, lerr = pcall(function(self) self:sv_yield() end, self) --касыль с лямбдой НУЖЕН для правильного разположения ошибки
 			if not lok and not err then
@@ -618,7 +618,7 @@ function ScriptableComputer:sv_execute(endtick)
 			
 			if self.env.callback_error then
 				self:sv_init_yield()
-				local ran, err = pcall(self.env.callback_error, err)
+				local ran, err = smartCall(self.scriptFunc, self.env.callback_error, err)
 				if not ran then
 					print("error in callback_error", err)
 				end

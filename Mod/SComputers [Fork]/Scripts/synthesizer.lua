@@ -10,7 +10,7 @@ synthesizer.componentType = "synthesizer"
 
 local maxBeeps = 4
 local maxLoops = 4
-local loopsList = {}
+local loopsList = {"GasEngine - Scrap"}
 for i = 1, 5 do
     table.insert(loopsList, "ElectricEngine - Level " .. i)
     table.insert(loopsList, "GasEngine - Level " .. i)
@@ -26,8 +26,10 @@ local function formatParams(data)
     local tbl = {}
     tbl.load = data.load
     tbl.rpm = data.rpm
+    tbl.gas = data.gas
     if type(tbl.load) ~= "number" then tbl.load = nil end
     if type(tbl.rpm) ~= "number" then tbl.rpm = nil end
+    if type(tbl.gas) ~= "number" then tbl.gas = nil end
     return tbl
 end
 

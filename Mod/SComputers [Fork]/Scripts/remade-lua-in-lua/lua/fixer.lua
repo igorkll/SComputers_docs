@@ -14,7 +14,7 @@ function ll_fix(code) --тут фикситься несколько багов
 end
 
 function ll_shorterr(err)
-    return err
+    return tostring(err or "unknown error")
 
     --[[
     local function a(str)

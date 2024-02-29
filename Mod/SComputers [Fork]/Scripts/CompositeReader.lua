@@ -40,7 +40,13 @@ function CompositeReader.server_onFixedUpdate(self, dt)
 				self.interactable:setActive(false)
 				self.interactable:setPower(0)
 			end
+		else
+			self.interactable:setActive(false)
+			self.interactable:setPower(0)
 		end
+	else
+		self.interactable:setActive(false)
+		self.interactable:setPower(0)
 	end
 end
 

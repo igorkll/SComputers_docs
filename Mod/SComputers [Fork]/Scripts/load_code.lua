@@ -219,6 +219,51 @@ local function createAdditionalInfo(names, values)
     return str .. ")"
 end
 
+function checkVMname()
+    local vm = sc.restrictions.vm
+    if vm == "fullLuaEnv" and a and a.load then
+        return "fullLuaEnv"
+    elseif vm == "scrapVM" and _G.luavm then
+        return "scrapVM"
+    elseif vm == "dlm" and dlm and dlm.loadstring then
+        return "dlm"
+    elseif vm == "hsandbox" and _HENV and _HENV.load then
+        return "hsandbox"
+    elseif vm == "advancedExecuter" and sm.advancedExecuter then
+        return "advancedExecuter"
+    elseif ll_Scanner and ll_Parser and ll_Interpreter then
+        return "luaInLua"
+    end
+end
+
+function smartCall(nativePart, func, ...)
+    if nativePart ~= func then
+        print(nativePart)
+        local self, tunnel
+        print(pcall(function ()
+            self, tunnel = nativePart[2], nativePart[1]
+        end))
+
+        if self then
+            ll_Interpreter.internalData[self.env[self.yieldName]] = true --а нехер перезаписывать __internal_yield, крашеры ебаные
+            local result = {pcall(func, ...)}
+            ll_Interpreter.internalData[self.env[self.yieldName]] = nil
+
+            if result[1] then
+                return unpack(result)
+            else
+                local str = ll_shorterr(result[2])
+                if tunnel.lastEval then
+                    str = str .. createAdditionalInfo({"line", "eval", "name"}, {tunnel.lastEval.line, tunnel.lastEval.type, tunnel.lastEval.chunkname})
+                end
+                return nil, str
+            end
+        end
+    end
+
+    return pcall(func, ...)
+end
+
 function load_code(self, chunk, chunkname, mode, env, serviceTable)
     checkArg(1, self,         "table")
     checkArg(2, chunk,        "string")
@@ -274,7 +319,8 @@ function load_code(self, chunk, chunkname, mode, env, serviceTable)
 		local ran, tree = getScriptTree(newchunk)
 		if ran then
             local enclosedEnv = ll_Interpreter:encloseEnvironment(env)
-            return function (...)
+
+            local function resultFunction(...)
                 local args = {...}
                 env[getargsfunc] = function ()
                     return unpack(args)
@@ -287,13 +333,31 @@ function load_code(self, chunk, chunkname, mode, env, serviceTable)
                 if result[1] then
                     return unpack(result, 2)
                 else
-                    local str = tostring(ll_shorterr(result[2]) or "unknown error")
+                    local str = ll_shorterr(result[2])
                     if tunnel.lastEval then
                         str = str .. createAdditionalInfo({"line", "eval", "name"}, {tunnel.lastEval.line, tunnel.lastEval.type, tunnel.lastEval.chunkname})
                     end
                     error(str, 2)
                 end
 			end
+
+            return mt_hook({
+                __call = function(_, ...)
+                    local result = {pcall(resultFunction, ...)}
+                    if not result[1] then
+                        error(result[2], 2)
+                    else
+                        return unpack(result, 2)
+                    end
+                end,
+                __index = function(_, key)
+                    if key == 1 then
+                        return tunnel
+                    elseif key == 2 then
+                        return self
+                    end
+                end
+            })
 		else
             return nil, ll_shorterr(tree)
 		end

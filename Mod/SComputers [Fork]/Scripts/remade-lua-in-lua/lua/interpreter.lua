@@ -492,7 +492,7 @@ function ll_Interpreter:evaluate(node, environment)
     end
     if node.serviceTable then
         if node.serviceTable.yield then
-            if globalStep % 512 == 0 then
+            if globalStep % 2048 == 0 then
                 node.serviceTable.yield(node.serviceTable.yieldArg)
                 globalStep = 1
             else

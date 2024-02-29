@@ -15,6 +15,12 @@ local table_concat = table.concat
 local ipairs = ipairs
 local pairs = pairs
 
+function mt_hook(mt)
+	local empty_class = class(mt)
+    empty_class.__index = mt.__index
+    return empty_class()
+end
+
 local maxrep = 1024 * 1024
 local orep = string.rep
 function customRep(s, n, sep)
