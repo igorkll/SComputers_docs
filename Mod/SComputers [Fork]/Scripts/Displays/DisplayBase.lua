@@ -1,15 +1,21 @@
+--[[
+    THIS CODE IS FULL OF CRAP
+    I KNOW IT'S TERRIBLE, AND I'M REFINING IT
+]]
+
 -- debug
 debug_out = false
 debug_printeffects = false
 debug_disabletext = false
 debug_disableoptimize = false
-debug_raycast = true
+debug_raycast = false
 debug_offset = false
 debug_disableEffectsBuffer = false
 debug_disableDBuff = false
 debug_disableForceNativeRender = false
 debug_disableUpdateColor = false
-debug_noNativeRender = false
+debug_noNativeRender = true
+debug_disableRectBuffer = true
 mul_ray_fov = 2
 
 --code
@@ -1129,7 +1135,6 @@ function sc.display.createDisplay(scriptableObject, width, height, pixelScale)
         -- client
         localLag = 0,
         rnd = math_random(0, 40 * 5),
-        dbuffPixels = {},
         quadTree = nil,
         dragging = {interact=false, tinker=false, interactLastPos={x=-1, y=-1}, tinkerLastPos={x=-1, y=-1}},
 
@@ -1177,7 +1182,8 @@ function sc.display.server_update(self)
     local ctick = sm.game.getCurrentTick()
     if ctick % rate == 0 then self.allow_update = true end
     if ctick % (40 * 4) == 0 then
-		self.forceNative_update = true
+        self.forceNative_update = true
+
 		self.serverCache = {}
         self.serverCacheAll = nil
 
@@ -1241,8 +1247,8 @@ function sc.display.server_update(self)
                 end
 
                 if not cancel then
-                    self.renderingStack.force = self.force_update
                     self.renderingStack.forceNative = self.forceNative_update
+                    self.renderingStack.force = self.force_update
                     self.renderingStack.endPack = true
                     --[[
                     local dist = RENDER_DISTANCE
@@ -1722,8 +1728,8 @@ function sc.display.server_createNetworkData(self)
 end
 
 function sc.display.server_onDataRequired(self, client)
-    --self.dbuffPixels = {}
-    --self.dbuffPixelsAll = nil
+    --self.buffer2 = {}
+    --self.buffer2All = nil
 
     self.scriptableObject.network:sendToClient(client, "client_onDataResponse", sc.display.server_createNetworkData(self))
     self.serverCache = {}
@@ -1825,25 +1831,28 @@ function sc_display_client_clear(self, color, removeAll)
         effect_setParameter(self.quadTree.back_effect, "color", color)
     end
 
-    self.dbuffPixels = {}
-    self.dbuffPixelsAll = color
-
     self.buffer1 = {}
     self.buffer2 = {}
-    self.buffer1All = color
-    self.buffer2All = nil
+    self.buffer1All = nil
+    self.buffer2All = color
 end
+
+
+
+
+
+
 
 function sc_display_client_drawPixelForce(self, x, y, color)
     local width = getWidth(self)
-    local currentColor = self.dbuffPixels[x + (y * width)] or self.dbuffPixelsAll
+    local currentColor = self.buffer2[x + (y * width)] or self.buffer2All
 
     if currentColor and currentColor == color and not debug_disableDBuff then
         return true --если нехрена не поменялось
     end
 
     quad_treeSetColor(self.quadTree, x, y, color)
-    self.dbuffPixels[x + (y * width)] = color
+    self.buffer2[x + (y * width)] = color
 end
 
 function sc_display_client_drawPixel(self, x, y, color)
@@ -1904,8 +1913,8 @@ function sc_display_client_drawRect(self, x, y, w, h, color)
 end
 
 function sc_display_client_fillRect(self, x, y, w, h, color)
-    self.dbuffPixels = {}
-    self.dbuffPixelsAll = nil
+    self.buffer2 = {}
+    self.buffer2All = nil
     --quad_treeFillRect(self.quadTree, math_floor(x), math_floor(y), math_floor(w), math_floor(h), color)
     return quad_treeFillRect(self.quadTree, x, y, w, h, color)
 
@@ -1915,8 +1924,8 @@ function sc_display_client_fillRect(self, x, y, w, h, color)
     for cx = x, x + (w - 1) do
         for cy = y, y + (h - 1) do
             if cx >= 0 and cy >= 0 and cx < mw and cy < mh then
-                if self.dbuffPixels[x + (y * mw)] or self.dbuffPixelsAll ~= color then
-                    self.dbuffPixels[cx + (cy * mw)] = color
+                if self.buffer2[x + (y * mw)] or self.buffer2All ~= color then
+                    self.buffer2[cx + (cy * mw)] = color
                     realAction = true
                 end
             end
@@ -1930,10 +1939,14 @@ function sc_display_client_fillRect(self, x, y, w, h, color)
     ]]
 end
 
+local function sc_display_client_buffer_fillRect(self, x, y, w, h, color)
+    return quad_treeFillRect(self.quadTree, x, y, w, h, color)
+end
+
 --[[
 function sc_display_client_rawFillRect(self, x, y, w, h, color)
-    self.dbuffPixels = {}
-    self.dbuffPixelsAll = nil
+    self.buffer2 = {}
+    self.buffer2All = nil
     quad_treeFillRect(self.quadTree, math_floor(x), math_floor(y), math_floor(w), math_floor(h), color)
 end
 ]]
@@ -1991,8 +2004,8 @@ end
 
 function sc_display_client_fillCircle(self, x, y, r, color)
     if quad_treeFillCircle(self.quadTree, x, y, r, color) then
-        self.dbuffPixels = {}
-        self.dbuffPixelsAll = nil
+        self.buffer2 = {}
+        self.buffer2All = nil
     else
         return true
     end
@@ -2011,7 +2024,7 @@ function sc_display_client_fillCircle(self, x, y, r, color)
                     break
                 elseif ix*ix + iy*iy <= r*r and py >= 0 then
                     sc_display_client_drawPixel(self, px, py, color)
-                    self.dbuffPixels[px + (py * mw)] = color
+                    self.buffer2[px + (py * mw)] = color
                 end
             end
             if px == true then --dubble break
@@ -2462,9 +2475,11 @@ function sc.display.client_update(self, dt)
     debug_print("allEffs", allEffs)
     ]]
 
+    --[[
 	if self.forceNativeRender then
 		self.forceNativeRender = self.forceNativeRender - (40 / (1 / dt))
 	end
+    ]]
 
     local ctick = getCurrentTick()
 
@@ -2473,7 +2488,7 @@ function sc.display.client_update(self, dt)
 
         self.newEffects = {}
         local isEffect = false
-        if basegraphic_doubleBuffering(self, nil, getWidth(self), getHeight(self), self.utf8support, sc_display_client_drawPixelForce, sc_display_client_optimize, sc_display_client_fillRect) then
+        if basegraphic_doubleBuffering(self, nil, getWidth(self), getHeight(self), self.utf8support, sc_display_client_drawPixelForce, sc_display_client_optimize, (not debug_disableRectBuffer) and sc_display_client_buffer_fillRect) then
             self.lastLastClearColor2 = nil
             isEffect = true
         end
@@ -2810,9 +2825,6 @@ function sc.display.client_onDataResponse(self, data)
 
     self.quadTree.rotation = data.rotation
     if data.rotation ~= self.old_rotation then
-        self.dbuffPixels = {}
-        self.dbuffPixelsAll = nil
-
         self.buffer1 = {}
         self.buffer2 = {}
         self.buffer1All = nil
@@ -2903,8 +2915,8 @@ function sc.display.client_drawStack(self, sendstack)
     debug_print("start render --------------------", self.isRendering, sendstack.force, self.skipAtLags, self.skipAtNotSight, self.forceNativeRender)
 
     if sendstack.force then
-        self.dbuffPixels = {}
-        self.dbuffPixelsAll = nil
+        self.buffer2 = {}
+        self.buffer2All = nil
     else
         if self.skipAtNotSight and not self.isRendering then debug_print("skipAtNotSight skipped") return end --если skipAtNotSight true, то картинка не будет обновляться когда ты на нее не смотриш
         if self.skipAtLags and sc.restrictions and sc.deltaTime >= (1 / sc.restrictions.skipFps) then debug_print("skipAtLags skipped") return end
@@ -2927,25 +2939,25 @@ function sc.display.client_drawStack(self, sendstack)
     self.newEffects = {}
     local isEffect = false --если от всего стека был хоть какой-то смысл
     local backgroundChanged = clearColor and clearColor ~= self.lastClearColor3
+    local width, height = getWidth(self), getHeight(self)
     debug_print("background change detecter", clearColor, self.lastClearColor3, backgroundChanged, self.old_backgroundChanged)
+
+    --[[
+    if sendstack.forceNative then
+        self.allowForceNativeSet = true
+    end
+    ]]
 
     if isEndClear and #stack == 1 then
         debug_print("clear only render")
 
-        local col = formatColor(stack[1][2], true)
-
-        self.buffer1 = {}
-        self.buffer2 = {}
-        self.buffer2All = col
-        self.buffer1All = col
-
-        if not sc_display_client_clear(self, col) then
+        if not sc_display_client_clear(self, clearColor) then
             isEffect = true
         end
 
         self.oldRenderType = true
         self.bufferWait = false
-    elseif not debug_noNativeRender and self.isRendering and ((backgroundChanged and not self.old_backgroundChanged) or sendstack.forceNative or (self.forceNativeRender and self.forceNativeRender > 0)) then
+    elseif not debug_noNativeRender and self.isRendering and ((backgroundChanged and not self.old_backgroundChanged) or sendstack.forceNative or self.forceNativeRender) then
         debug_print("native render")
 
         self.buffer1 = {}
@@ -2980,26 +2992,43 @@ function sc.display.client_drawStack(self, sendstack)
         self.bufferWait = false
 
         if self.lastNativeRenderTime > 1/40 then
+            debug_print("disable forceNativeRender")
             self.forceNativeRender = nil
         end
     else
         debug_print("buffer render")
 
         local startRnd = os_clock()
-        if basegraphic_doubleBuffering(self, stack, getWidth(self), getHeight(self), self.utf8support, self.isRendering and sc_display_client_drawPixelForce, sc_display_client_optimize, sc_display_client_fillRect) then
+        if basegraphic_doubleBuffering(self, stack, width, height, self.utf8support, self.isRendering and sc_display_client_drawPixelForce, sc_display_client_optimize, (not debug_disableRectBuffer) and sc_display_client_buffer_fillRect) then
             self.lastLastClearColor2 = nil
             isEffect = true
         end
+        --local rendTime = os_clock() - startRnd
 
-		if self.lastNativeRenderTime then
-			local rendTime = os_clock() - startRnd
-			local dt2 = self.lastNativeRenderTime * 2
-			if not self.oldRenderType and dt2 < rendTime and not debug_disableForceNativeRender then
-				local add = constrain(math_ceil(rendTime / dt2) * 5, 10, 40)
-				debug_print("force native render", self.lastNativeRenderTime, dt2, rendTime, add)
-				self.forceNativeRender = add
-			end
-		end
+        if not debug_disableForceNativeRender and not debug_noNativeRender then
+            --[[
+            if rendTime > 1/40 then
+                if self.allowForceNativeSet then
+                    debug_print("enable forceNativeRender (1)")
+
+                    self.allowForceNativeSet = nil
+                    self.forceNativeRender = true
+                end
+            end
+            ]]
+            if self.lastNativeRenderTime and not self.oldRenderType then
+                local dt2 = self.lastNativeRenderTime * 2
+                local rendTime = os_clock() - startRnd
+                if dt2 < rendTime then
+                    debug_print("enable forceNativeRender (2)")
+
+                    --local add = constrain(math_ceil(rendTime / dt2) * 5, 10, 40)
+                    --debug_print("force native render", self.lastNativeRenderTime, dt2, rendTime, add)
+                    --self.forceNativeRender = add
+                    self.forceNativeRender = true
+                end
+            end
+        end
 
         self.oldRenderType = false
         if not self.isRendering then

@@ -464,9 +464,34 @@ function basegraphic_doFont(self, val)
 end
 local basegraphic_doFont = basegraphic_doFont
 
+
+local buffer1, buffer2 --recreating variables overloads the garbage collector (and creates freezes)
 local formatColor = sc.formatColor
+local col, v
+local posDX_x
+local negDX_x
+local posDX_y
+local negDX_y
+local posDY_y
+local negDY_y
+local posDY_x
+local negDY_x
+local x
+local y
+local r
+local lx
+local ly
+local d
+local nx, ny, px, py
+local isEffect
+local buffer1All
+local buffer2All
+local col
+local i2
+local i
+local msize
 function basegraphic_doubleBuffering(self, stack, width, height, utf8support, flush, optimize, rectFlush)
-	local buffer1, buffer2 = self.buffer1, self.buffer2
+	buffer1 = self.buffer1
 
 	if stack then
 		local function draw(_, x, y, color)
@@ -476,14 +501,14 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 		end
 
 		local function drawCircle_putpixel(cx, cy, x, y, color)
-			local posDX_x = cx + x
-			local negDX_x = cx - x
-			local posDX_y = cx + y
-			local negDX_y = cx - y
-			local posDY_y = cy + y
-			local negDY_y = cy - y
-			local posDY_x = cy + x
-			local negDY_x = cy - x
+			posDX_x = cx + x
+			negDX_x = cx - x
+			posDX_y = cx + y
+			negDX_y = cx - y
+			posDY_y = cy + y
+			negDY_y = cy - y
+			posDY_x = cy + x
+			negDY_x = cy - x
 		
 			draw(nil, posDX_x, posDY_y, color)
 			draw(nil, negDX_x, posDY_y, color)
@@ -495,8 +520,9 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 			draw(nil, negDX_y, negDY_x, color)
 		end
 
-		local col
-		for _, v in ipairs(stack) do
+		col, v = nil, nil
+		for i = 1, #stack do
+			v = stack[i]
 			if v[1] >= 0 then
 				col = formatColor(v[2], v[1] == 0)
 			end
@@ -522,13 +548,12 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 					end
 				end
 			elseif v[1] == 4 then
-				local x = v[3]
-				local y = v[4]
-				local r = v[5]
-
-				local lx = 0
-				local ly = r
-				local d = 3 - 2 * r
+				x = v[3]
+				y = v[4]
+				r = v[5]
+				lx = 0
+				ly = r
+				d = 3 - 2 * r
 
 				drawCircle_putpixel(x, y, lx, ly, col)
 				while ly >= lx do
@@ -544,12 +569,11 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 					drawCircle_putpixel(x, y, lx, ly, col)
 				end
 			elseif v[1] == 5 then
-				local nx, ny = v[3], v[4]
-				local x = math_floor(v[3])
-				local y = math_floor(v[4])
-				local r = v[5]
-
-				local px, py
+				nx, ny = v[3], v[4]
+				x = math_floor(v[3])
+				y = math_floor(v[4])
+				r = v[5]
+				px, py = nil, nil
 				for ix = math_max(-r, -x), math_min(r, (width - x) - 1) do
 					px = x + ix
 					for iy = math_max(-r, -y), math_min(r, (height - y) - 1) do
@@ -570,12 +594,56 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 	end
 
 	if flush then
-		local isEffect = false
-		local buffer1All = self.buffer1All
-		local buffer2All = self.buffer2All
-		local col
-		local i2 = 1
-		local i = 0
+		isEffect = false
+		buffer1All = self.buffer1All
+		buffer2All = self.buffer2All
+		buffer2 = self.buffer2
+		col = nil
+		i2 = 1
+	
+		if rectFlush then
+			--print("rect start")
+			i = 0
+			while i < width * height do
+				col = buffer1[i] or buffer1All
+				if col ~= (buffer2[i] or buffer2All) then
+					x = i % width
+					y = math_floor(i / width)
+
+					for ix = x, width - 1 do
+						if (buffer1[ix + (y * width)] or buffer1All) ~= col or ix == (width - 1) then
+							for iy = y, height - 1 do
+								if (buffer1[ix + (iy * width)] or buffer1All) ~= col or iy == (height - 1) then
+									--print((buffer1[ix + (iy * width)] or buffer1All) ~= col, ix >= width, iy >= height)
+									ix = ix - 1
+									iy = iy - 1
+									if ix - x > 0 and iy - y > 0 and (ix - x > 1 or iy - y > 1) then
+										for ix2 = x, ix do
+											for iy2 = y, iy do
+												buffer2[ix2 + (iy2 * width)] = col
+											end
+										end
+				
+										rectFlush(self, x, y, (ix - x) + 1, (iy - y) + 1, col)
+										--print(ix, iy)
+										--print(x, y, ix - x, iy - y, col)
+										isEffect = true
+									end
+
+									break
+								end
+							end
+							break
+						end
+					end
+				end
+				i = i + 1
+			end
+
+			--print("rect stop")
+		end
+
+		i = 0
 		while i < width * height do
 			--::continue::
 			col = buffer1[i] or buffer1All
@@ -609,3 +677,21 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 		return isEffect
 	end
 end
+
+--[[
+function basegraphic_bufferingBudget(self, width, height, profitableQuantity)
+	buffer1, buffer2 = self.buffer1, self.buffer2
+	i = 0
+	i2 = 0
+	while i < width * height do
+		col = buffer1[i] or buffer1All
+		if col ~= (buffer2[i] or buffer2All) then
+			i2 = i2 + 1
+			if i2 > profitableQuantity then
+				return true
+			end
+		end
+		i = i + 1
+	end
+end
+]]
