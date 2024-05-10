@@ -137,7 +137,7 @@ you can write your values there
 * camera.getSkyColor():smcolor - returns the color of the sky (even if the sky is not visible to the camera at the moment) this color is used in advanced rendering
 * camera.rawRay(xAngle:number, yAngle:number, maxdist:number):table, nil - ray shoots from the camera and gives out a table {color = smcolor, distance = distance, fraction = distance/maxdist, uuid = uuid, type = character/shape/harvestable/lift/joint/terrain/asset/limiter}. maxdist is the maximum distance for raycast in meters. please note that the angle can be set from -45 to 45 degrees, it is transmitted in radians. limiter is the wall of the world. please note that not all types of objects have the "color" and "uuid" field. please note that getting the uuid of a block only works if it is no further than 4 meters (16 blocks) from the camera
 * new rendering types
-* camera.drawCustom(display, drawer(xPos:number, yPos:number, raydata:table):smcolor) - custom render, you must pass a function that will receive pixel pos and raydata as input (the same as rawRay outputs) and this function should return the color that you need to paint the pixel
+* camera.drawCustom(display, drawer(xPos:number, yPos:number, raydata:table, ...):smcolor, ...) - custom render, you must pass a function that will receive pixel pos and raydata as input (the same as rawRay outputs) and this function should return the color that you need to paint the pixel
 * camera.drawAdvanced(display) - advanced rendering which is designed to give the most realistic picture possible at the moment
 * now methods can accept additional colors
 * camera.drawColorWithDepth(display, noCollideColor, terrainColor, unitsColor)
