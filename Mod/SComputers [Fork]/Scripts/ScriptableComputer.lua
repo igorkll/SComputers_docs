@@ -15,6 +15,7 @@ ScriptableComputer.UV_HAS_ERROR = 10
 ScriptableComputer.UV_HAS_DISABLED = 9
 
 ScriptableComputer.maxcodesize = 32 * 1024
+ScriptableComputer.shortTraceback = 4 --сокрашения traceback на определенное количетсво линий
 ScriptableComputer.longOperationMsg = "too long without yielding"
 ScriptableComputer.oftenLongOperationMsg = "too long without yielding"
 ScriptableComputer.lagMsg = "too long without yielding"
@@ -175,7 +176,7 @@ function ScriptableComputer:server_onCreate(constData)
 
 		if self.cdata.unsafe then
 			self.storageData.invisible = true
-		end	
+		end
 	end
 	
 	------env settings
@@ -212,6 +213,8 @@ function ScriptableComputer:server_onCreate(constData)
 	self.old_sum = tableChecksum(self.storageData, "fsData")
 end
 
+local newline = string.byte("\n")
+local tab = string.byte("\t")
 function ScriptableComputer:sv_formatException()
 	for k, v in pairs(self.crashstate) do
 		if k ~= "hasException" and k ~= "exceptionMsg" then
@@ -225,8 +228,10 @@ function ScriptableComputer:sv_formatException()
 		local newstr = {}
 		for i = 1, #str do
 			local b = str:byte(i)
-			if b >= 32 and b <= 126 then
+			if (b >= 32 and b <= 126) or b == newline then
 				table.insert(newstr, string.char(b))
+			elseif b == tab then
+				table.insert(newstr, "   ")
 			end
 		end
 		self.crashstate.exceptionMsg = table.concat(newstr)
@@ -556,16 +561,17 @@ function ScriptableComputer:sv_sendException()
 end
 
 function ScriptableComputer:sv_execute(endtick)
-	tweaks()
-	sc.lastComputer = self
-
 	if self.scriptFunc and _G.computersAllow then
+		tweaks()
+		sc.lastComputer = self
 		local startExecTime = os.clock()
 
 		if not self.env then
 			self.crashstate.hasException = true
 			self.crashstate.exceptionMsg = "Unknown error"
 			self:sv_formatException()
+			sc.lastComputer = nil
+			unTweaks()
 			return
 		end
 
@@ -596,6 +602,8 @@ function ScriptableComputer:sv_execute(endtick)
 		end
 
 		if self.crashstate.hasException then
+			sc.lastComputer = nil
+			unTweaks()
 			return
 		end
 
@@ -626,10 +634,9 @@ function ScriptableComputer:sv_execute(endtick)
 		end
 
 		sc.addLagScore((os.clock() - startExecTime) * sc.clockLagMul)
+		sc.lastComputer = nil
+		unTweaks()
 	end
-
-	unTweaks()
-	sc.lastComputer = nil
 end
 
 function ScriptableComputer:sv_updateData(data)
@@ -996,8 +1003,8 @@ function ScriptableComputer:cl_invokeScript(tbl)
 	tweaks()
 	sc.lastComputer = self
 	local ran, err = pcall(code, unpack(args))
-	unTweaks()
 	sc.lastComputer = nil
+	unTweaks()
 
 	if not ran then
 		print("client invoke error: " .. (err or "Unknown error"))
@@ -1012,8 +1019,11 @@ end
 function ScriptableComputer:cl_onComputerException(msg)
 	self:cl_createGUI()
 
-	if msg then msg = formatBeforeGui(msg) end
-	self.gui:setText("ExceptionData", msg or "No errors")
+	if msg then
+		self.gui:setText("ExceptionData", makeErrorColor(formatBeforeGui(msg)))
+	else
+		self.gui:setText("ExceptionData", "No errors")
+	end
 end
 
 function ScriptableComputer:cl_getParam(data)

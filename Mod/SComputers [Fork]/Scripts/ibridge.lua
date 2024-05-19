@@ -8,7 +8,7 @@ ibridge.colorHighlight = sm.color.new(0xFFFFFFff)
 ibridge.componentType = "ibridge" --absences can cause problems
 
 function ibridge:check()
-    if not dlm then error("The DLM is not installed. the component cannot work", 3) end
+    if not dlm then error("The BetterAPI is not installed. the component cannot work", 3) end
     if not sc.restrictions.ibridge then error("the use of the Internet bridge was prohibited by the administrator", 3) end
 end
 

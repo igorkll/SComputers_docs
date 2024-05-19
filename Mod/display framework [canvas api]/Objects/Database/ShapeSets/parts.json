@@ -1,0 +1,42 @@
+{
+   "partList" : [
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "color" : "30daff",
+         "physicsMaterial" : "Plastic",
+         "renderable" : "$GAME_DATA/Objects/Renderable/decor/obj_decor_babyduck.rend",
+         "rotationSet" : "PropY",
+         "scripted" : {
+            "classname" : "test1",
+            "filename" : "$CONTENT_DATA/Scripts/test/test1.lua"
+         },
+         "stackSize" : 10,
+         "sticky" : "-Y",
+         "uuid" : "191f93e3-8a3a-4693-bc7a-9323d3611b6f",
+         "name" : "canvas test 1"
+      },
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "color" : "30daff",
+         "physicsMaterial" : "Plastic",
+         "renderable" : "$GAME_DATA/Objects/Renderable/decor/obj_decor_babyduck.rend",
+         "rotationSet" : "PropY",
+         "scripted" : {
+            "classname" : "test2",
+            "filename" : "$CONTENT_DATA/Scripts/test/test2.lua"
+         },
+         "stackSize" : 10,
+         "sticky" : "-Y",
+         "uuid" : "ba0af7bf-e566-415e-bec7-86747081eefa",
+         "name" : "canvas test 2"
+      }
+   ]
+}

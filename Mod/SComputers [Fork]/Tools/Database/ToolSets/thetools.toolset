@@ -26,13 +26,10 @@
          "showInInventory" : true,
          "uuid" : "7f3e227c-345a-4c28-8775-f6c011b80127"
       },
-
-
-
       {
          "name" : "tablet 32S",
-         "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
          "previewRenderable" : "$CONTENT_DATA/Tools/Renderables/t1.rend",
+         "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
          "script" : {
             "class" : "tablet",
             "data" : {
@@ -42,6 +39,7 @@
             },
             "file" : "$CONTENT_DATA/Scripts/tools/tablet.lua"
          },
+         "showInInventory" : false,
          "uuid" : "3aa0151f-a3d6-48b1-9a7e-2328aa1bfe36"
       },
       {
@@ -58,12 +56,13 @@
             },
             "file" : "$CONTENT_DATA/Scripts/tools/tablet.lua"
          },
+         "showInInventory" : false,
          "uuid" : "178a9ec6-f5d9-4842-aa5b-5307f6822f46"
       },
       {
          "name" : "tablet 128",
-         "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
          "previewRenderable" : "$CONTENT_DATA/Tools/Renderables/t3.rend",
+         "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
          "script" : {
             "class" : "tablet",
             "data" : {
@@ -74,26 +73,29 @@
             },
             "file" : "$CONTENT_DATA/Scripts/tools/tablet.lua"
          },
+         "showInInventory" : false,
          "uuid" : "9f4d34ef-61c8-4cc6-96bc-74aa1ce002ed"
       },
-
       {
-         "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
+         "name" : "",
          "previewRenderable" : "$CONTENT_DATA/Tools/Renderables/pt0.rend",
+         "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
          "script" : {
             "class" : "PermissionTool",
             "data" : {
-               "survival": true
+               "survival" : true
             },
             "file" : "$CONTENT_DATA/Scripts/tools/PermissionTool.lua"
          },
          "uuid" : "db358391-f914-4e08-af92-5de0c7e32976"
       },
       {
-         "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
+         "name" : "",
          "previewRenderable" : "$CONTENT_DATA/Tools/Renderables/pt1.rend",
+         "previewRotation" : [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ],
          "script" : {
             "class" : "PermissionTool",
+            "data" : {},
             "file" : "$CONTENT_DATA/Scripts/tools/PermissionTool.lua"
          },
          "uuid" : "3d37b254-dbaa-4be2-9a0d-ce1e24315c08"

@@ -1,4 +1,4 @@
-local pcall, unpack, error, pairs, type = pcall, unpack, error, pairs, type
+local pcall, xpcall, unpack, error, pairs, type = pcall, xpcall, unpack, error, pairs, type
 
 function addServiceCode(self, code, env, serviceTable) --спизженно с: https://github.com/Ocawesome101/oc-cynosure/blob/dev/base/load.lua
     local computer = self
@@ -225,6 +225,8 @@ function checkVMname()
         return "fullLuaEnv"
     elseif vm == "scrapVM" and _G.luavm then
         return "scrapVM"
+    elseif vm == "betterAPI" and better then
+        return "betterAPI"
     elseif vm == "dlm" and dlm and dlm.loadstring then
         return "dlm"
     elseif vm == "hsandbox" and _HENV and _HENV.load then
@@ -236,6 +238,21 @@ function checkVMname()
     end
 end
 
+function shortTraceback(...)
+    local tbl = {...}
+    if not tbl[1] then
+        tbl[2] = tostring(tbl[2])
+        if ScriptableComputer and ScriptableComputer.shortTraceback then
+            local lines = strSplit(string, tbl[2], "\n", true)
+            for i = 1, ScriptableComputer.shortTraceback do
+                table.remove(lines, #lines)
+            end
+            tbl[2] = table.concat(lines, "\n")
+        end
+    end
+    return unpack(tbl)
+end
+
 function smartCall(nativePart, func, ...)
     if nativePart ~= func then
         local self, tunnel
@@ -245,7 +262,12 @@ function smartCall(nativePart, func, ...)
 
         if self then
             ll_Interpreter.internalData[self.env[self.yieldName]] = true --а нехер перезаписывать __internal_yield, крашеры ебаные
-            local result = {pcall(func, ...)}
+            local result
+			if sc.traceback then
+				result = {shortTraceback(xpcall(func, sc.traceback, ...))}
+			else
+				result = {pcall(func, ...)}
+			end
             ll_Interpreter.internalData[self.env[self.yieldName]] = nil
 
             if result[1] then
@@ -260,7 +282,11 @@ function smartCall(nativePart, func, ...)
         end
     end
 
-    return pcall(func, ...)
+    if sc.traceback then
+        return shortTraceback(xpcall(func, sc.traceback, ...))
+    else
+        return pcall(func, ...)
+    end
 end
 
 function load_code(self, chunk, chunkname, mode, env, serviceTable)
@@ -288,6 +314,8 @@ function load_code(self, chunk, chunkname, mode, env, serviceTable)
         else
             return code, err
         end
+    elseif vm == "betterAPI" and better then
+        return better.loadstring(chunk, chunkname, env)
     elseif vm == "dlm" and dlm and dlm.loadstring then
         return dlm.loadstring(chunk, chunkname, env)
     elseif vm == "hsandbox" and _HENV and _HENV.load then

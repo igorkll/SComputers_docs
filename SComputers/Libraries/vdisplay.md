@@ -5,30 +5,17 @@ hide_title: true
 sidebar-label: 'vdisplay'
 ---
 
-The vdisplay library allows you to create a virtual display that will have an API identical to a regular SComputers display
-vdisplay implements type and range checks
-if you want to process clicks (from any of your sources), you must replace the getClick method in the virtual display with your own
-please note that performance when using "vdisplay" performance may be lower, because there are fewer optimizations in it
-
-### methods that are stubs (setters and getters will accept and give the set values, and when reset is called, they will be reset, but these methods are still "dummy"):
-* isAllow - the virtual display can have any resolution, regardless of the maximum available on the server
-* getClick / setMaxClicks / getMaxClicks / clearClicks / setClicksAllowed / getClicksAllowed - the virtual display does not have a touchscreen
-* setRenderAtDistance / getRenderAtDistance / setSkipAtLags / getSkipAtLags / setSkipAtNotSight / getSkipAtNotSight - all these methods require a physical display
-* optimize
+the "vdisplay" library allows you to create a virtual display with an API identical to a regular display.
+this display does not respond to resolution limitations in the mod configuration, as it is purely software-based.
 
 ### library methods
 * vdisplay.create(callbacks:table, rx:number, ry:number):dsp - creates a virtual display
 
-# all callbacks (they all need to be implemented)
-* clear:function(self, color) - called when cleaning
-* set:function(self, x, y, color) - called when setting pixels by any methods(including text)
-* flush:function(self, isForce) - called when calling "flush" / "forceFlush" / "update"
-
-### display object methods
-* setRotation / getRotation
-* setUtf8Support / getUtf8Support
-* setFont / getFontWidth / getFontHeight
-* flush / update / forceFlush - all these methods do exactly the same thing in the context of a virtual display
+# all callbacks
+* you are implementing: set:function(self, x, y, color) - called when the color of the display pixel changes(by default, all display pixels are black)
+* you are implementing: flush:function(self, isForce) - called when calling "flush" / "forceFlush" / "update"
+* the library implements: pushClick:function(tbl) - registers clicks on the screen, this table will be returned unchanged by the "getClick" method
+* the library implements: updateAudience:function(count) - updates the number of the display audience. if the number is 0, then the display may stop updating in some cases
 
 ```lua
 --makes a holographic display

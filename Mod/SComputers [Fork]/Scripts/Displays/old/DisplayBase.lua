@@ -3,19 +3,19 @@
     I KNOW IT'S TERRIBLE, AND I'M REFINING IT
 ]]
 
--- debug
-debug_out = false
+-- debug / settings
+debug_out = true
 debug_printeffects = false
 debug_disabletext = false
 debug_disableoptimize = false
 debug_raycast = false
 debug_offset = false
 debug_disableEffectsBuffer = false
-debug_disableDBuff = false
+debug_disableSimpleCheck = false
 debug_disableForceNativeRender = false
-debug_disableUpdateColor = false
-debug_noNativeRender = true
-debug_disableRectBuffer = true
+--debug_disableUpdateColor = false
+debug_noNativeRender = false
+debug_disableRectBufferFill = true
 mul_ray_fov = 2
 
 --code
@@ -395,11 +395,12 @@ local function raw_set_color(effect, color)
 end
 ]]
 
+local color
 function quad_updateEffectColor(self, force)
-    if debug_disableUpdateColor then return end
+    --if debug_disableUpdateColor then return end
 
     --if not self.effect or not sm_exists(self.effect) then return end
-    local color = self.color
+    color = self.color
 
     --if color ~= self.display.lastLastClearColor or force then
         --effect_setScale(effect, sm.vec3.new(0.02, 0.02, 0.02))
@@ -845,7 +846,6 @@ function quad_treeFillRect(self, x, y, w, h, color)
     local ssize = self.size
 
     if quadIntersectsRect(sx, sy, ssize, x, y, w, h) then
-
         if quadInRect(sx, sy, ssize, x, y, w, h) then
             if self.children then
                 quad_destroyChildren(self)
@@ -860,12 +860,9 @@ function quad_treeFillRect(self, x, y, w, h, color)
             --end
         else
             if not self.children then quad_split(self) end
-            local children = self.children
 
-            quad_treeFillRect(children[1], x, y, w, h, color)
-            quad_treeFillRect(children[2], x, y, w, h, color)
-            quad_treeFillRect(children[3], x, y, w, h, color)
-            return quad_treeFillRect(children[4], x, y, w, h, color)
+            local children = self.children
+            return quad_treeFillRect(children[1], x, y, w, h, color) or quad_treeFillRect(children[2], x, y, w, h, color) or quad_treeFillRect(children[3], x, y, w, h, color) or quad_treeFillRect(children[4], x, y, w, h, color)
         end
     end
 end
@@ -1842,12 +1839,10 @@ end
 
 
 
-
+local width, height
 function sc_display_client_drawPixelForce(self, x, y, color)
-    local width = getWidth(self)
-    local currentColor = self.buffer2[x + (y * width)] or self.buffer2All
-
-    if currentColor and currentColor == color and not debug_disableDBuff then
+    width = getWidth(self)
+    if (self.buffer2[x + (y * width)] or self.buffer2All) == color and not debug_disableSimpleCheck then
         return true --если нехрена не поменялось
     end
 
@@ -1867,8 +1862,8 @@ function sc_display_client_drawPixel(self, x, y, color)
 end
 
 function sc_display_client_drawRect(self, x, y, w, h, color)
-    local width = getWidth(self)
-    local height = getHeight(self)
+    width = getWidth(self)
+    height = getHeight(self)
 
     if x >= width then return true end
     if y >= height then return true end
@@ -1939,10 +1934,6 @@ function sc_display_client_fillRect(self, x, y, w, h, color)
     ]]
 end
 
-local function sc_display_client_buffer_fillRect(self, x, y, w, h, color)
-    return quad_treeFillRect(self.quadTree, x, y, w, h, color)
-end
-
 --[[
 function sc_display_client_rawFillRect(self, x, y, w, h, color)
     self.buffer2 = {}
@@ -1958,7 +1949,6 @@ local function drawCircle_putpixel(self, cx, cy, x, y, color)
     local negDX_x = cx - x
     local posDX_y = cx + y
     local negDX_y = cx - y
-
     local posDY_y = cy + y
     local negDY_y = cy - y
     local posDY_x = cy + x
@@ -2488,7 +2478,7 @@ function sc.display.client_update(self, dt)
 
         self.newEffects = {}
         local isEffect = false
-        if basegraphic_doubleBuffering(self, nil, getWidth(self), getHeight(self), self.utf8support, sc_display_client_drawPixelForce, sc_display_client_optimize, (not debug_disableRectBuffer) and sc_display_client_buffer_fillRect) then
+        if basegraphic_doubleBuffering(self, nil, getWidth(self), getHeight(self), self.utf8support, quad_treeSetColor, sc_display_client_optimize, (not debug_disableRectBufferFill) and quad_treeFillRect) then
             self.lastLastClearColor2 = nil
             isEffect = true
         end
@@ -2757,15 +2747,6 @@ function sc.display.client_update(self, dt)
     end
     ]]
 
-    if self.clearLastClearColor3 then
-        self.clearLastClearColor3 = self.clearLastClearColor3 - 1
-        if self.clearLastClearColor3 <= 0 then
-            self.old_backgroundChanged = false
-            self.lastClearColor3 = nil
-            self.clearLastClearColor3 = nil
-        end
-    end
-
     ------stylus
     --debug_print("stylus works")
     if scriptableObject.character then
@@ -2938,10 +2919,7 @@ function sc.display.client_drawStack(self, sendstack)
 
     self.newEffects = {}
     local isEffect = false --если от всего стека был хоть какой-то смысл
-    local backgroundChanged = clearColor and clearColor ~= self.lastClearColor3
     local width, height = getWidth(self), getHeight(self)
-    debug_print("background change detecter", clearColor, self.lastClearColor3, backgroundChanged, self.old_backgroundChanged)
-
     --[[
     if sendstack.forceNative then
         self.allowForceNativeSet = true
@@ -2957,13 +2935,8 @@ function sc.display.client_drawStack(self, sendstack)
 
         self.oldRenderType = true
         self.bufferWait = false
-    elseif not debug_noNativeRender and self.isRendering and ((backgroundChanged and not self.old_backgroundChanged) or sendstack.forceNative or self.forceNativeRender) then
+    elseif not debug_noNativeRender and self.isRendering and (clearColor and (clearColor ~= self.lastClearColor3) or sendstack.forceNative or self.forceNativeRender) then
         debug_print("native render")
-
-        self.buffer1 = {}
-        self.buffer2 = {}
-        self.buffer2All = nil
-        self.buffer1All = nil
 
         local startRnd = os_clock()
         local v
@@ -2999,7 +2972,7 @@ function sc.display.client_drawStack(self, sendstack)
         debug_print("buffer render")
 
         local startRnd = os_clock()
-        if basegraphic_doubleBuffering(self, stack, width, height, self.utf8support, self.isRendering and sc_display_client_drawPixelForce, sc_display_client_optimize, (not debug_disableRectBuffer) and sc_display_client_buffer_fillRect) then
+        if basegraphic_doubleBuffering(self, stack, width, height, self.utf8support, self.isRendering and quad_treeSetColor, sc_display_client_optimize, (not debug_disableRectBufferFill) and quad_treeFillRect) then
             self.lastLastClearColor2 = nil
             isEffect = true
         end
@@ -3036,11 +3009,9 @@ function sc.display.client_drawStack(self, sendstack)
         end
     end
 
-    self.old_backgroundChanged = backgroundChanged
     if clearColor then
     	self.lastClearColor3 = clearColor
     end
-    self.clearLastClearColor3 = 5
 
     if isEffect then
         debug_print("isEffect!!")

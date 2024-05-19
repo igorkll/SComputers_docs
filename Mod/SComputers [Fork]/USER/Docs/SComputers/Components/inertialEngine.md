@@ -25,6 +25,13 @@ note that the addPosition method perceives as a rotation for processing movement
 * inertialEngine.addPosition(offset:vec3) - adds a position in meters to the target position of the structure(the position is added taking into account the rotation)
 * inertialEngine.setStableMode(mode) - sets the stabilization mode (default 1) to a maximum of 4. this changes the stabilization force
 * inertialEngine.getOffset():number - returns the distance in meters from the actual location to the target point
+* inertialEngine.setRawMovement(boolean) - sets the raw movement mode. in this mode, the "addPosition" method will not affect the position of the creation, and the movements will need to be carried out using the "raw_move" method
+* inertialEngine.isRawMovement():boolean
+* inertialEngine.setGravity(number) - sets the local gravity for the inertialEngine that will run in rawmode. The default is 1 (The standard gravity of the game). minimum values -1 maximum 1
+* inertialEngine.getGravity():number
+* inertialEngine.raw_rotation(vec3) - makes the rotation pulse relative to the current rotation. it cannot be called more than once per tick, the maximum value of the vector element is 8. Note that the momentum is multiplied by the mass of the creation
+* inertialEngine.raw_move(vec3) - makes the pulse relative to the current rotation. it cannot be called more than once per tick, the maximum value of the vector element is 5. Note that the momentum is multiplied by the mass of the creation
+
 
 ### stable modes
 * 0 - no stabilization
@@ -34,8 +41,8 @@ note that the addPosition method perceives as a rotation for processing movement
 * 4 - very big creation
 
 ```lua
-local wasd = getComponents("wasd")[1]
-local inertialEngine = getComponents("inertialEngine")[1]
+local wasd = getComponent("wasd")
+local inertialEngine = getComponent("inertialEngine")
 
 inertialEngine.setActive(true)
 inertialEngine.setStableMode(1)

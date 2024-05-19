@@ -400,7 +400,7 @@
 
 
    "6b08c951-f207-4280-9470-b7fce56a480a" : {
-      "description" : "Позволяет вам отправлять GET/POST запросы в реальный Интернет!\nНо... Он весит много и очень дорогой в крафте. \n\n#eeeeeeДля его работы требуется #ff0000DLM#eeeeee.",
+      "description" : "Позволяет вам отправлять GET/POST запросы в реальный Интернет!\nНо... Он весит много и очень дорогой в крафте. \n\n#eeeeeeДля его работы требуется #ff0000BetterAPI#eeeeee.",
       "keywords" : ["программируемый", "scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "#f4c6ff[ТОЛЬКО ФОРК]#eeeeee Интернет-мост"
    },

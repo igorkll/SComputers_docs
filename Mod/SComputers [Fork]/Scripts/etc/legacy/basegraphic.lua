@@ -464,7 +464,8 @@ function basegraphic_doFont(self, val)
 end
 local basegraphic_doFont = basegraphic_doFont
 
-
+local blackCol = sm.color.new(0, 0, 0)
+local minRectFillSize = 8
 local buffer1, buffer2 --recreating variables overloads the garbage collector (and creates freezes)
 local formatColor = sc.formatColor
 local col, v
@@ -489,7 +490,7 @@ local buffer2All
 local col
 local i2
 local i
-local msize
+local pself
 function basegraphic_doubleBuffering(self, stack, width, height, utf8support, flush, optimize, rectFlush)
 	buffer1 = self.buffer1
 
@@ -534,12 +535,28 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 			elseif v[1] == 1 then
 				buffer1[v[3] + (v[4] * width)] = col
 			elseif v[1] == 2 then
+				--[[
 				for ix = v[3], v[3] + (v[5] - 1) do
 					for iy = v[4], v[4] + (v[6] - 1) do
 						if ix == v[3] or iy == v[4] or ix == (v[3] + (v[5] - 1)) or iy == (v[4] + (v[6] - 1)) then
 							buffer1[ix + (iy * width)] = col
 						end
 					end
+				end
+				]]
+				x = v[3]
+				y = v[4]
+				lx = v[5]
+				ly = v[6]
+				px = x + (lx - 1)
+				py = y + (ly - 1)
+				for ix = x, px do
+					buffer1[ix + (y * width)] = col
+					buffer1[ix + (py * width)] = col
+				end
+				for iy = y + 1, py - 1 do
+					buffer1[x + (iy * width)] = col
+					buffer1[px + (iy * width)] = col
 				end
 			elseif v[1] == 3 then
 				for ix = v[3], v[3] + (v[5] - 1) do
@@ -594,40 +611,50 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 	end
 
 	if flush then
+		pself = self.quadTree or self
+
 		isEffect = false
-		buffer1All = self.buffer1All
+		buffer1All = self.buffer1All or blackCol
 		buffer2All = self.buffer2All
 		buffer2 = self.buffer2
 		col = nil
-		i2 = 1
 	
 		if rectFlush then
 			--print("rect start")
 			i = 0
+			i2 = 1
 			while i < width * height do
 				col = buffer1[i] or buffer1All
 				if col ~= (buffer2[i] or buffer2All) then
 					x = i % width
 					y = math_floor(i / width)
 
-					for ix = x, width - 1 do
-						if (buffer1[ix + (y * width)] or buffer1All) ~= col or ix == (width - 1) then
-							for iy = y, height - 1 do
-								if (buffer1[ix + (iy * width)] or buffer1All) ~= col or iy == (height - 1) then
+					--lx = math_min(width - 1, x + maxRectFillSize)
+					--ly = math_min(height - 1, y + maxRectFillSize)
+					lx = width
+					ly = height
+					for ix = x + 1, lx do
+						--if (buffer1[ix + (y * width)] or buffer1All) ~= col or (buffer2[ix + (y * width)] or buffer2All) == col or ix == lx then
+						if (buffer1[ix + (y * width)] or buffer1All) ~= col or ix == lx then
+							for iy = y + 1, ly do
+								if (buffer1[ix + (iy * width)] or buffer1All) ~= col or (buffer2[ix + (iy * width)] or buffer2All) == col or iy == ly then
 									--print((buffer1[ix + (iy * width)] or buffer1All) ~= col, ix >= width, iy >= height)
-									ix = ix - 1
-									iy = iy - 1
-									if ix - x > 0 and iy - y > 0 and (ix - x > 1 or iy - y > 1) then
-										for ix2 = x, ix do
-											for iy2 = y, iy do
+									nx = ix - x
+									ny = iy - y
+									if nx > 1 and ny > 1 and (nx >= minRectFillSize or ny >= minRectFillSize) then
+										for ix2 = x, x + (nx - 1) do
+											for iy2 = y, y + (ny - 1) do
 												buffer2[ix2 + (iy2 * width)] = col
 											end
 										end
-				
-										rectFlush(self, x, y, (ix - x) + 1, (iy - y) + 1, col)
-										--print(ix, iy)
-										--print(x, y, ix - x, iy - y, col)
+
+										--print(x, y, nx, ny, col)
+										rectFlush(pself, x, y, nx, ny, col)
+										--rectFlush(pself, x, y, nx, ny, sm.color.new(math.random(), math.random(), math.random()))
+
 										isEffect = true
+										if optimize and i2 % 64 == 0 then optimize(self) end
+										i2 = i2 + 1
 									end
 
 									break
@@ -644,6 +671,7 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 		end
 
 		i = 0
+		i2 = 1
 		while i < width * height do
 			--::continue::
 			col = buffer1[i] or buffer1All
@@ -665,7 +693,7 @@ function basegraphic_doubleBuffering(self, stack, width, height, utf8support, fl
 					end
 				end
 				]]
-				if not flush(self, i % width, math_floor(i / width), col) then
+				if not flush(pself, i % width, math_floor(i / width), col) then
 					isEffect = true
 					if optimize and i2 % 1024 == 0 then optimize(self) end
 					i2 = i2 + 1

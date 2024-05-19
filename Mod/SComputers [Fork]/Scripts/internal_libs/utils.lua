@@ -3,7 +3,9 @@ local utils = {}
 utils.clamp = constrain
 utils.map = map
 utils.roundTo = round
-utils.split = strSplit
+utils.split = function(tool, str, seps)
+    return strSplit(tool, str, seps)
+end
 utils.splitByMaxSize = splitByMaxSize
 utils.deepcopy = sc.advDeepcopy
 utils.md5 = function (str)

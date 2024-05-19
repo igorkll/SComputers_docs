@@ -342,7 +342,19 @@ end
 
 ftgui = formatBeforeGui
 
-function strSplit(tool, str, seps)
+function makeErrorColor(msg)
+	local lines = strSplit(string, msg, "\n", true)
+	for i, v in ipairs(lines) do
+		if i == 1 then
+			lines[i] = "#ffffff" .. v
+		else
+			lines[i] = "#00ff62" .. v
+		end
+	end
+	return table.concat(lines, "\n")
+end
+
+function strSplit(tool, str, seps, noYield)
     if type(seps) ~= "table" then
         seps = {seps}
     end
@@ -351,14 +363,20 @@ function strSplit(tool, str, seps)
     local index = 1
     local strlen = tool.len(str)
     while index <= strlen do
-		sc.yield()
+		if not noYield then
+			sc.yield()
+		end
 
         for _ = 0, strlen * 2 do
-			sc.yield()
+            if not noYield then
+                sc.yield()
+            end
 
             local isBreak
             for i, sep in ipairs(seps) do
-				sc.yield()
+                if not noYield then
+    				sc.yield()
+                end
 				
                 sep = tostring(sep)
                 if sep ~= "" and tool.sub(str, index, index + (tool.len(sep) - 1)) == sep then

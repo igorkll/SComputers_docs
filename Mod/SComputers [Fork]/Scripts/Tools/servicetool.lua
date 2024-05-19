@@ -42,11 +42,14 @@ function servicetool:server_onFixedUpdate()
     end
 
     --local forceSend = sm.game.getCurrentTick() % (40 * 60 * 60) == 0
-    local forceSend = false
-    if forceSend or sc.restrictionsUpdated or (sc.shutdownFlag and sm.game.getCurrentTick() % (5 * 40) == 0) then
+    --if sc.restrictionsUpdated or (sc.shutdownFlag and sm.game.getCurrentTick() % (5 * 40) == 0) then
+        --self:sv_print_vulnerabilities()
+    --end
+
+    if sc.shutdownFlag and sm.game.getCurrentTick() % (5 * 40) == 0 then
         self:sv_print_vulnerabilities()
     end
-
+    
     if self.scAllow then
         sc.setRestrictions(sc.originalRestrictions)
         sc.saveRestrictions()
@@ -217,9 +220,9 @@ function servicetool:cl_print_vulnerabilities(vulnerabilities)
     end
 
     if #vulnerabilities > 0 then
-        sm.gui.chatMessage("#ff0000warnings from the SComputers security system:#ffffff")
+        sm.gui.chatMessage("#ff0000warnings from the SComputers:#ffffff")
         for index, value in ipairs(vulnerabilities) do
-            sm.gui.chatMessage(tostring(index) .. ". " .. value .. ".")
+            sm.gui.chatMessage(tostring(index) .. ". " .. value)
         end
 
         if not noSafeCommand and oldVulnerabilitiesCount > 0 then

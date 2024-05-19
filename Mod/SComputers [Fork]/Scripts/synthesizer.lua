@@ -214,17 +214,21 @@ end
 function synthesizer:client_onFixedUpdate()
     for i = #self.effects, 1, -1 do
         local data = self.effects[i]
-        if data[4] then
-            data[4] = data[4] - 1
-        
-            if data[4] <= 0 then
+        if data.effect and sm.exists(data.effect) then
+            if data[4] then
+                data[4] = data[4] - 1
+            
+                if data[4] <= 0 then
+                    data.effect:stop()
+                    data.effect:destroy()
+                    table.remove(self.effects, i)
+                end
+            elseif not data.effect:isPlaying() then
                 data.effect:stop()
                 data.effect:destroy()
                 table.remove(self.effects, i)
             end
-        elseif not data.effect:isPlaying() then
-            data.effect:stop()
-            data.effect:destroy()
+        else
             table.remove(self.effects, i)
         end
     end

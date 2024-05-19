@@ -226,8 +226,10 @@ function PermissionTool.cl_guiUpdateButtons(self)
 		self.gui:setVisible("ApplyButton", not not _HENV)
 	elseif self.currentSettings.vm == "luaVM" then
 		self.gui:setVisible("ApplyButton", not not (vm and vm.lua52))
+	elseif self.currentSettings.vm == "betterAPI" then
+		self.gui:setVisible("ApplyButton", not not (better and better.loadstring))
 	elseif self.currentSettings.vm == "dlm" then
-		self.gui:setVisible("ApplyButton", not not (dlm and dlm.loadstring))
+		self.gui:setVisible("ApplyButton", not not (not better and dlm and dlm.loadstring))
 	elseif self.currentSettings.vm == "advancedExecuter" then
 		self.gui:setVisible("ApplyButton", not not sm.advancedExecuter)
 	else
@@ -383,7 +385,7 @@ function PermissionTool.client_onLuaVmPress(self)
 	if not self:client_canChangeSettings() then return end
 
 	--local vms = {"luaInLua", "scrapVM", "advancedExecuter", "dlm", "fullLuaEnv", "hsandbox"}
-	local vms = {"luaInLua", "dlm", "fullLuaEnv"}
+	local vms = {"luaInLua", "betterAPI", "dlm", "fullLuaEnv"}
 	
 	local currentIndex
 	for index, value in ipairs(vms) do

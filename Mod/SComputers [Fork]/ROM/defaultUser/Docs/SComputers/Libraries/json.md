@@ -6,7 +6,9 @@ sidebar-label: 'json'
 ---
 
 ### custom json implementation
-### safer(does not cause crashes)
 #### methods
 * json.encode(table)
 * json.decode(jsonstring)
+
+it may work better in some cases.
+this version of json is fully compatible with binary data

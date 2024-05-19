@@ -1,0 +1,29 @@
+{
+   "blockList" : [
+      {
+         "asg" : "$CONTENT_DATA/Textures/pixel_glass_asg.tga",
+         "dif" : "$CONTENT_DATA/Textures/pixel_glass_dif.tga",
+         "nor" : "$CONTENT_DATA/Textures/nor.tga",
+         "glass" : true,
+         "physicsMaterial" : "Water",
+         "showInInventory" : false,
+         "tiling" : 4,
+         "uuid" : "a683f897-5b8a-4c96-9c46-7b9fbc76d186"
+      }
+   ],
+   "partList" : [
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "color" : "FFFFFF",
+         "physicsMaterial" : "Default",
+         "renderable" : "$CONTENT_DATA/Objects/Renderables/pixel.rend",
+         "rotationSet" : "Default",
+         "showInInventory" : false,
+         "uuid" : "64d41b06-9b71-4e19-9f87-1e7e63845e59"
+      }
+   ]
+}

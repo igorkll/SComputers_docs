@@ -93,6 +93,8 @@ before the computer crashes (but it will crash anyway if you not delete the cras
 at the same time, it will be called before the crash and you will be able to "cancel" the crash
 using the "getCurrentComputer" method and interacting with the crashstate table
 if an exception occurs in this function, it can be caught only in the game logs/debug console
+* ATTENTION, now the "crashstate" table in the public API is a shadow of the real "crashstate" table. as a result, you can read from it, but writing to it will not lead to any result.
+to undo the computer crash from "callback_error", use the "reboot" method
 * if you declare the "callback_loop" function, it will be called on the next tick instead of calling the entire program
 * there is a SCI api for compatibility (env.SCI =env)
 * added the load method, which allows you to set the name of a piece of code and works as in a normal lua, but does not allow you to load bytecode
@@ -135,7 +137,7 @@ you can write your values there
 * camera.getSkyColor():smcolor - returns the color of the sky (even if the sky is not visible to the camera at the moment) this color is used in advanced rendering
 * camera.rawRay(xAngle:number, yAngle:number, maxdist:number):table, nil - ray shoots from the camera and gives out a table {color = smcolor, distance = distance, fraction = distance/maxdist, uuid = uuid, type = character/shape/harvestable/lift/joint/terrain/asset/limiter}. maxdist is the maximum distance for raycast in meters. please note that the angle can be set from -45 to 45 degrees, it is transmitted in radians. limiter is the wall of the world. please note that not all types of objects have the "color" and "uuid" field. please note that getting the uuid of a block only works if it is no further than 4 meters (16 blocks) from the camera
 * new rendering types
-* camera.drawCustom(display, drawer(xPos:number, yPos:number, raydata:table):smcolor) - custom render, you must pass a function that will receive pixel pos and raydata as input (the same as rawRay outputs) and this function should return the color that you need to paint the pixel
+* camera.drawCustom(display, drawer(xPos:number, yPos:number, raydata:table, ...):smcolor, ...) - custom render, you must pass a function that will receive pixel pos and raydata as input (the same as rawRay outputs) and this function should return the color that you need to paint the pixel
 * camera.drawAdvanced(display) - advanced rendering which is designed to give the most realistic picture possible at the moment
 * now methods can accept additional colors
 * camera.drawColorWithDepth(display, noCollideColor, terrainColor, unitsColor)
@@ -196,7 +198,7 @@ you should turn it on if the picture is constantly updated and skipping one flus
 , or turn it off if each rendering is important
 * display.setRotation/display.getRotation
 by default: 0
-sets the orientation of the screen, please note that the old content will not be redrawed
+sets the orientation of the screen, clears the screen when using
 * display.getFontWidth - returns the width of the current font
 * display.getFontHeight - returns the height of the current font
 * display.setFont - sets a custom font

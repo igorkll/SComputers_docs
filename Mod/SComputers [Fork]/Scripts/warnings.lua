@@ -1,7 +1,12 @@
 warnings = {}
 
-if not dlm then
-    table.insert(warnings, "#FF0000WARNING#FFFFFF: the DLM is not installed, the mod will use the LUA virtual machine, which may cause the code to malfunction.\nit is recommended to install DLM(DLM LEGACY): https://steamcommunity.com/sharedfiles/filedetails/?id=2988924872")
+if not better then
+    table.insert(warnings, "#FF0000WARNING#FFFFFF: the BetterAPI is not installed, the mod will use the LUA virtual machine, which may cause the code to malfunction.\nit is recommended to install BetterAPI: https://steamcommunity.com/sharedfiles/filedetails/?id=3177944610")
+end
+
+pcall(dofile, "$CONTENT_e8298053-4412-48e8-aff1-4271d1b07584/Scripts/canvas.lua")
+if not sm.canvas then
+    table.insert(warnings, "#FF0000WARNING#FFFFFF: for some reason, you did not download the display framework automatically, the displays will not work until you manually download: https://steamcommunity.com/sharedfiles/filedetails/?id=3202981462")
 end
 
 function sc.warningsCheck()

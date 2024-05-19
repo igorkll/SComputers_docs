@@ -400,7 +400,7 @@
 
 
    "6b08c951-f207-4280-9470-b7fce56a480a" : {
-      "description" : "Allows you to send GET/POST requests to the real internet!\nBut... It weighs a lot and is very expensive to craft. \n\n#ff0000DLM#eeeeee is required to work.",
+      "description" : "Allows you to send GET/POST requests to the real internet!\nBut... It weighs a lot and is very expensive to craft. \n\n#ff0000BetterAPI#eeeeee is required to work.",
       "keywords" : ["scomputers", "scomputer", "computers", "computer", "script", "lua", "scripted", "program", "programs"],
       "title" : "#f4c6ff[FORK ONLY]#eeeeee Internet Bridge"
    },
