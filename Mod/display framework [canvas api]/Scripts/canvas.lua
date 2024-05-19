@@ -499,7 +499,7 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
                 dy = e2
                 chr = 3 - 2 * e2
 
-                if err and e2 % 2 == 0 then
+                if err then
                     while dx <= dy do
                         checkSet(px + dx - 1, py + dy - 1, col)
                         checkSet(px + dy - 1, py + dx, col)
@@ -545,13 +545,11 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
                 chr = e2*e2
                 col = stack[offset+3]
                 for ix = math_max(-e2, -px), math_min(e2, (sizeX - px) - 1) do
-					dx = px + ix
                     sx = ix + 0.5
 					for iy = math_max(-e2, -py), math_min(e2, (sizeY - py) - 1) do
-						dy = py + iy
                         sy = iy + 0.5
 						if (sx * sx) + (sy * sy) <= chr then
-							lset(dx, dy, col)
+							lset(px + ix, py + iy, col)
 						end
 					end
 				end
