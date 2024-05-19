@@ -114,6 +114,7 @@ function AnyDisplay:server_onFixedUpdate()
 				self.network:sendToClients("cl_dataTunnel", sm.canvas.minimizeDataTunnel(self.dataTunnel))
 				self.allow_send = nil
                 self.dataTunnel.dataUpdated = nil
+                self.dataTunnel.display_reset = nil
 			end
 	
 			if self.dataTunnel.display_flush then
@@ -362,5 +363,8 @@ end
 
 function AnyDisplay:cl_dataTunnel(data)
 	self.c_dataTunnel = data
+    if data.display_reset then
+        self.canvas.drawerReset()
+    end
     self.canvas.pushDataTunnelParams(data)
 end

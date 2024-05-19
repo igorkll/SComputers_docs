@@ -12,6 +12,7 @@ local canvasAPI = {
         line  = 5,
         circle  = 6,
         circleF = 7,
+        circleC = 8
     },
     material = {
         classic = sm.uuid.new("64d41b06-9b71-4e19-9f87-1e7e63845e59"),
@@ -19,6 +20,7 @@ local canvasAPI = {
     }
 }
 
+local string_len = string.len
 local bit = bit or bit32
 local bit_rshift = bit.rshift
 local bit_lshift = bit.lshift
@@ -45,6 +47,8 @@ local math_min = math.min
 local string_sub = string.sub
 local table_concat = table.concat
 local tonumber = tonumber
+local utf8_len = utf8.len
+local utf8_sub = utf8.sub
 
 local black = color_new(0, 0, 0)
 local white = color_new(1, 1, 1)
@@ -237,6 +241,7 @@ local dataSizes = {
     5,
     6,
     5,
+    5,
     5
 }
 
@@ -252,9 +257,11 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
     local currentFont = font.optimized
     local fontWidth, fontHeight = font.width, font.height
     local rotation = 0
-    local strmanager = string
+    local utf8Support = false
     local updated = false
     local maxLineSize = sizeX + sizeY
+    local textCache = {}
+    local textCacheSize = 0
 
     local lsetList = {
         function (x, y, color)
@@ -272,6 +279,17 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
     }
     local lset = lsetList[1]
 
+    local function checkSet(px, py, col)
+        if posCheck(sizeX, sizeY, px, py) then
+            lset(px, py, col)
+        end
+    end
+
+    function obj.drawerReset()
+        textCache = {}
+        textCacheSize = 0
+    end
+
     function obj.setSoftwareRotation(_rotation)
         rotation = _rotation
         if rotation == 1 or rotation == 3 then
@@ -286,7 +304,7 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
     end
 
     function obj.setUtf8Support(state)
-        strmanager = state and utf8 or string
+        utf8Support = not not state
     end
 
     function obj.setFont(customFont)
@@ -297,11 +315,26 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
             currentFont = font.optimized
             fontWidth, fontHeight = font.width, font.height
         end
+        textCache = {}
+        textCacheSize = 0
     end
 
+    local old_rotation
+    local old_utf8support
+    local old_customFont
     function obj.pushDataTunnelParams(params)
-        obj.setSoftwareRotation(params.rotation)
-        obj.setUtf8Support(params.utf8support)
+        if params.rotation ~= old_rotation then
+            obj.setSoftwareRotation(params.rotation)
+            old_rotation = params.rotation
+        end
+        if params.utf8support ~= old_utf8support then
+            obj.setUtf8Support(params.utf8support)
+            old_utf8support = params.utf8support
+        end
+        if params.customFont ~= old_customFont then
+            obj.setFont(params.customFont)
+            old_customFont = params.customFont
+        end
     end
 
     function obj.pushStack(stack)
@@ -327,10 +360,10 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
                     lset(px, py, col)
                 end
             elseif actionNum == 2 then
+                remathRect(offset, stack, sizeX, sizeY)
                 tx, ty = stack[offset], stack[offset+1]
                 px, py = stack[offset+2], stack[offset+3]
                 col = stack[offset+4]
-                remathRect(offset, stack, sizeX, sizeY)
                 for ix = tx, tx + (px - 1) do
 					for iy = ty, ty + (py - 1) do
                         lset(ix, iy, col)
@@ -355,13 +388,76 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
                 tx, ty = stack[offset], stack[offset+1]
                 text = stack[offset+2]
                 col = stack[offset+3]
-                for i = 1, strmanager.len(text) do
-                    chr = strmanager.sub(text, i, i)
-                    chrdata = currentFont[chr] or currentFont.error or defaultError
-                    for i2 = 1, #chrdata, 2 do
-                        px, py = tx + chrdata[i2] + ((i - 1) * (fontWidth + 1)), ty + chrdata[i2 + 1]
+                if textCache[text] then
+                    chr = textCache[text]
+                    for i = 1, #chr, 2 do
+                        px, py = tx + chr[i], ty + chr[i+1]
                         if posCheck(sizeX, sizeY, px, py) then
                             lset(px, py, col)
+                        end
+                    end
+                else
+                    if textCacheSize < 1024 then
+                        e2 = {}
+                        err = 1
+                        if utf8Support then
+                            for i = 1, utf8_len(text) do
+                                chr = utf8_sub(text, i, i)
+                                chrdata = currentFont[chr] or currentFont.error or defaultError
+                                for i2 = 1, #chrdata, 2 do
+                                    sx, sy = chrdata[i2] + ((i - 1) * (fontWidth + 1)), chrdata[i2 + 1]
+                                    px, py = tx + sx, ty + sy
+                                    e2[err] = sx
+                                    err = err + 1
+                                    e2[err] = sy
+                                    err = err + 1
+                                    if posCheck(sizeX, sizeY, px, py) then
+                                        lset(px, py, col)
+                                    end
+                                end
+                            end
+                        else
+                            for i = 1, string_len(text) do
+                                chr = string_byte(text, i)
+                                chrdata = currentFont[chr] or currentFont.error or defaultError
+                                for i2 = 1, #chrdata, 2 do
+                                    sx, sy = chrdata[i2] + ((i - 1) * (fontWidth + 1)), chrdata[i2 + 1]
+                                    px, py = tx + sx, ty + sy
+                                    e2[err] = sx
+                                    err = err + 1
+                                    e2[err] = sy
+                                    err = err + 1
+                                    if posCheck(sizeX, sizeY, px, py) then
+                                        lset(px, py, col)
+                                    end
+                                end
+                            end
+                        end
+                        textCache[text] = e2
+                        textCacheSize = textCacheSize + 1
+                    else
+                        if utf8Support then
+                            for i = 1, utf8_len(text) do
+                                chr = utf8_sub(text, i, i)
+                                chrdata = currentFont[chr] or currentFont.error or defaultError
+                                for i2 = 1, #chrdata, 2 do
+                                    px, py = tx + chrdata[i2] + ((i - 1) * (fontWidth + 1)), ty + chrdata[i2 + 1]
+                                    if posCheck(sizeX, sizeY, px, py) then
+                                        lset(px, py, col)
+                                    end
+                                end
+                            end
+                        else
+                            for i = 1, string_len(text) do
+                                chr = string_byte(text, i)
+                                chrdata = currentFont[chr] or currentFont.error or defaultError
+                                for i2 = 1, #chrdata, 2 do
+                                    px, py = tx + chrdata[i2] + ((i - 1) * (fontWidth + 1)), ty + chrdata[i2 + 1]
+                                    if posCheck(sizeX, sizeY, px, py) then
+                                        lset(px, py, col)
+                                    end
+                                end
+                            end
                         end
                     end
                 end
@@ -393,6 +489,72 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
                         py = py + sy
                     end
                 end
+            elseif actionNum == 6 or actionNum == 8 then --Michener’s Algorithm
+                err = actionNum == 8
+                px = stack[offset]
+                py = stack[offset+1]
+                e2 = stack[offset+2]
+                col = stack[offset+3]
+                dx = 0
+                dy = e2
+                chr = 3 - 2 * e2
+
+                if err and e2 % 2 == 0 then
+                    while dx <= dy do
+                        checkSet(px + dx - 1, py + dy - 1, col)
+                        checkSet(px + dy - 1, py + dx, col)
+                        checkSet(px - dy, py + dx, col)
+                        checkSet(px - dx, py + dy - 1, col)
+                        checkSet(px + dy - 1, py - dx, col)
+                        checkSet(px + dx - 1, py - dy, col)
+                        checkSet(px - dy, py - dx, col)
+                        checkSet(px - dx, py - dy, col)
+    
+                        if chr < 0 then
+                            chr = chr + 4 * dx + 6
+                        else
+                            chr = chr + 4 * (dx - dy) + 10
+                            dy = dy - 1
+                        end
+                        dx = dx + 1
+                    end
+                else
+                    while dx <= dy do
+                        checkSet(px + dx, py + dy, col)
+                        checkSet(px + dy, py + dx, col)
+                        checkSet(px - dy, py + dx, col)
+                        checkSet(px - dx, py + dy, col)
+                        checkSet(px + dy, py - dx, col)
+                        checkSet(px + dx, py - dy, col)
+                        checkSet(px - dy, py - dx, col)
+                        checkSet(px - dx, py - dy, col)
+    
+                        if chr < 0 then
+                            chr = chr + 4 * dx + 6
+                        else
+                            chr = chr + 4 * (dx - dy) + 10
+                            dy = dy - 1
+                        end
+                        dx = dx + 1
+                    end
+                end
+            elseif actionNum == 7 then
+                px = stack[offset]
+                py = stack[offset+1]
+                e2 = stack[offset+2]
+                chr = e2*e2
+                col = stack[offset+3]
+                for ix = math_max(-e2, -px), math_min(e2, (sizeX - px) - 1) do
+					dx = px + ix
+                    sx = ix + 0.5
+					for iy = math_max(-e2, -py), math_min(e2, (sizeY - py) - 1) do
+						dy = py + iy
+                        sy = iy + 0.5
+						if (sx * sx) + (sy * sy) <= chr then
+							lset(dx, dy, col)
+						end
+					end
+				end
             end
 
             offset = offset + dataSizes[actionNum]
@@ -408,14 +570,14 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
             if force then
                 for i = 1, maxBuffer do
                     color = newBuffer[i] or newBufferBase
-                    callback((i - 1) % rSizeX, math_floor((i - 1) / rSizeX), color, newBuffer[i+1] or newBufferBase, newBufferBase)
+                    callback((i - 1) % rSizeX, math_floor((i - 1) / rSizeX), color, newBufferBase)
                     realBuffer[i] = color
                 end
             else
                 for i = 1, maxBuffer do
                     color = newBuffer[i] or newBufferBase
                     if color ~= (realBuffer[i] or realBufferBase) then
-                        callback((i - 1) % rSizeX, math_floor((i - 1) / rSizeX), color, newBuffer[i+1] or newBufferBase, newBufferBase)
+                        callback((i - 1) % rSizeX, math_floor((i - 1) / rSizeX), color, newBufferBase)
                         realBuffer[i] = color
                     end
                 end
@@ -435,6 +597,7 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
 end
 
 --low level display api
+local hiddenOffset = sm.vec3.new(1000000, 1000000, 1000000)
 function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotation, material)
     local obj = {sizeX = sizeX, sizeY = sizeY}
     local maxX, maxY = sizeX - 1, sizeY - 1
@@ -466,13 +629,13 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
         effect_setOffsetRotation(effect, rotation)
     end
 
-    local drawer = canvasAPI.createDrawer(sizeX, sizeY, function (x, y, color, next, base)
+    local drawer = canvasAPI.createDrawer(sizeX, sizeY, function (x, y, color, base)
         local index = x + (y * sizeX)
         local effectData = effects[index]
 
         if blackplate and color == base then
             if effectData and effectData[4] then
-                effect_stop(effectData[1])
+                effect_setOffsetPosition(effectData[1], hiddenOffset)
                 effectData[4] = false
             end
         elseif effectData then
@@ -482,7 +645,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
             end
 
             if not effectData[4] then
-                effect_start(effectData[1])
+                setOffsetPosition(effectData[1], effectData[2], effectData[3])
                 effectData[4] = true
             end
         else
@@ -547,9 +710,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
                     flushedDefault = true
                 end
                 for _, effect in pairs(effects) do
-                    if effect[4] then
-                        effect_start(effect[1])
-                    end
+                    effect_start(effect[1])
                 end
                 if blackplate then
                     effect_start(blackplate)
@@ -660,6 +821,11 @@ function canvasAPI.createClientScriptableCanvas(parent, sizeX, sizeY, pixelSize,
         canvas.pushDataTunnelParams(dataTunnel)
         canvas.update()
         dataTunnel.scriptableApi_update()
+
+        if dataTunnel.display_reset then
+            canvas.drawerReset()
+            dataTunnel.display_reset = nil
+        end
 
         if dataTunnel.display_flush then
             if needPushStack(canvas, dataTunnel, dt) then
@@ -875,6 +1041,8 @@ function canvasAPI.createScriptableApi(width, height, dataTunnel)
             end
         end,
         drawCircle = function (x, y, r, color)
+            if r > 1024 then r = 1024 end
+
             stack[stackIndex] = 6
             stackIndex = stackIndex + 1
             stack[stackIndex] = math_floor(x + 0.5)
@@ -892,7 +1060,28 @@ function canvasAPI.createScriptableApi(width, height, dataTunnel)
             end
         end,
         fillCircle = function (x, y, r, color)
+            if r > 1024 then r = 1024 end
+            
             stack[stackIndex] = 7
+            stackIndex = stackIndex + 1
+            stack[stackIndex] = math_floor(x + 0.5)
+            stackIndex = stackIndex + 1
+            stack[stackIndex] = math_floor(y + 0.5)
+            stackIndex = stackIndex + 1
+            stack[stackIndex] = math_floor(r + 0.5)
+            stackIndex = stackIndex + 1
+            stack[stackIndex] = formatColorToNumber(color, whiteNumber)
+            stackIndex = stackIndex + 1
+            
+            if pixelsCacheExists then
+                pixelsCache = {}
+                pixelsCacheExists = false
+            end
+        end,
+        drawCircleEvenly = function (x, y, r, color)
+            if r > 1024 then r = 1024 end
+
+            stack[stackIndex] = 8
             stackIndex = stackIndex + 1
             stack[stackIndex] = math_floor(x + 0.5)
             stackIndex = stackIndex + 1
@@ -977,25 +1166,14 @@ function canvasAPI.createScriptableApi(width, height, dataTunnel)
 
         setFont = function (customFont)
             checkArg(1, customFont, "table", "nil")
-            --[[
             if customFont then
                 checkFont(customFont)
-                fw, fh = customFont.width, customFont.height
-                datastack[datastackIndex] = {-5, fw, fh}
-                for k, v in pairs(font.optimizeFont(customFont.chars, fw, fh)) do
-                    datastack[datastackIndex] = {-4, k, v}
-                    datastackIndex = datastackIndex + 1
-                end
+                fontX, fontY = customFont.width, customFont.height
             else
-                datastack[datastackIndex] = {-3}
-                datastackIndex = datastackIndex + 1
-
-                fw, fh = font.width, font.height
+                fontX, fontY = font.width, font.height
             end
-
-            dataTunnel.display_datastack = datastack
-            dataTunnel.display_dataflush = clearDataStack
-            ]]
+            dataTunnel.customFont = customFont
+            dataTunnel.dataUpdated = true
         end,
         getFontWidth = function ()
             return fontX
@@ -1028,6 +1206,7 @@ function canvasAPI.createScriptableApi(width, height, dataTunnel)
             if api.setSkipAtLags then api.setSkipAtLags(true) end
             if api.setSkipAtNotSight then api.setSkipAtNotSight(false) end
             if api.setRenderAtDistance then api.setRenderAtDistance(false) end
+            dataTunnel.display_reset = true
         end
     }
     api.update = api.flush
@@ -1090,7 +1269,9 @@ function canvasAPI.minimizeDataTunnel(dataTunnel)
         renderAtDistance = dataTunnel.renderAtDistance,
         skipAtNotSight = dataTunnel.skipAtNotSight,
         skipAtLags = dataTunnel.skipAtLags,
-        utf8support = dataTunnel.utf8support
+        utf8support = dataTunnel.utf8support,
+        customFont = dataTunnel.customFont,
+        display_reset = dataTunnel.display_reset
     }
 end
 
