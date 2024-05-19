@@ -12,8 +12,9 @@ this display does not respond to resolution limitations in the mod configuration
 * vdisplay.create(callbacks:table, rx:number, ry:number):dsp - creates a virtual display
 
 # callbacks (for the exchange of callbacks, a table is used that you pass when creating a virtual display)
-* you are implementing: set:function(self, x, y, color) - called when the color of the display pixel changes(by default, all display pixels are black)
+* you are implementing: set:function(self, x, y, color) - called when the color of the display pixel changes
 * you are implementing: flush:function(self, isForce) - called when calling "flush" / "forceFlush" / "update"
+* the library implements: update:function() - just call every tick.. Don't worry about what it is. it doesn't cause the screen to refresh or anything like that.. you just have to call it every tick.
 * the library implements: pushClick:function(tbl) - registers clicks on the screen, this table will be returned unchanged by the "getClick" method
 * the library implements: updateAudience:function(count) - updates the number of the display audience. if the number is 0, then the display may stop updating in some cases(the default is 1)
 
@@ -45,7 +46,10 @@ function callback_loop()
         holo.reset()
         holo.clear()
         holo.flush()
+        return
     end
+
+    callbacks.update()
 
     --[[ an example of simulated clicks
     callbacks.pushClick({0, 0, "pressed", 1})
