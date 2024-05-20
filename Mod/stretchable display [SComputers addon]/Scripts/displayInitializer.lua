@@ -15,8 +15,8 @@ function displayInitializer:sv_make(data)
     if data.box.x > 1 then table.insert(sizes, data.box.x) end
     if data.box.y > 1 then table.insert(sizes, data.box.y) end
     if data.box.z > 1 then table.insert(sizes, data.box.z) end
-    local rx, ry = sizes[1], sizes[1]
-    _g_coreData = {x = rx, y = ry}
+    local rx, ry = sizes[2], sizes[1]
+    _g_coreData = {x = rx, y = ry, v = 32, addRot = sm.vec3.new(0, 0, 70)}
     for ix = 0, data.box.x - 1 do
         for iy = 0, data.box.y - 1 do
             for iz = 0, data.box.z - 1 do

@@ -1,6 +1,18 @@
 {
    "allow_add_mods" : true,
    "custom_icons" : false,
+   "dependencies" : [
+      {
+         "fileId" : 3202981462,
+         "localId" : "e8298053-4412-48e8-aff1-4271d1b07584",
+         "name" : "display framework [canvas api]"
+      },
+      {
+         "fileId" : 2949350596,
+         "localId" : "3aeb81c2-71b9-45a1-9479-1f48f1e8ff21",
+         "name" : "SComputers [Fork]"
+      }
+   ],
    "description" : "This mod doesn't have a description",
    "localId" : "2ab6eb84-2cff-4200-af1d-3091a0b8393a",
    "name" : "stretchable display [SComputers addon]",

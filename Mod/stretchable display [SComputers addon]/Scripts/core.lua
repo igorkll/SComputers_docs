@@ -2,21 +2,22 @@ local AnyDisplay = sm.sc_g.AnyDisplay
 core = class(AnyDisplay)
 
 function core:load()
-    self.data = self.data:load()
+    self.data = self.storage:load()
     if not self.data then
-        self.data = _g_coreData
-        self.data:save(self.data)
+        self.data = _g_coreData or {}
+        _g_coreData = nil
+        self.storage:save(self.data)
     end
 end
 
 function core:server_onCreate()
     self:load()
-    self.server_onCreate(AnyDisplay)
+    AnyDisplay.server_onCreate(self)
     self.network:sendToClients("cl_init", self.data)
 end
 
 function core:sv_request(_, player)
-    self.network:sendToClient(player.id, "cl_init", self.data)
+    self.network:sendToClient(player, "cl_init", self.data)
 end
 
 function core:client_onCreate()
@@ -27,5 +28,5 @@ function core:cl_init(data)
     if not self.data then
         self.data = data
     end
-    self.client_onCreate(AnyDisplay)
+    AnyDisplay.client_onCreate(self)
 end

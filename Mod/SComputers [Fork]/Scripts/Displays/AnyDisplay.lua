@@ -179,7 +179,15 @@ function AnyDisplay:client_onCreate()
 
 	self.width = self.data.x
 	self.height = self.data.y
-	self.canvas = sm.canvas.createCanvas(self.interactable, self.width, self.height, self.data.v, sm.vec3.new(0, ypos, zpos), sm.quat.fromEuler(sm.vec3.new(0, -90, (not rotate) and 180 or 0)), material)
+    local rot = sm.vec3.new(0, -90, (not rotate) and 180 or 0)
+    local pos = sm.vec3.new(0, ypos, zpos)
+    if self.data.addRot then
+        rot = rot + self.data.addRot
+    end
+    if self.data.addPos then
+        pos = pos + self.data.addPos
+    end
+	self.canvas = sm.canvas.createCanvas(self.interactable, self.width, self.height, self.data.v, pos, sm.quat.fromEuler(rot), material)
 	self.network:sendToServer("sv_dataRequest")
 
 	self.c_dataTunnel = {}
