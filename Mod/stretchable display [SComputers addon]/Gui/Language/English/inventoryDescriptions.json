@@ -1,0 +1,10 @@
+{
+    "750e224c-d504-4641-ba09-9c0a698781c6" : {
+        "description" : "first make your display out of display blocks and then use this tool",
+        "title" : "display initializer"
+    },
+    "4a7bd6e6-a48d-4932-8233-9dd6eb7386c8" : {
+        "description" : "make a display shape from this block and then use a special tool",
+        "title" : "stretchable display"
+    }
+}

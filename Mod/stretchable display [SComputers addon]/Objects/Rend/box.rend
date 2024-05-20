@@ -1,0 +1,19 @@
+{
+	"lodList" : [
+	   {
+		  "mesh" : "$CONTENT_DATA/Objects/Mesh/box.fbx",
+		  "minViewSize" : 20,
+		  "subMeshList" : [
+			{
+				"material" : "DifAsgNor",
+				"textureList" : [
+					"$GAME_DATA/Textures/Default/default_dif.tga",
+					"$GAME_DATA/Textures/Default/default_asg.tga",
+					"$GAME_DATA/Textures/Default/default_nor.tga"
+				]
+			}
+		  ]
+	   }
+	]
+ }
+ 

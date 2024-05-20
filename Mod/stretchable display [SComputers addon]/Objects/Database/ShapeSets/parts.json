@@ -1,0 +1,40 @@
+{
+   "blockList" : [
+      {
+         "asg" : "$GAME_DATA/Textures/Default/default_asg.tga",
+         "dif" : "$CONTENT_DATA/Textures/display_dif.tga",
+         "nor" : "$GAME_DATA/Textures/Default/default_nor.tga",
+         "physicsMaterial" : "Plastic",
+         "tiling" : 4,
+         "uuid" : "4a7bd6e6-a48d-4932-8233-9dd6eb7386c8"
+      }
+   ],
+   "partList" : [
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "physicsMaterial" : "Plastic",
+         "renderable" : "$CONTENT_DATA/Objects/Rend/box.rend",
+         "rotationSet" : "Default",
+         "uuid" : "c4704ff3-dd5a-4840-bfd6-0551497ccc32"
+      },
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "physicsMaterial" : "Plastic",
+         "renderable" : "$CONTENT_DATA/Objects/Rend/box.rend",
+         "rotationSet" : "Default",
+         "scripted" : {
+            "classname" : "core",
+            "filename" : "$CONTENT_DATA/Scripts/core.lua"
+         },
+         "uuid" : "ab36aa06-ea7d-4309-acd1-ed772e8c61fc"
+      }
+   ]
+}
