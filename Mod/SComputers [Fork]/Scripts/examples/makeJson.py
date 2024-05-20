@@ -12,10 +12,10 @@ def walk_directory(directory):
                 lpath = path.replace("\\", "/")
                 
                 data = f.read()
-                disk_data[lpath[lpath.find("/") + 1:]] = (base64.b64encode(data)).decode("utf-8")
+                disk_data[lpath[lpath.find("/") + 1:].split(".")[0]] = (base64.b64encode(data)).decode("utf-8")
 
 
 disk_data = {}
 walk_directory('scripts')
-with open('disk.json', 'w') as f:
+with open('examples.json', 'w') as f:
         json.dump(disk_data, f)

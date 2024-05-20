@@ -1048,8 +1048,8 @@ function ScriptableComputer:cl_updateScript(code)
 	end
 end
 
-function ScriptableComputer:cl_onExample(name)
-	loadExample(self, name)
+function ScriptableComputer:cl_onExample(...)
+	loadExample(self, ...)
 end
 
 function ScriptableComputer:cl_chatMessage(msg)
