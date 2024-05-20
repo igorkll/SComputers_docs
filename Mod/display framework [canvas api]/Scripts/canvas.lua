@@ -1,6 +1,7 @@
 print("> canvas.lua")
 dofile("$CONTENT_e8298053-4412-48e8-aff1-4271d1b07584/Scripts/font.lua")
 dofile("$CONTENT_e8298053-4412-48e8-aff1-4271d1b07584/Scripts/utf8.lua")
+dofile("$CONTENT_e8298053-4412-48e8-aff1-4271d1b07584/Scripts/audienceCounter.lua")
 
 local canvasAPI = {
     draw = {
@@ -17,8 +18,10 @@ local canvasAPI = {
     material = {
         classic = sm.uuid.new("64d41b06-9b71-4e19-9f87-1e7e63845e59"),
         glass = sm.uuid.new("a683f897-5b8a-4c96-9c46-7b9fbc76d186")
-    }
+    },
+    multi_layer = {}
 }
+canvasAPI.multi_layer[tostring(canvasAPI.material.classic)] = true
 
 local string_len = string.len
 local bit = bit or bit32
@@ -490,7 +493,6 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
                     end
                 end
             elseif actionNum == 6 or actionNum == 8 then --Michener’s Algorithm
-                err = actionNum == 8
                 px = stack[offset]
                 py = stack[offset+1]
                 e2 = stack[offset+2]
@@ -499,7 +501,7 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
                 dy = e2
                 chr = 3 - 2 * e2
 
-                if err then
+                if actionNum == 8 then
                     while dx <= dy do
                         checkSet(px + dx - 1, py + dy - 1, col)
                         checkSet(px + dy - 1, py + dx, col)
@@ -609,7 +611,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
     local flushedDefault = false
     local oldBackplateColor = 0
     local blackplate
-    if material == canvasAPI.material.classic then
+    if canvasAPI.multi_layer[tostring(material)] then
         blackplate = sm_effect_createEffect(getEffectName(), parent)
         effect_setParameter(blackplate, "uuid", material)
         effect_setParameter(blackplate, "color", black)
@@ -1285,6 +1287,7 @@ canvasAPI.mathDist = mathDist
 canvasAPI.needPushStack = needPushStack
 canvasAPI.font = font
 canvasAPI.tableClone = tableClone
+canvasAPI.audienceCounter = audienceCounter
 
 function canvasAPI.pushData(stack, ...)
     for i, v in ipairs({...}) do

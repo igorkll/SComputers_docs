@@ -1,6 +1,6 @@
 dofile("$CONTENT_DATA/Scripts/Config.lua")
 dofile("$CONTENT_e8298053-4412-48e8-aff1-4271d1b07584/Scripts/canvas.lua")
-AnyDisplay = class()
+AnyDisplay = class(sm.canvas.audienceCounter)
 AnyDisplay.maxParentCount = 1
 AnyDisplay.maxChildCount = 0
 AnyDisplay.connectionInput = sm.interactable.connectionType.composite
@@ -88,6 +88,13 @@ function AnyDisplay:server_onCreate()
 	self.api.isAllow = function()
 		return isAllow(self)
 	end
+
+    self.api.getAudience = function()
+        if self._getAudienceCount then
+            return self._getAudienceCount()
+        end
+        return 0
+    end
 
 	self.interactable.publicData = {
 		sc_component = {
@@ -270,6 +277,7 @@ function AnyDisplay:client_onFixedUpdate()
 		self.canvas.setRenderDistance((sc.restrictions and sc.restrictions.rend) or RENDER_DISTANCE)
 	end
 	self.canvas.update()
+    self:audienceCounter(self.canvas.isRendering())
 
 	if self.dragging.interact then
 		client_onClick(self, 1, "drag")
