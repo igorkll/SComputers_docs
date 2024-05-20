@@ -285,7 +285,7 @@ function sceneinstance:createCustom(x, y, sizeX, sizeY, cls, ...)
         end
     end
     if cls.init then
-        cls.init(self, ...)
+        cls.init(obj, ...)
     end
     table.insert(self.objs, obj)
     return obj

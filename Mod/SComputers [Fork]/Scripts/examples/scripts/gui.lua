@@ -46,7 +46,7 @@ gimg = scene2:createImage(display.getWidth() - 32, display.getHeight() - 32, img
 selectScene1:setCustomStyle(buttonDrawer)
 
 customObjClass = {
-    init = function(color)
+    init = function(self, color)
         self.color = color or 0xffffff
     end,
     drawer = function(self)

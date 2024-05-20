@@ -11,6 +11,7 @@ AnyDisplay.componentType = "display"
 local PIXEL_SCALE = 0.0072
 local RENDER_DISTANCE = 15
 local defaultTrySend = 7000
+local sc = sc
 
 --------------------------------------- SERVER
 

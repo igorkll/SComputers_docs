@@ -814,6 +814,7 @@ end
 --dofile("$CONTENT_DATA/Scripts/font.lua")
 --dofile("$CONTENT_DATA/Scripts/basegraphic.lua")
 dofile("$CONTENT_DATA/Scripts/warnings.lua")
+dofile("$CONTENT_DATA/Scripts/Displays/AnyDisplay.lua")
 
 -------------------------------------------------------
 
