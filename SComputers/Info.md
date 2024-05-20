@@ -202,7 +202,7 @@ sets the orientation of the screen, clears the screen when using
 * display.getFontWidth - returns the width of the current font
 * display.getFontHeight - returns the height of the current font
 * display.setFont - sets a custom font
-* display.drawCircleEvenly - the method is similar to drawCircle, but with support for an even radius. he will not be able to lie flat on a fillCircle, but he can cut off circles with an even radius as a fillCircle
+* display.drawCircleEvenly - the method is similar to drawCircle, but with support for an even radius. he will not be able to lie flat on a fillCircle, but he can cut off circles with an even radius as a fillCircle. this function is just a more correct version of drawCircle
 to set a standard font, pass nil
 the font is a lua format table:
 ```lua

@@ -8,17 +8,15 @@ function styles:switch()
 
     local sy = self.sizeY / 2
     local addX = sy - 1
-    local py = (self.y + sy) - 1
+    local py = self.y + sy
 
-    self.display.fillRect(self.x + addX, self.y, self.sizeX - (addX * 2), self.sizeY, bg)
-    for i = 0, 1 - (self.sizeY % 2) do
-        if self.state then
-            self.display.fillCircle(self.x + addX, py + i, sy, color1)
-            self.display.fillCircle(self.x + (self.sizeX - 1 - addX), py + i, sy, color2)
-        else
-            self.display.fillCircle(self.x + (self.sizeX - 1 - addX), py + i, sy, color2)
-            self.display.fillCircle(self.x + addX, py + i, sy, color1)
-        end
+    self.display.fillRect(self.x + addX, self.y, self.sizeX - (addX * 2), self.sizeY + (self.sizeY % 2 == 0 and 0 or 1), bg)
+    if self.state then
+        self.display.fillCircle(self.x + addX, py, sy, color1)
+        self.display.fillCircle(self.x + (self.sizeX - 1 - addX), py, sy, color2)
+    else
+        self.display.fillCircle(self.x + (self.sizeX - 1 - addX), py, sy, color2)
+        self.display.fillCircle(self.x + addX, py, sy, color1)
     end
 end
 

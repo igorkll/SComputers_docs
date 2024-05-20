@@ -9,7 +9,9 @@ end
 
 function objinstance:update()
     self.needUpdate = true
-    self.guiinstance.needFlushFlag = true
+    if self.sceneinstance:isSelected() then
+        self.guiinstance.needFlushFlag = true
+    end
 end
 
 function objinstance:getLastInteractionType()
@@ -122,7 +124,12 @@ function objinstance:_tick(click)
         return
     end
 
-    if self.button then
+    if self.customHandler then
+        if click == true and self.state then
+            self:customHandler(-1, -1, "released", -1) --release the pressed items when switching the scene
+            self.state = false
+        end
+    elseif self.button then
         if click == true and not self.toggle then
             self.state = false
         end
@@ -130,13 +137,21 @@ function objinstance:_tick(click)
     end
     if not click or click == true then return end
 
+    local tx, ty = click[1], click[2]
     local selected = click[1] >= self.x and click[2] >= self.y and click[1] < (self.x + self.sizeX) and click[2] < (self.y + self.sizeY)
     local clktype = click[3]
     local btntype = click[4]
 
     self.lastInteractionType = btntype
 
-    if self.button then
+    if self.customHandler then
+        if selected or (self.state and clktype == "released") then
+            self.state = clktype ~= "released"
+            if self:customHandler(tx, ty, clktype, btntype) then
+                self:update()
+            end
+        end
+    elseif self.button then
         if self.toggle then
             if selected and clktype == "pressed" then
                 self.state = not self.state
@@ -159,7 +174,7 @@ end
 function objinstance:_draw(force)
     if self.invisible then return end
     if not force and not self.needUpdate then return end
-    self.needUpdate = nil
+    self.needUpdate = false
 
     if self.style then
         self:style()
@@ -188,7 +203,9 @@ local sceneinstance = {}
 
 function sceneinstance:update()
     self.needUpdate = true
-    self.guiinstance.needFlushFlag = true
+    if self:isSelected() then
+        self.guiinstance.needFlushFlag = true
+    end
 end
 
 function sceneinstance:_tick(clean)
@@ -211,7 +228,7 @@ function sceneinstance:_draw(force)
                 self.display.clear(self.color)
             end
         end
-        self.needUpdate = nil
+        self.needUpdate = false
         force = true
     end
     for _, obj in ipairs(self.objs) do
@@ -246,6 +263,32 @@ local function attachMethods(self, obj)
     obj.setCustomStyle = objinstance.setCustomStyle
     obj.setInvisible = objinstance.setInvisible
     obj.setDisabled = objinstance.setDisabled
+end
+
+function sceneinstance:createCustom(x, y, sizeX, sizeY, cls, ...)
+    local obj = {
+        x = x,
+        y = y,
+        sizeX = sizeX,
+        sizeY = sizeY,
+        disable = false,
+        invisible = false,
+        state = false,
+        args = {...},
+        style = cls.drawer,
+        customHandler = cls.handler
+    }
+    attachMethods(self, obj)
+    if cls.methods then
+        for k, v in pairs(cls.methods) do
+            obj[k] = v
+        end
+    end
+    if cls.init then
+        cls.init(self, ...)
+    end
+    table.insert(self.objs, obj)
+    return obj
 end
 
 function sceneinstance:createButton(x, y, sizeX, sizeY, toggle, text, bg, fg, bg_press, fg_press)
@@ -380,7 +423,7 @@ end
 
 function guiinstance:needFlush()
     local needFlushFlag = self.needFlushFlag
-    self.needFlushFlag = nil
+    self.needFlushFlag = false
     return needFlushFlag
 end
 
@@ -400,6 +443,7 @@ function guiinstance:createScene(color)
         createImage = sceneinstance.createImage,
         createText = sceneinstance.createText,
         createLabel = sceneinstance.createLabel,
+        createCustom = sceneinstance.createCustom,
         select = sceneinstance.select,
         isSelected = sceneinstance.isSelected,
         update = sceneinstance.update,
