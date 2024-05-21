@@ -19,6 +19,10 @@
          "physicsMaterial" : "Plastic",
          "renderable" : "$CONTENT_DATA/Objects/Rend/box.rend",
          "rotationSet" : "Default",
+         "scripted" : {
+            "classname" : "part",
+            "filename" : "$CONTENT_DATA/Scripts/part.lua"
+         },
          "uuid" : "c4704ff3-dd5a-4840-bfd6-0551497ccc32"
       },
       {
