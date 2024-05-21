@@ -2,7 +2,7 @@
 	"lodList" : [
 	   {
 		  "mesh" : "$CONTENT_DATA/Objects/Mesh/box.fbx",
-		  "minViewSize" : 20,
+		  "minViewSize" : 80,
 		  "subMeshList" : [
 			{
 				"material" : "Dif",

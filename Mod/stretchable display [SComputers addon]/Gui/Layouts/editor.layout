@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout" version="3.2.0">
+    <Widget type="Widget" skin="LogicGateBG" position_real="0 0 0.3515625 0.1416015625" name="BackPanel">
+        <Property key="Colour" value="1 1 1"/>
+        <Property key="Alpha" value="1"/>
+        <Widget type="TextBox" skin="TextBox" position_real="0.013888888888888888 0 0.97222222222222221 0.1793103448275862" name="Title">
+            <Property key="TextAlign" value="Center"/>
+            <Property key="TextShadow" value="true"/>
+            <Property key="Caption" value="display configurator"/>
+        </Widget>
+        <Widget type="TextBox" skin="TextBox" position_real="0.28333333333333333 0.34482758620689657 0.43055555555555558 0.31034482758620691" align="Center" name="res">
+            <Property key="FontName" value="SM_Button"/>
+            <Property key="TextAlign" value="Center"/>
+            <Property key="FontHeight" value="15"/>
+            <Property key="Caption" value="resolution"/>
+        </Widget>
+        <Widget type="Button" skin="PrimaryButton" position_real="0.72222222222222221 0.34482758620689657 0.1388888888888889 0.31034482758620691" name="res_add">
+            <Property key="Caption" value="+"/>
+            <Property key="FontName" value="SM_Button"/>
+            <Property key="TextAlign" value="Center"/>
+        </Widget>
+        <Widget type="Button" skin="PrimaryButton" position_real="0.1388888888888889 0.34482758620689657 0.1388888888888889 0.31034482758620691" align="Default" name="res_sub">
+            <Property key="Caption" value="-"/>
+            <Property key="FontName" value="SM_Button"/>
+            <Property key="TextAlign" value="Center"/>
+        </Widget>
+        <Widget type="Button" skin="PrimaryButton" position_real="0.27777777777777779 0.68965517241379315 0.44444444444444442 0.27586206896551724" name="make">
+            <Property key="Caption" value="make"/>
+            <Property key="FontName" value="SM_Button"/>
+            <Property key="TextAlign" value="Center"/>
+        </Widget>
+    </Widget>
+    <CodeGeneratorSettings>
+        <Property key="IncludeDirectory" value=""/>
+        <Property key="PanelName" value=""/>
+        <Property key="PanelNamespace" value=""/>
+        <Property key="SourceDirectory" value=""/>
+    </CodeGeneratorSettings>
+</MyGUI>
