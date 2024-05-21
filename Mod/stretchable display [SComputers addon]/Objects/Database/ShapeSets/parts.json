@@ -24,6 +24,7 @@
             "classname" : "part",
             "filename" : "$CONTENT_DATA/Scripts/part.lua"
          },
+         "showInInventory" : false,
          "uuid" : "c4704ff3-dd5a-4840-bfd6-0551497ccc32"
       },
       {
@@ -40,6 +41,7 @@
             "classname" : "core",
             "filename" : "$CONTENT_DATA/Scripts/core.lua"
          },
+         "showInInventory" : false,
          "uuid" : "ab36aa06-ea7d-4309-acd1-ed772e8c61fc"
       }
    ]
