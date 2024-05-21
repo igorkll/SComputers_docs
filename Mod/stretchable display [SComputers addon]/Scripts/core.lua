@@ -40,12 +40,14 @@ function core:server_canErase()
 end
 
 function core:server_onDestroy()
-    if not self.publicData.del then
+    if not self.publicData.del and self.shapes then
         for _, shape in ipairs(self.shapes) do
-            if sm.exists(shape) and shape.id ~= self.shapeID and shape.interactable and shape.interactable.publicData and shape.interactable.publicData.id == self.id then
-                shape.interactable.publicData.del = true
-                shape:destroyShape()
-            end
+            pcall(function()
+                if sm.exists(shape) and shape.id ~= self.shapeID and shape.interactable and shape.interactable.publicData and shape.interactable.publicData.id == self.id then
+                    shape.interactable.publicData.del = true
+                    shape:destroyShape()
+                end
+            end)
         end
     end
 end
