@@ -4,8 +4,8 @@ core = class(AnyDisplay)
 function core:load()
     self.data = self.storage:load()
     if not self.data then
-        self.data = _g_coreData or {}
-        _g_coreData = nil
+        self.data = _g_displayData or {}
+        _g_displayData = nil
         self.storage:save(self.data)
     end
 end

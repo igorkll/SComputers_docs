@@ -7,7 +7,8 @@ displayInitializer.displayUuid = sm.uuid.new("c4704ff3-dd5a-4840-bfd6-0551497ccc
 sm.tool.preloadRenderables(displayInitializer.rend)
 
 local effectRotation = sm.quat.fromEuler(sm.vec3.new(90, 0, 0))
-local rotationZ, rotationX = sm.vec3.new(0, 0, 1), sm.vec3.new(1, 0, 0)
+local rotationZ, rotationX = sm.vec3.new(0, 1, 0), sm.vec3.new(1, 0, 0)
+local lOffset = sm.vec3.new(0, 0, 1)
 
 function displayInitializer:sv_make(data)
     sm.effect.playEffect("Part - Upgrade", data.shape.worldPosition, nil, effectRotation)
@@ -15,14 +16,15 @@ function displayInitializer:sv_make(data)
     if data.box.x > 1 then table.insert(sizes, data.box.x) end
     if data.box.y > 1 then table.insert(sizes, data.box.y) end
     if data.box.z > 1 then table.insert(sizes, data.box.z) end
-    local rx, ry = sizes[2], sizes[1]
-    _g_coreData = {x = rx, y = ry, v = 32, addRot = sm.vec3.new(0, 0, 70)}
+    local rx, ry = 4, 2
+    _g_displayData = {x = rx * 8, y = ry * 8, v = -0.25 / 8, addPos = sm.vec3.new(0, 0, 0)}
     for ix = 0, data.box.x - 1 do
         for iy = 0, data.box.y - 1 do
             for iz = 0, data.box.z - 1 do
-                local needSource = ix == 0 and iy == 0 and iz == 0
+                local needSource = ix == data.box.x - 1 and iy == 0 and iz == data.box.z - 1
                 local uuid = needSource and displayInitializer.displayCoreUuid or displayInitializer.displayUuid
-                data.body:createPart(uuid, data.shape.localPosition + sm.vec3.new(ix, iy, iz), rotationZ, rotationX)
+                local localPos = data.shape.localPosition + sm.vec3.new(ix, iy, iz) + lOffset
+                data.body:createPart(uuid, localPos, rotationZ, rotationX)
             end
         end
     end
