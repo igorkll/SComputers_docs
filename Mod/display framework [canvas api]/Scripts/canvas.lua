@@ -771,9 +771,16 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
     ---------------------------------------
 
     if type(pixelSize) == "number" then
-        local vec = vec3_new(0.0072, 0.0072, 0) * pixelSize
-        vec.z = 0.001
-        obj.setPixelSize(vec)
+        if pixelSize < 0 then
+            pixelSize = math.abs(pixelSize)
+            local vec = vec3_new(pixelSize, pixelSize, 0)
+            vec.z = 0.001
+            obj.setPixelSize(vec)
+        else
+            local vec = vec3_new(0.0072, 0.0072, 0) * pixelSize
+            vec.z = 0.001
+            obj.setPixelSize(vec)
+        end
     else
         obj.setPixelSize(pixelSize or vec3_new(0.25 / 4, 0.25 / 4, 0.05 / 4))
     end
