@@ -16,6 +16,7 @@
             "y" : 1,
             "z" : 1
          },
+         "color" : "222222",
          "physicsMaterial" : "Plastic",
          "renderable" : "$CONTENT_DATA/Objects/Rend/box.rend",
          "rotationSet" : "Default",
@@ -31,7 +32,7 @@
             "y" : 1,
             "z" : 1
          },
-         "color" : "FF6666",
+         "color" : "222222",
          "physicsMaterial" : "Plastic",
          "renderable" : "$CONTENT_DATA/Objects/Rend/box.rend",
          "rotationSet" : "Default",
