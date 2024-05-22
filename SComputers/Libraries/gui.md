@@ -11,7 +11,7 @@ sidebar-label: 'gui'
 * gui.new(display:table):guiinstance - create a new gui instance
 
 ### gui instance
-* guiinstance:tick() - processing clicks, etc
+* guiinstance:tick():clickdata - processing clicks, etc
 * guiinstance:draw() - draw a current scene, redrawing is optional only if necessary
 * guiinstance:drawForce() - draw a current scene, redrawing always happens
 * guiinstance:createScene(autoclearcolor:smcolor,function(sceneinstance) ):sceneinstance - create a new scene, you can transfer the color so that when you select a scene, the screen is cleared automatically(you can pass a cleaning function instead of a color, for example, to draw a picture on the background)

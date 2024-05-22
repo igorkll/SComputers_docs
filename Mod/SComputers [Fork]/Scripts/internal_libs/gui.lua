@@ -217,6 +217,9 @@ function sceneinstance:_tick(clean)
         sc.yield()
         obj:_tick(click)
     end
+    if click ~= true then
+        return click
+    end
 end
 
 function sceneinstance:_draw(force)
@@ -397,7 +400,7 @@ local guiinstance = {}
 
 function guiinstance:tick()
     if self.scene then
-        self.scene:_tick()
+        return self.scene:_tick()
     end
 end
 
