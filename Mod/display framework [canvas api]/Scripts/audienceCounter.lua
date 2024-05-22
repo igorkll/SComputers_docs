@@ -27,3 +27,18 @@ function audienceCounter:audienceCounter(state)
         self.old_audienceCounter_state = state
     end
 end
+
+--------------------------------------------------
+
+function audienceCounter:sv_n_lagDetector_request(score)
+    self._lagDetector = (self._lagDetector or 0) + score
+end
+
+function audienceCounter:lagDetector(execTime, mul)
+    local lagScore = execTime * mul
+    self._clLagDetector = (self._clLagDetector or 0) + lagScore
+    if self._clLagDetector >= 0.1 then
+        self.network:sendToServer("sv_n_lagDetector_request", self._clLagDetector)
+        self._clLagDetector = 0
+    end
+end

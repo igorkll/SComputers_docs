@@ -855,7 +855,7 @@ function canvasAPI.createClientScriptableCanvas(parent, sizeX, sizeY, pixelSize,
 end
 
 --simulates the SComputers API, does not implement data transfer
-function canvasAPI.createScriptableApi(width, height, dataTunnel)
+function canvasAPI.createScriptableApi(width, height, dataTunnel, flushCallback)
     dataTunnel = dataTunnel or {}
     dataTunnel.rotation = 0
     dataTunnel.skipAtLags = true
@@ -1105,6 +1105,9 @@ function canvasAPI.createScriptableApi(width, height, dataTunnel)
             end
         end,
         flush = function()
+            if flushCallback then
+                flushCallback()
+            end
             local stachSum = stackChecksum(stack)
             if stachSum ~= oldStackSum then
                 dataTunnel.display_stack = stack

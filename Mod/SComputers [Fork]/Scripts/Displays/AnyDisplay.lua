@@ -83,7 +83,9 @@ function AnyDisplay:server_onCreate()
 	self.dataTunnel = {}
 	self.width = self.data.x
 	self.height = self.data.y
-	self.api = sm.canvas.createScriptableApi(self.width, self.height, self.dataTunnel)
+	self.api = sm.canvas.createScriptableApi(self.width, self.height, self.dataTunnel, function ()
+        self.lastComputer = sc.lastComputer
+    end)
 	self.touchscreen = sm.canvas.addTouch(self.api, self.dataTunnel)
 
 	self.api.isAllow = function()
@@ -114,6 +116,12 @@ function AnyDisplay:server_onFixedUpdate()
     if ctick % (40 * 4) == 0 then
         self.tryPacket = nil
     end
+
+    if self.lastComputer and self._lagDetector then
+        self.lastComputer.lagScore = self.lastComputer.lagScore + (self._lagDetector * sc.restrictions.lagDetector)
+        self._lagDetector = 0
+    end
+
     self.dataTunnel.scriptableApi_update()
 
 	if isAllow(self) then
@@ -358,9 +366,11 @@ end
 function AnyDisplay:cl_pushStack(stack)
     if self.sendedData_cl_pushStack then
         if self.sendedData_cl_pushStack.force or needPushStack(self.canvas, self.c_dataTunnel, sc.deltaTime, sc.restrictions.skipFps) then
+            local startTime = os.clock()
             self.canvas.pushStack(self.sendedData_cl_pushStack)
             self.canvas.flush()
             self.sendedData_cl_pushStack = nil
+            self:lagDetector(os.clock() - startTime, sc.clockLagMul)
         end
         return
     elseif self.stack then
@@ -372,9 +382,11 @@ function AnyDisplay:cl_pushStack(stack)
 	end
 
 	if stack.flush and (stack.force or needPushStack(self.canvas, self.c_dataTunnel, sc.deltaTime, sc.restrictions.skipFps)) then
+        local startTime = os.clock()
 		self.canvas.pushStack(self.stack)
 		self.canvas.flush()
 		self.stack = nil
+        self:lagDetector(os.clock() - startTime, sc.clockLagMul)
 	end
 end
 

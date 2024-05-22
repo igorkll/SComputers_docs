@@ -8,7 +8,10 @@ end
 function vdisplay.create(callbacks, width, height)
     local dataTunnel = {}
     local audience = 1
-    local obj = sm.canvas.createScriptableApi(width, height, dataTunnel)
+    local libUpdate
+    local obj = sm.canvas.createScriptableApi(width, height, dataTunnel, function ()
+        libUpdate()
+    end)
     local drawer = sm.canvas.createDrawer(width, height, function (x, y, color)
         callbacks.set(obj, x, y, color_new(color))
     end)
@@ -20,7 +23,7 @@ function vdisplay.create(callbacks, width, height)
     end
 
     local oldUpdateTick
-    local function libUpdate()
+    function libUpdate()
         local ctick = sm.game.getCurrentTick()
         if ctick == oldUpdateTick then return end
         oldUpdateTick = ctick
@@ -55,17 +58,6 @@ function vdisplay.create(callbacks, width, height)
     function obj.getAudience()
         return audience
     end
-
-    local function hook(name)
-        local oldFunc = obj[name]
-        obj[name] = function(...)
-            libUpdate()
-            return oldFunc(...)
-        end
-    end
-    hook("flush")
-    hook("update")
-    hook("forceFlush")
 
     drawer.flush(true)
     return obj
