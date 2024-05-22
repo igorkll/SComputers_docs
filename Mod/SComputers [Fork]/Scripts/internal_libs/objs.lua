@@ -12,23 +12,31 @@ objs.textbox = {
             self.display.fillRect(self.x, self.y, self.sizeX, self.sizeY, self.args[5])
         end
 
-        local index = 0
-        for _, line in ipairs(splitByMaxSizeWithTool(utf8, text, self.sizeX / (fontX + 1))) do
-            for _, line in ipairs(strSplit(utf8, line, "\n")) do
-                local px, py
-                if centerText then
-                    px = (self.x + (self.sizeX / 2) / 2) - ((utf8.len(line) * (fontX + 1)) / 2)
-                else
-                    px = self.x
-                end
-                if centerLines then
-                    py = self.y + (index * (fontY + 1))
-                else
-                    py = self.y + (index * (fontY + 1))
-                end
-                self.display.drawText(px, py, line, color)
-                index = index + 1
+        local lines = {}
+        for _, line in ipairs(strSplit(utf8, text, "\n")) do
+            for _, line in ipairs(splitByMaxSizeWithTool(utf8, line, self.sizeX / (fontX + 1))) do
+                table.insert(lines, line)
             end
+        end
+
+        local index = 0
+        for _, line in ipairs(lines) do
+            local len = utf8.len(line)
+            local px, py
+            if centerText then
+                px = (self.x + (self.sizeX / 2)) - ((len * (fontX + 1)) / 2)
+            else
+                px = self.x
+            end
+            if centerLines then
+                py = (self.y + (self.sizeY / 2) + (index * (fontY + 1))) - ((#lines * (fontY + 1)) / 2)
+            else
+                py = self.y + (index * (fontY + 1))
+            end
+            if py >= self.y and py + fontY < self.y + self.sizeY and px >= self.x and px + fontX < self.x + self.sizeX then
+                self.display.drawText(px, py, line, color)
+            end
+            index = index + 1
         end
     end
 }
