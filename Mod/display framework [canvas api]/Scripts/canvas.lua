@@ -1105,14 +1105,14 @@ function canvasAPI.createScriptableApi(width, height, dataTunnel, flushCallback)
             end
         end,
         flush = function()
-            if flushCallback then
-                flushCallback()
-            end
             local stachSum = stackChecksum(stack)
             if stachSum ~= oldStackSum then
                 dataTunnel.display_stack = stack
                 dataTunnel.display_flush = clearStack
                 oldStackSum = stachSum
+                if flushCallback then
+                    flushCallback()
+                end
             end
         end,
         forceFlush = function()
