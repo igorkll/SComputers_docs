@@ -306,6 +306,22 @@ function splitByMaxSize(str, max)
     return strs
 end
 
+function splitByMaxSizeWithTool(tool, str, max)
+    max = math.floor(max + 0.5)
+    if max <= 0 then
+        max = 1
+    end
+
+    local strs = {}
+    while tool.len(str) > 0 do
+        sc.yield()
+        
+        table.insert(strs, tool.sub(str, 1, max))
+        str = tool.sub(str, tool.len(strs[#strs]) + 1, #str)
+    end
+    return strs
+end
+
 function paths_path(str)
 	local strs = FileSystem.strSplit(string, str, {"/"})
 	if str:sub(1, 1) == "/" then

@@ -432,7 +432,7 @@ function guiinstance:createScene(color)
         color = sc.formatColor(color)
     end
 
-    return {
+    local scene = {
         guiinstance = self,
         display = self.display,
         color = color,
@@ -451,6 +451,12 @@ function guiinstance:createScene(color)
         _tick = sceneinstance._tick,
         _draw = sceneinstance._draw
     }
+
+    if not self.scene then
+        scene:select()
+    end
+
+    return scene
 end
 
 -----------------------------------gui
