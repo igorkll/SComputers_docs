@@ -118,7 +118,9 @@ function AnyDisplay:server_onFixedUpdate()
     end
 
     if self.lastComputer and self._lagDetector then
-        self.lastComputer.lagScore = self.lastComputer.lagScore + (self._lagDetector * sc.restrictions.lagDetector)
+        if type(sc.restrictions.lagDetector) == "number" then
+            self.lastComputer.lagScore = self.lastComputer.lagScore + (self._lagDetector * sc.restrictions.lagDetector)
+        end
         self._lagDetector = 0
     end
 
