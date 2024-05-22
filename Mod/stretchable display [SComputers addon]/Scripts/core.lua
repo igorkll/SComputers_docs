@@ -39,6 +39,21 @@ function core:server_canErase()
     return true
 end
 
+function core:server_onFixedUpdate()
+    local color = self.shape.color
+    self.oldColor = self.oldColor or color
+    if color ~= self.oldColor then
+        self.oldColor = color
+        for _, shape in ipairs(self.shape.body:getCreationShapes()) do
+            pcall(function()
+                if sm.exists(shape) and shape.id ~= self.shape.id and shape.interactable and shape.interactable.publicData and shape.interactable.publicData.id == self.data.id then
+                    shape.color = color
+                end
+            end)
+        end
+    end
+end
+
 function core:server_onDestroy()
     if not self.publicData.del and self.shapes then
         for _, shape in ipairs(self.shapes) do
