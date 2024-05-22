@@ -630,9 +630,10 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
     material = material or canvasAPI.material.classic
 
     local flushedDefault = false
-    local oldBackplateColor = 0
+    local oldBackplateColor
     local blackplate
     if canvasAPI.multi_layer[tostring(material)] then
+        oldBackplateColor = 0
         blackplate = sm_effect_createEffect(getEffectName(), parent)
         effect_setParameter(blackplate, "uuid", material)
         effect_setParameter(blackplate, "color", black)
@@ -654,31 +655,58 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
     end
 
     local effects = {}
+    local bufferedEffects = {}
+    local bufferedEffectsIndex = 0
+
+    local function updateColor(effectData, color)
+        if color == oldBackplateColor then
+            bufferedEffects = bufferedEffects + 1
+            bufferedEffects[bufferedEffects] = effectData[1]
+        else
+            effect_setParameter(effectData[1], "color", color_new(color))
+            effectData[4] = color
+        end
+    end
+
     local drawer = canvasAPI.createDrawer(sizeX, sizeY, function (x, y, color, base, next)
         local index = x + (y * sizeX)
         local effectData = effects[index]
 
         if effectData then
+            if effectData[6] == 0 and effectData[5] == next then
+                updateColor(effectData, color)
+                return true
+            elseif effectData[6] == 0 and effectData[5] == 1 then
+                updateColor(effectData, color)
+            end
         else
-            local effect = sm_effect_createEffect(getEffectName(), parent)
-            effect_setParameter(effect, "uuid", material)
+            local effect
+            if bufferedEffectsIndex > 0 then
+                effect = bufferedEffects[bufferedEffectsIndex]
+                bufferedEffectsIndex = bufferedEffectsIndex - 1
+            else
+                effect = sm_effect_createEffect(getEffectName(), parent)
+                effect_setParameter(effect, "uuid", material)
+            end
             effect_setParameter(effect, "color", color_new(color))
 
-            effects[index] = {
-                effect,
-                x,
-                y,
-                color,
-                next
-            }
+            for i = 0, next - 1 do
+                effects[index + i] = {
+                    effect,
+                    x,
+                    y,
+                    color,
+                    next,
+                    i
+                }
+            end
             
             setOffsetPosition(effect, x, y, next)
             setScale(effect, next)
             setOffsetRotation(effect)
             effect_start(effect)
+            return true
         end
-
-        return true
     end, blackplate and function (base)
         if oldBackplateColor ~= base then
             effect_setParameter(blackplate, "color", color_new(base))
