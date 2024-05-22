@@ -567,19 +567,41 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
                 callbackBefore(newBufferBase)
             end
             local color
-            if force then
-                for i = 1, maxBuffer do
-                    color = newBuffer[i] or newBufferBase
-                    callback((i - 1) % rSizeX, math_floor((i - 1) / rSizeX), color, newBufferBase)
-                    realBuffer[i] = color
-                end
-            else
-                for i = 1, maxBuffer do
-                    color = newBuffer[i] or newBufferBase
-                    if color ~= (realBuffer[i] or realBufferBase) then
-                        callback((i - 1) % rSizeX, math_floor((i - 1) / rSizeX), color, newBufferBase)
-                        realBuffer[i] = color
+            local next = 0
+            local px, py = 0, 0
+            local i = 1
+            local li = 0
+            local m
+            while i <= maxBuffer do
+                color = newBuffer[i] or newBufferBase
+                if color ~= (realBuffer[i] or realBufferBase) or force then
+                    px = (i - 1) % rSizeX
+                    py = math_floor((i - 1) / rSizeX)
+                    next = rSizeX
+                    for i2 = 1, rSizeX - 1 do
+                        m = i + i2
+                        if (m - 1) % rSizeX == 0 or (newBuffer[m] or newBufferBase) ~= color then
+                            next = i2
+                            break
+                        end
                     end
+                    li = 0
+                    while next > 0 do
+                        if callback(px + li, py, color, newBufferBase, next) then
+                            while next > 0 do
+                                realBuffer[i] = color
+                                i = i + 1
+                                next = next - 1
+                            end
+                            break
+                        end
+                        next = next - 1
+                        realBuffer[i] = color
+                        li = li + 1
+                        i = i + 1
+                    end
+                else
+                    i = i + 1
                 end
             end
             updated = false
@@ -607,7 +629,6 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
 
     material = material or canvasAPI.material.classic
 
-    local effects = {}
     local flushedDefault = false
     local oldBackplateColor = 0
     local blackplate
@@ -617,37 +638,27 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
         effect_setParameter(blackplate, "color", black)
     end
 
-    local function setOffsetPosition(effect, posX, posY)
+    local function setOffsetPosition(effect, posX, posY, size)
+        posX = posX + (size * 0.5)
         effect_setOffsetPosition(effect, rotation * (offset + vec3_new(((posX + 0.5) - (sizeX / 2)) * pixelSize.x, ((posY + 0.5) - (sizeY / 2)) * -pixelSize.y, blackplate and 0.001 or 0)))
     end
 
-    local function setScale(effect)
-        effect_setScale(effect, pixelSize * 1.02)
+    local function setScale(effect, size)
+        local vec = pixelSize * 1.02
+        vec.x = pixelSize.x * size
+        effect_setScale(effect, vec)
     end
 
     local function setOffsetRotation(effect)
         effect_setOffsetRotation(effect, rotation)
     end
 
-    local drawer = canvasAPI.createDrawer(sizeX, sizeY, function (x, y, color, base)
+    local effects = {}
+    local drawer = canvasAPI.createDrawer(sizeX, sizeY, function (x, y, color, base, next)
         local index = x + (y * sizeX)
         local effectData = effects[index]
 
-        if blackplate and color == base then
-            if effectData and effectData[4] then
-                effect_setOffsetPosition(effectData[1], hiddenOffset)
-                effectData[4] = false
-            end
-        elseif effectData then
-            if effectData[5] ~= color then
-                effect_setParameter(effectData[1], "color", color_new(color))
-                effectData[5] = color
-            end
-
-            if not effectData[4] then
-                setOffsetPosition(effectData[1], effectData[2], effectData[3])
-                effectData[4] = true
-            end
+        if effectData then
         else
             local effect = sm_effect_createEffect(getEffectName(), parent)
             effect_setParameter(effect, "uuid", material)
@@ -657,15 +668,17 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
                 effect,
                 x,
                 y,
-                true,
-                color
+                color,
+                next
             }
-
-            setOffsetPosition(effect, x, y)
-            setScale(effect)
+            
+            setOffsetPosition(effect, x, y, next)
+            setScale(effect, next)
             setOffsetRotation(effect)
             effect_start(effect)
         end
+
+        return true
     end, blackplate and function (base)
         if oldBackplateColor ~= base then
             effect_setParameter(blackplate, "color", color_new(base))
@@ -742,7 +755,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
     function obj.setOffset(_offset)
         offset = _offset
         for _, data in pairs(effects) do
-            setOffsetPosition(data[1], data[2], data[3])
+            setOffsetPosition(data[1], data[2], data[3], data[5])
         end
         if blackplate then
             effect_setOffsetPosition(blackplate, rotation * (offset + vec3_new(((sizeX / 2) - (sizeX / 2)) * pixelSize.x, ((sizeY / 2) - (sizeY / 2)) * -pixelSize.y, 0)))
