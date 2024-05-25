@@ -691,14 +691,14 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
             currentEffect = effects[currentIndex]
             if currentEffect and currentEffect[1].id ~= selfId and ignore then
                 t = currentEffect[7]
+                t2 = currentEffect[1].id
                 if #t == 1 then
                     bufferedEffectsIndex = bufferedEffectsIndex + 1
                     bufferedEffects[bufferedEffectsIndex] = currentEffect[1]
                     effect_setOffsetPosition(currentEffect[1], hiddenOffset)
-                    updatedList[t[1][1].id] = nil
+                    updatedList[t2] = nil
                 else
                     table_remove(t, 1)
-                    t2 = currentEffect[1].id
                     for i2 = 1, #t do
                         v = t[i2]
                         v[5] = v[5] - 1
@@ -760,6 +760,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
                         return true
                     end
                 else
+                    --[[
                     local sub = effectSize - nextCount
                     if effectIndex >= sub then
                         local itemsList = effectData[7]
@@ -771,6 +772,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
                         createEffect(index, x, y, color, nextCount, true)
                         return true
                     end
+                    ]]
                 end
             end
         elseif color ~= base or not oldBackplateColor then
