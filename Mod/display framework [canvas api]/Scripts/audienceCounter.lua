@@ -37,7 +37,7 @@ function audienceCounter:sv_n_lagDetector_request(score)
             if not self._lagDetector then
                 return 0
             elseif self._getAudienceCount then
-                return self._lagDetector / self._getAudienceCount()
+                return self._lagDetector / math.max(self._getAudienceCount(), 1)
             else
                 return self._lagDetector
             end
