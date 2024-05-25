@@ -641,7 +641,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
     end
 
     local function setOffsetPosition(effect, posX, posY, size)
-        posX = posX + (size * 0.5)
+        posX = posX + ((size - 1) * 0.5)
         effect_setOffsetPosition(effect, rotation * (offset + vec3_new(((posX + 0.5) - (sizeX / 2)) * pixelSize.x, ((posY + 0.5) - (sizeY / 2)) * -pixelSize.y, blackplate and 0.001 or 0)))
     end
 
