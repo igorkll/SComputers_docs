@@ -257,7 +257,7 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
     local maxX, maxY = sizeX - 1, sizeY - 1
     local newBuffer, newBufferBase = {}, 0
     local realBuffer, realBufferBase = {}, 0
-    local maxBuffer = ((sizeX - 1) + ((sizeY - 1) * sizeX)) + 1
+    local maxBuffer = (maxX + (maxY * sizeX)) + 1
     local currentFont = font.optimized
     local fontWidth, fontHeight = font.width, font.height
     local rotation = 0
