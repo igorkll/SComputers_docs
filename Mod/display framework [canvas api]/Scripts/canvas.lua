@@ -664,7 +664,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
         effectData[4] = color
     end
 
-    local function createEffect(index, x, y, color, nextCount)
+    local function createEffect(index, x, y, color, nextCount, ignore)
         local effect
         if bufferedEffectsIndex > 0 then
             effect = bufferedEffects[bufferedEffectsIndex]
@@ -678,6 +678,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
         end
         effect_setParameter(effect, "color", color_new(color))
 
+        ignore = not ignore
         local selfId = effect.id
         local currentEffect
         local currentIndex
@@ -688,7 +689,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
         for i = 0, nextCount - 1 do
             currentIndex = index + i
             currentEffect = effects[currentIndex]
-            if currentEffect and currentEffect[1].id ~= selfId then
+            if currentEffect and currentEffect[1].id ~= selfId and ignore then
                 t = currentEffect[7]
                 if #t == 1 then
                     bufferedEffectsIndex = bufferedEffectsIndex + 1
@@ -737,6 +738,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
 
         if effectData then
             local effectSize = effectData[5]
+            local effectIndex = effectData[6]
             local effectObject = effectData[1]
 
             if color == oldBackplateColor then
@@ -747,17 +749,26 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
                     effects[i] = nil
                 end
             else
-                if effectData[6] == 0 then
+                if effectIndex == 0 then
                     if effectSize == nextCount then
                         updateColor(effectData, color)
                         return true
                     elseif effectSize == 1 then
                         updateColor(effectData, color)
                     else
-                        if x == 63 then
-                            print(index, x, y, color, nextCount)
-                        end
                         createEffect(index, x, y, color, nextCount)
+                        return true
+                    end
+                else
+                    local sub = effectSize - nextCount
+                    if effectIndex >= sub then
+                        local itemsList = effectData[7]
+                        local item
+                        for i = 1, #itemsList do
+                            item = itemsList[i]
+                            item[5] = item[5] - sub
+                        end
+                        createEffect(index, x, y, color, nextCount, true)
                         return true
                     end
                 end
