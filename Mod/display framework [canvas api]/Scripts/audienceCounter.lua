@@ -32,6 +32,18 @@ end
 
 function audienceCounter:sv_n_lagDetector_request(score)
     self._lagDetector = (self._lagDetector or 0) + score
+    if not self._getLagDetector then
+        self._getLagDetector = function()
+            if not self._lagDetector then
+                return 0
+            elseif self._getAudienceCount then
+                return self._lagDetector / self._getAudienceCount()
+            else
+                return self._lagDetector
+            end
+            self._lagDetector = 0
+        end
+    end
 end
 
 function audienceCounter:lagDetector(execTime, mul)

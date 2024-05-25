@@ -117,11 +117,11 @@ function AnyDisplay:server_onFixedUpdate()
         self.tryPacket = nil
     end
 
-    if self.lastComputer and self._lagDetector then
+    if self.lastComputer and self._getLagDetector then
+        local lagScore = self._getLagDetector()
         if type(sc.restrictions.lagDetector) == "number" then
-            self.lastComputer.lagScore = self.lastComputer.lagScore + (self._lagDetector * sc.restrictions.lagDetector)
+            self.lastComputer.lagScore = self.lastComputer.lagScore + (lagScore * sc.restrictions.lagDetector)
         end
-        self._lagDetector = 0
     end
 
     self.dataTunnel.scriptableApi_update()
