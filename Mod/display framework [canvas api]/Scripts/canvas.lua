@@ -52,6 +52,7 @@ local table_concat = table.concat
 local tonumber = tonumber
 local utf8_len = utf8.len
 local utf8_sub = utf8.sub
+local sm_localPlayer_getPlayer = sm.localPlayer.getPlayer
 
 local black = color_new(0, 0, 0)
 local white = color_new(1, 1, 1)
@@ -619,8 +620,8 @@ function canvasAPI.createDrawer(sizeX, sizeY, callback, callbackBefore)
 end
 
 --low level display api
-local hiddenOffset = vec3_new(1000000, 1000000, 1000000)
 function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotation, material)
+    local hiddenOffset = vec3_new(1000000, 1000000, 1000000)
     local obj = {sizeX = sizeX, sizeY = sizeY}
     local maxX, maxY = sizeX - 1, sizeY - 1
     local dist
@@ -663,87 +664,107 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
         effectData[4] = color
     end
 
+    local function createEffect(index, x, y, color, nextCount)
+        local effect
+        if bufferedEffectsIndex > 0 then
+            effect = bufferedEffects[bufferedEffectsIndex]
+            bufferedEffectsIndex = bufferedEffectsIndex - 1
+        else
+            effect = sm_effect_createEffect(getEffectName(), parent)
+            effect_setParameter(effect, "uuid", material)
+            if showState then
+                effect_start(effect)
+            end
+        end
+        effect_setParameter(effect, "color", color_new(color))
+
+        local selfId = effect.id
+        local currentEffect
+        local currentIndex
+        local itemsList = {}
+        local itemsListIndex = 1
+        local updatedList = {}
+        local t, t2, v
+        for i = 0, nextCount - 1 do
+            currentIndex = index + i
+            currentEffect = effects[currentIndex]
+            if currentEffect and currentEffect[1].id ~= selfId then
+                t = currentEffect[7]
+                if #t == 1 then
+                    bufferedEffectsIndex = bufferedEffectsIndex + 1
+                    bufferedEffects[bufferedEffectsIndex] = currentEffect[1]
+                    effect_setOffsetPosition(currentEffect[1], hiddenOffset)
+                    updatedList[t[1][1].id] = nil
+                else
+                    table_remove(t, 1)
+                    t2 = currentEffect[1].id
+                    for i2 = 1, #t do
+                        v = t[i2]
+                        v[5] = v[5] - 1
+                        v[6] = v[6] - 1
+                        v[2] = v[2] + 1
+                    end
+                    updatedList[t2] = t[1]
+                end
+            end
+            currentEffect = {
+                effect,
+                x,
+                y,
+                color,
+                nextCount,
+                i,
+                itemsList
+            }
+            itemsList[itemsListIndex] = currentEffect
+            itemsListIndex = itemsListIndex + 1
+            effects[currentIndex] = currentEffect
+        end
+
+        for _, v in pairs(updatedList) do
+            setOffsetPosition(v[1], v[2], v[3], v[5])
+            setScale(v[1], v[5])
+        end
+        
+        setOffsetPosition(effect, x, y, nextCount)
+        setScale(effect, nextCount)
+        setOffsetRotation(effect)
+    end
+
     local drawer = canvasAPI.createDrawer(sizeX, sizeY, function (x, y, color, base, nextCount)
         local index = x + (y * sizeX)
         local effectData = effects[index]
 
         if effectData then
+            local effectSize = effectData[5]
+            local effectObject = effectData[1]
+
             if color == oldBackplateColor then
                 bufferedEffectsIndex = bufferedEffectsIndex + 1
-                bufferedEffects[bufferedEffectsIndex] = effectData[1]
-                effect_setOffsetPosition(effectData[1], hiddenOffset)
-                for i = index, (index + effectData[5]) - 1 do
+                bufferedEffects[bufferedEffectsIndex] = effectObject
+                effect_setOffsetPosition(effectObject, hiddenOffset)
+                for i = index, (index + effectSize) - 1 do
                     effects[i] = nil
                 end
-            elseif effectData[6] == 0 and effectData[5] == nextCount then
-                updateColor(effectData, color)
-                return true
-            elseif effectData[6] == 0 and effectData[5] == 1 then
-                updateColor(effectData, color)
-            end
-        elseif color ~= base or not oldBackplateColor then
-            local effect
-            if bufferedEffectsIndex > 0 then
-                effect = bufferedEffects[bufferedEffectsIndex]
-                bufferedEffectsIndex = bufferedEffectsIndex - 1
             else
-                effect = sm_effect_createEffect(getEffectName(), parent)
-                effect_setParameter(effect, "uuid", material)
-                if showState then
-                    effect_start(effect)
-                end
-            end
-            effect_setParameter(effect, "color", color_new(color))
-
-            local selfId = effect.id
-            local currentEffect
-            local currentIndex
-            local itemsList = {}
-            local itemsListIndex = 1
-            local updatedList = {}
-            local t, t2, v
-            for i = 0, nextCount - 1 do
-                currentIndex = index + i
-                currentEffect = effects[currentIndex]
-                if currentEffect and currentEffect[1].id ~= selfId then
-                    t = currentEffect[7]
-                    if #t == 1 then
-                        bufferedEffectsIndex = bufferedEffectsIndex + 1
-                        bufferedEffects[bufferedEffectsIndex] = currentEffect[1]
-                        effect_setOffsetPosition(currentEffect[1], hiddenOffset)
+                if effectData[6] == 0 then
+                    if effectSize == nextCount then
+                        updateColor(effectData, color)
+                        return true
+                    elseif effectSize == 1 then
+                        updateColor(effectData, color)
                     else
-                        table_remove(t, 1)
-                        t2 = currentEffect[1].id
-                        for i2 = 1, #t do
-                            v = t[i2]
-                            v[5] = v[5] - 1
-                            v[6] = v[6] - 1
-                            v[2] = v[2] + 1
+                        if x == 63 then
+                            print(index, x, y, color, nextCount)
                         end
-                        updatedList[t2] = t[1]
+                        createEffect(index, x, y, color, nextCount)
+                        return true
                     end
                 end
-                currentEffect = {
-                    effect,
-                    x,
-                    y,
-                    color,
-                    nextCount,
-                    i,
-                    itemsList
-                }
-                itemsList[itemsListIndex] = currentEffect
-                itemsListIndex = itemsListIndex + 1
-                effects[currentIndex] = currentEffect
             end
-
-            for _, v in pairs(updatedList) do
-                setOffsetPosition(v[1], v[2], v[3], v[5])
-            end
-            
-            setOffsetPosition(effect, x, y, nextCount)
-            setScale(effect, nextCount)
-            setOffsetRotation(effect)
+        elseif color ~= base or not oldBackplateColor then
+            createEffect(index, x, y, color, nextCount)
+            return true
         end
     end, blackplate and function (base)
         if oldBackplateColor ~= base then
@@ -779,7 +800,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
         if disable then
             newShowState = false
         elseif dist then
-            newShowState = mathDist(getSelfPos(), sm.localPlayer.getPlayer().character.worldPosition) <= dist
+            newShowState = mathDist(getSelfPos(), sm_localPlayer_getPlayer().character.worldPosition) <= dist
         end
 
         if newShowState ~= showState then
@@ -853,7 +874,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
 
     if type(pixelSize) == "number" then
         if pixelSize < 0 then
-            pixelSize = math.abs(pixelSize)
+            pixelSize = math_abs(pixelSize)
             local vec = vec3_new(pixelSize, pixelSize, 0)
             vec.z = 0.001
             obj.setPixelSize(vec)
@@ -980,7 +1001,6 @@ function canvasAPI.createScriptableApi(width, height, dataTunnel, flushCallback)
     local mFontX, mFontY = fontX - 1, fontY - 1
     local xFontX, xFontY = fontX + 1, fontY + 1
     local utf8support = false
-    local index
 
     local api
     api = {
@@ -1021,7 +1041,7 @@ function canvasAPI.createScriptableApi(width, height, dataTunnel, flushCallback)
         end,
         drawPixel = function(x, y, color)
             x, y = math_floor(x + 0.5), math_floor(y + 0.5)
-            index = x + (y * rwidth) + 1
+            local index = x + (y * rwidth) + 1
             if pixelsCache[index] ~= color then
                 pixelsCache[index] = color
                 pixelsCacheExists = true
