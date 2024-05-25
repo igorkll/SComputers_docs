@@ -681,7 +681,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
             elseif effectData[6] == 0 and effectData[5] == 1 then
                 updateColor(effectData, color)
             end
-        elseif color ~= base then
+        elseif color ~= base or not oldBackplateColor then
             local effect
             if bufferedEffectsIndex > 0 then
                 effect = bufferedEffects[bufferedEffectsIndex]
@@ -689,10 +689,13 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
             else
                 effect = sm_effect_createEffect(getEffectName(), parent)
                 effect_setParameter(effect, "uuid", material)
-                effect_start(effect)
+                if showState then
+                    effect_start(effect)
+                end
             end
             effect_setParameter(effect, "color", color_new(color))
 
+            local selfId = effect.id
             local currentEffect
             local currentIndex
             local itemsList = {}
@@ -702,7 +705,7 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
             for i = 0, nextCount - 1 do
                 currentIndex = index + i
                 currentEffect = effects[currentIndex]
-                if currentEffect then
+                if currentEffect and currentEffect[1].id ~= selfId then
                     t = currentEffect[7]
                     if #t == 1 then
                         bufferedEffectsIndex = bufferedEffectsIndex + 1
@@ -741,7 +744,6 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
             setOffsetPosition(effect, x, y, nextCount)
             setScale(effect, nextCount)
             setOffsetRotation(effect)
-            return true
         end
     end, blackplate and function (base)
         if oldBackplateColor ~= base then
@@ -787,7 +789,9 @@ function canvasAPI.createCanvas(parent, sizeX, sizeY, pixelSize, offset, rotatio
                     flushedDefault = true
                 end
                 for _, effect in pairs(effects) do
-                    effect_start(effect[1])
+                    if not effect_isPlaying(effect[1]) then
+                        effect_start(effect[1])
+                    end
                 end
                 if blackplate then
                     effect_start(blackplate)
