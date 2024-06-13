@@ -1,8 +1,0 @@
-{
-   "shapeSetList" : [
-      "$CONTENT_DATA/Objects/Database/ShapeSets/composite.shapeset",
-      "$CONTENT_DATA/Objects/Database/ShapeSets/networking.shapeset",
-      "$CONTENT_DATA/Objects/Database/ShapeSets/util.shapeset",
-      "$CONTENT_DATA/Objects/Database/ShapeSets/tools.shapeset"
-   ]
-}

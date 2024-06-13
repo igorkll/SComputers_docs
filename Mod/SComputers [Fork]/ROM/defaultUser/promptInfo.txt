@@ -1,5 +1,0 @@
-eng:
-    chatGPT quickly forgets promt, if he starts to "blunt" send him a prompt for it (no need to create a new chat)
-
-rus:
-    chatGPT быстро забывает promt, если он начинает "тупить" отправьте ему prompt заного(не нужно создавать новый чат)

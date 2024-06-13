@@ -1,3 +1,0 @@
-The "ScriptableComputer" fork, which was made based on the "SComputers" code, has all the optimizations and fixes from SComputers.
-however, all the items that were added to SComputers have been removed from here.
-however, the API methods added to SComputers are available in this fork
