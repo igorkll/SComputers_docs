@@ -135,7 +135,7 @@ you can write your values there
 
 ### raycast-camera features
 * camera.getSkyColor():smcolor - returns the color of the sky (even if the sky is not visible to the camera at the moment) this color is used in advanced rendering
-* camera.rawRay(xAngle:number, yAngle:number, maxdist:number):table, nil - ray shoots from the camera and gives out a table {color = smcolor, distance = distance, fraction = distance/maxdist, uuid = uuid, type = character/shape/harvestable/lift/joint/terrain/asset/limiter}. maxdist is the maximum distance for raycast in meters. please note that the angle can be set from -45 to 45 degrees, it is transmitted in radians. limiter is the wall of the world. please note that not all types of objects have the "uuid" field. please note that getting the uuid of a block only works if it is no further than 4 meters (16 blocks) from the camera(this is done to maintain a balance)
+* camera.rawRay(xAngle:number, yAngle:number, maxdist:number):table, nil - ray shoots from the camera and gives out a table {color = smcolor, distance = distance, fraction = distance/maxdist, uuid = uuid, type = character/shape/harvestable/lift/joint/terrain/asset/limiter, normalWorld=some of the information from raycast}. maxdist is the maximum distance for raycast in meters. please note that the angle can be set from -45 to 45 degrees, it is transmitted in radians. limiter is the wall of the world. please note that not all types of objects have the "uuid" field. please note that getting the uuid of a block only works if it is no further than 4 meters (16 blocks) from the camera(this is done to maintain a balance)
 * new rendering types
 * camera.drawCustom(display, drawer(xPos:number, yPos:number, raydata:table, ...):smcolor, ...) - custom render, you must pass a function that will receive pixel pos and raydata as input (the same as rawRay outputs) and this function should return the color that you need to paint the pixel
 * camera.drawAdvanced(display) - advanced rendering which is designed to give the most realistic picture possible at the moment
@@ -203,7 +203,8 @@ sets the orientation of the screen, clears the screen when using
 * display.getFontHeight - returns the height of the current font
 * display.setFont - sets a custom font
 * display.drawCircleEvenly - the method is similar to drawCircle, but with support for an even radius. he will not be able to lie flat on a fillCircle, but he can cut off circles with an even radius as a fillCircle. this function is just a more correct version of drawCircle
-to set a standard font, pass nil
+* display.drawCircleVeryEvenly(x, y, r, color, stroke=1) - this method is similar to drawCircle, but at the same time it lies flat on fillCircle, it works slower than drawCircle and drawCircleEvenly
+to set a standard font, pass nil. you can set the stroke width (the stroke is drawn inwards)
 the font is a lua format table:
 ```lua
 {

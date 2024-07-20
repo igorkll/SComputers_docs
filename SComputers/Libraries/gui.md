@@ -7,6 +7,17 @@ sidebar-label: 'gui'
 
 ![gui demo](/img/gui_demo.png)
 
+### recommendations
+* avoid overlapping elements
+
+### placement of elements (you can not specify the position of the elements, but set it using these methods later)
+* gobj:setPosition(x, y) - sets the absolute position
+* gobj:setOffsetPosition(gobjs, x, y) - sets the offset position relative to another element
+* gobj:setLeft(gobjs, padding:1) - sets the element to the left of another element
+* gobj:setRight(gobjs, padding:1)
+* gobj:setUp(gobjs, padding:1)
+* gobj:setDown(gobjs, padding:1)
+
 ### gui library
 * gui.new(display:table):guiinstance - create a new gui instance
 
@@ -22,13 +33,16 @@ sidebar-label: 'gui'
 ### scene instance
 * sceneinstance:isSelected():boolean - returns true if this scene is selected
 * sceneinstance:select() - select a current scene
-* sceneinstance:createButton(x, y, sizeX, sizeY, toggle, text, bg:smcolor, fg:smcolor, bg_press:smcolor, fg_press:smcolor):gbutton - create a new button
-* sceneinstance:createLabel(x, y, sizeX, sizeY, text, bg:smcolor, fg:smcolor):glabel - create a new label
-the label looks like a button
-* sceneinstance:createImage(x, y, img):gimage - creates a picture, the size is set by the size of the picture
-* sceneinstance:createText(x, y, text, color):gtext - creates text
-* sceneinstance:createCustom(x, y, sizeX, sizeY, class, ...):gobj - creates a custom element
 * sceneinstance:update() - forced redrawing of the scene will occur at the next gui.draw call
+
+### creating objects
+* sceneOrWindow:createButton(x, y, sizeX, sizeY, toggle, text, bg:smcolor, fg:smcolor, bg_press:smcolor, fg_press:smcolor):gbutton - create a new button
+* sceneOrWindow:createLabel(x, y, sizeX, sizeY, text, bg:smcolor, fg:smcolor):glabel - create a new label
+the label looks like a button
+* sceneOrWindow:createImage(x, y, img):gimage - creates a picture, the size is set by the size of the picture
+* sceneOrWindow:createText(x, y, text, color):gtext - creates text
+* sceneOrWindow:createCustom(x, y, sizeX, sizeY, class, ...):gobj - creates a custom element
+* sceneOrWindow:createWindow(x, y, sizeX, sizeY, color):gwindow - creates a new window that is a container for elements that can be moved around the screen. instead of the color, you can pass "nil", then the window will become completely transparent. you can also pass a function instead of a color, it will be called when the window is drawn and get a self window
 
 ### any object
 * gobj:destroy():boolean - removes an object from the list
@@ -49,6 +63,7 @@ the label looks like a button
 * gbutton:setBgColor(smcolor)
 * gbutton:setPfgColor(smcolor) - sets fg when pressed
 * gbutton:setPbgColor(smcolor) - sets bg when pressed
+* gbutton:attachCallback(function(button, newstate, inZone)) - connects the callback to the button. inZone true if the action occurred "inside the button", in cases of pressing it is always true, when releasing it is true if the cursor has not been moved
 
 ### object image
 * gimage:updateImage(img) - sets a new image object to draw. however, you can change the old one and call gimage:update
@@ -62,6 +77,12 @@ the label looks like a button
 * glabel:setFgColor(smcolor)
 * glabel:setBgColor(smcolor)
 
+### object window
+* gwindow:upPanel(color, textcolor, title:string, collapsibility:boolean) - creates the top panel on the window, call without arguments to remove this panel. the height of the panel is equal to the height of the font used + 2, you can place elements on the panel and they will not be hidden when the window is minimized
+* gwindow:panelButton(sizeX, toggle, text, bg:smcolor, fg:smcolor, bg_press:smcolor, fg_press:smcolor):gbutton - creates a button on the top panel
+* gwindow:minimize(state:boolean) - hides or shows a window, you need to create an upper panel to work
+* gwindow:setDraggable(state) - set to true so that the window can be moved around the display
+* gwindow:setColor(color|nil|function) - sets a new button color or rendering function
 
 
 ### gui example
@@ -227,6 +248,73 @@ function callback_loop()
 
     out(switch:getState())
 
+    if gui:needFlush() then
+        gui:draw()
+        display.flush()
+    end
+end
+```
+
+### window example
+```lua
+--the example was created for a 128x128 screen
+local display = getComponents("display")[1]
+display.reset()
+display.clearClicks()
+display.setSkipAtLags(false)
+display.setClicksAllowed(true)
+local rx, ry = display.getWidth(), display.getHeight()
+
+local gui = require("gui").new(display)
+local styles = require("styles")
+local scene = gui:createScene("777777")
+
+local function addWindow()
+    local window = scene:createWindow(16, 16, 64, 64, "2d2d2d")
+    window:upPanel("058db8", "ffffff", "test window", true)
+    window:setDraggable(true)
+
+    local closeButton = window:panelButton(7, false, "X", "00a2d5", "0054a1", "00c2ff", "0085ff")
+    closeButton:attachCallback(function(self, state, inZone)
+        if not state and inZone then
+            window:destroy()
+        end
+    end)
+
+    local oldText
+    for i = 1, 4 do
+        local text = window:createText(nil, nil, "switch " .. i .. ": ")
+        if oldText then text:setDown(oldText) end
+        local switch = window:createButton(nil, nil, 8, 4, true, nil, "444444", "ffffff", "44b300", "ffffff")
+        switch:setCustomStyle(styles.switch)
+        switch:setRight(text)
+        oldText = text
+    end
+
+    local window2 = window:createWindow(nil, nil, 32, 16, "333377")
+    window2:setDown(oldText)
+    window2:upPanel("058db8", "ffffff", "test", true)
+    window2:minimize(true)
+    local switch = window2:createButton(nil, nil, 14, 8, true, nil, "444444", "ffffff", "44b300", "ffffff")
+    switch:setCustomStyle(styles.switch)
+end
+
+local addWindowButton = scene:createButton(nil, nil, 32, 32, false, "WINDOW")
+addWindowButton:attachCallback(function(self, state, inZone)
+    if state then
+        addWindow()
+    end
+end)
+
+function callback_loop()
+    if _endtick then
+        display.clear()
+        display.flush()
+        out(false)
+        return
+    end
+
+    gui:tick()
     if gui:needFlush() then
         gui:draw()
         display.flush()
