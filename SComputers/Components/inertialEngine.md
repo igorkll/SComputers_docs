@@ -31,6 +31,10 @@ note that the addPosition method perceives as a rotation for processing movement
 * inertialEngine.getGravity():number
 * inertialEngine.raw_rotation(vec3) - makes the rotation pulse relative to the current rotation. it cannot be called more than once per tick, the maximum value of the vector element is 8. Note that the momentum is multiplied by the mass of the creation
 * inertialEngine.raw_move(vec3) - makes the pulse relative to the current rotation. it cannot be called more than once per tick, the maximum value of the vector element is 5. Note that the momentum is multiplied by the mass of the creation
+* inertialEngine.setSoundType(type:number) - sets the inertialEngine sound type:
+* 0 - off
+* 1 - standard sound
+* inertialEngine.getSoundType():number - returns the current type of motor sound
 
 
 ### stable modes

@@ -12,7 +12,7 @@ this display does not respond to resolution limitations in the mod configuration
 * vdisplay.create(callbacks:table, rx:number, ry:number):dsp - creates a virtual display
 
 # callbacks (for the exchange of callbacks, a table is used that you pass when creating a virtual display)
-* you are implementing: set:function(self, x, y, color) - called when the color of the display pixel changes
+* you are implementing: set:function(self, x, y, color) - called when the color of the display pixel changes. color in 0xRRGGBBLL format
 * you are implementing: flush:function(self, isForce) - called when calling "flush" / "forceFlush" / "update"
 * the library implements: update:function() - just call every tick.. Don't worry about what it is. it doesn't cause the screen to refresh or anything like that.. you just have to call it every tick.
 * the library implements: pushClick:function(tbl) - registers clicks on the screen, this table will be returned unchanged by the "getClick" method
@@ -21,7 +21,7 @@ this display does not respond to resolution limitations in the mod configuration
 ```lua
 --makes a holographic display from a holographic projector (in fact, you'd better use a separate part of the holographic display for this)
 local vdisplay = require("vdisplay")
-local holo = getComponents("holoprojector")[1]
+local holo = getComponent("holoprojector")
 holo.reset()
 holo.clear()
 holo.flush()
@@ -33,7 +33,7 @@ local callbacks = {
     set = function (self, x, y, color)
         local index = x + (y * width)
         if idBuffer[index] then holo.delVoxel(idBuffer[index]) end
-        idBuffer[index] = holo.addVoxel(x - (width / 2), (((height - 1) - y) - (height / 2)) + 20, 0, color, 2)
+        idBuffer[index] = holo.addVoxel(x - (width / 2), (((height - 1) - y) - (height / 2)) + 20, 0, math.ceil((color / 256) - 1), 2)
     end,
     flush = function (self, isForce)
         holo.flush()
