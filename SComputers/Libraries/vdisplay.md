@@ -33,7 +33,7 @@ local callbacks = {
     set = function (self, x, y, color)
         local index = x + (y * width)
         if idBuffer[index] then holo.delVoxel(idBuffer[index]) end
-        idBuffer[index] = holo.addVoxel(x - (width / 2), (((height - 1) - y) - (height / 2)) + 20, 0, math.ceil((color / 256) - 1), 2)
+        idBuffer[index] = holo.addVoxel(x - (width / 2), (((height - 1) - y) - (height / 2)) + 20, 0, color, 2)
     end,
     flush = function (self, isForce)
         holo.flush()

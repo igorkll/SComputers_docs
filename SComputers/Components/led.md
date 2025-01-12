@@ -9,3 +9,4 @@ sidebar-label: 'led'
 * type - led
 * setColor(index, color) - index(the index of the LED in the ribbon, starting from 0), color(the color you want to set)
 * setGlow(index, multiplier) - sets the LED brightness multiplier (in the range from 0 to 1, default: 1)
+* getStripLenght():number - return the number of LEDs that go from this to the end of the strip

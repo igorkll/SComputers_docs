@@ -42,7 +42,7 @@ you can configure how much the computer can "delay" the game-tick in the "Permis
 * now, when disabling a component/removing a component, it is guaranteed not to be work
 * now the stepper motors do not create any force in the off state
 * now the camera is able to see the units in a separate (by you exposed) color(by default, this color is bright white in all rendering modes)
-* The camera's FOV is limited to 90 degrees
+* The camera's FOV is limited to 165 degrees
 * The radar.getTargets method can now be used only once per tick on one radar (to avoid noise filtering) if you need to filter the noise then use multiple radars
 * port.nextPacket can now be called even if there are no packets in the buffer without the risk of an error, the method will simply return nil if the packet is not in the buffer
 * port.nextPacket now it returns 2 values, the first is the packet itself, and the second is the ID of the port from which the packet was sent
@@ -64,8 +64,7 @@ you can configure how much the computer can "delay" the game-tick in the "Permis
 
 ### lua implementations
 * lua-in-lua   (most of the bugs have been fixed, but the debugging process of the program can be difficult)
-* scrapVM      (very bad interpreter, support is over)
-* dlm          (the best option at the moment)
+* betterAPI    (the best option at the moment)
 * full lua env (dangerous)
 
 
@@ -109,6 +108,7 @@ you can write your values there
 * reboot
 * setCode / getCode
 * setData / getData
+* setTable / getTable
 * setLock / getLock
 * setAlwaysOn / getAlwaysOn
 * setInvisible / getInvisible
@@ -134,15 +134,18 @@ you can write your values there
 * radar.getTargets() - now returns the object type (character/body) by parameter number 6
 
 ### raycast-camera features
-* camera.getSkyColor():smcolor - returns the color of the sky (even if the sky is not visible to the camera at the moment) this color is used in advanced rendering
-* camera.rawRay(xAngle:number, yAngle:number, maxdist:number):table, nil - ray shoots from the camera and gives out a table {color = smcolor, distance = distance, fraction = distance/maxdist, uuid = uuid, type = character/shape/harvestable/lift/joint/terrain/asset/limiter, normalWorld=some of the information from raycast}. maxdist is the maximum distance for raycast in meters. please note that the angle can be set from -45 to 45 degrees, it is transmitted in radians. limiter is the wall of the world. please note that not all types of objects have the "uuid" field. please note that getting the uuid of a block only works if it is no further than 4 meters (16 blocks) from the camera(this is done to maintain a balance)
+* camera.setNonSquareFov(fovX, fovY) - sets fov separately for X and Y. use on non-square screens
+* camera.getFovX():number
+* camera.getFovY():number
+* camera.rawRay(xAngle:number, yAngle:number, maxdist:number):table, nil - ray shoots from the camera and gives out a table {color = smcolor, distance = distance, fraction = distance/maxdist, uuid = uuid, type = character/shape/harvestable/lift/joint/terrain/asset/limiter, normalWorld=some of the information from raycast}. maxdist is the maximum distance for raycast in meters. please note that the angle can be set from -82.5 to 82.5 degrees, it is transmitted in radians. limiter is the wall of the world. please note that not all types of objects have the "uuid" field. please note that getting the uuid of a block only works if it is no further than 4 meters (16 blocks) from the camera(this is done to maintain a balance)
 * new rendering types
 * camera.drawCustom(display, drawer(xPos:number, yPos:number, raydata:table, ...):smcolor, ...) - custom render, you must pass a function that will receive pixel pos and raydata as input (the same as rawRay outputs) and this function should return the color that you need to paint the pixel
-* camera.drawAdvanced(display) - advanced rendering which is designed to give the most realistic picture possible at the moment
+* camera.drawAdvanced(display, fastmode:boolean) - advanced rendering which is designed to give the most realistic picture possible at the moment. When fast mode is enabled, shadows and lighting from lamps will not be rendered, and performance will increase significantly. in fast mode, there is also no smoothing of the color of the earth's surface
 * now methods can accept additional colors
 * camera.drawColorWithDepth(display, noCollideColor, terrainColor, unitsColor)
 * camera.drawColor(display, noCollideColor, terrainColor, unitsColor)
 * camera.drawDepth(display, baseColor, noCollideColor, unitsColor)
+* camera.isCameraAvailable():boolean - the camera tunnel has this method in order to understand if there is a connection with the camera
 
 ### antenna features
 * the antenna now has its own API which you can view in the components section
@@ -173,8 +176,13 @@ the creative engine method will always return true
 ### disk features
 * disk.clear() - clear the disk
 * disk.getMaxSize():number - returns the maximum amount of data that can be written to disk in bytes
+* disk.getData():string - reads a line from a .fastsave file, if there is no such file yet, returns an empty line
+* disk.setData(string) - saves a string to a .fastsave file
+* disk.getTable():table - tries to deserialize a row from disk.getData as a table, if this fails, it will return an empty table
+* disk.setTable(table) - writes a serialized table to disk.setData
 
 ### display features
+* display.getTextBox(text:string):number, number - it will return two numbers, this will be the size of the box that your text will occupy with this font and this scale
 * display.reset() - resets all screen settings, list of resettable data:
 maxClicks, rotation, framecheck, skipAtNotSight, utf8support, renderAtDistance, skipAtLags, clickData(click list), clicksAllowed
 and resets the font
@@ -182,7 +190,7 @@ and resets the font
 * display.getAudience():number - returns the number of people who are looking at the screen. can be used for optimization
 * display.forceFlush() - 
 it works like a regular flush, but updates the picture with 100% probability,
-ignoring setSkipAtNotSight/setSkipAtLags
+ignoring setSkipAtNotSight
 * display.setUtf8Support/display.getUtf8Support -
 default: false.
 it is necessary to enable utf8 characters for output, however, it may cause performance degradation when rendering text.
@@ -191,16 +199,19 @@ default: false.
 if set to true, the screen will not be updated for those people who do not look at it.
 this should be set to true if skipping frames will not cause problems.
 if the screen is updated rarely and every frame is important, then you should set false.
-* display.setSkipAtLags/display.getSkipAtLags
-default: true.
-should I skip the rendering if the fps is lower than the one set by the user,
-you should turn it on if the picture is constantly updated and skipping one flush will not lead to problems
-, or turn it off if each rendering is important
 * display.setRotation/display.getRotation
 by default: 0
 sets the orientation of the screen, clears the screen when using
-* display.getFontWidth - returns the width of the current font
-* display.getFontHeight - returns the height of the current font
+* display.setFontScale(scaleX:float, scaleY:float) - sets the font scale. getFontWidth and getFontHeight also change the return value
+* display.getFontScale():float, float
+* display.setFontSize(number, number) - calculates the scale for the font based on the target height and width
+* display.getRealFontWidth():number - returns the width of the current font without taking into account the scale
+* display.getRealFontHeight():number - returns the height of the current font without taking into account the scale
+* display.setTextSpacing(number) - sets the distance between characters
+* display.getTextSpacing():number - returns the distance between characters(default is 1)
+* display.getFontWidth():number - returns the width of the current font
+* display.getFontHeight():number - returns the height of the current font
+* display.drawText(x, y, text, color) - now supports font scale. besides, by X and by Y separately!
 * display.setFont - sets a custom font
 * display.drawCircleEvenly - the method is similar to drawCircle, but with support for an even radius. he will not be able to lie flat on a fillCircle, but he can cut off circles with an even radius as a fillCircle. this function is just a more correct version of drawCircle
 * display.drawCircleVeryEvenly(x, y, r, color, stroke=1) - this method is similar to drawCircle, but at the same time it lies flat on fillCircle, it works slower than drawCircle and drawCircleEvenly
@@ -249,7 +260,7 @@ disk sizes are GREATLY reduced in order to avoid non-spawning buildings and savi
 the game cannot save even megabytes of data
 now small and embedded disks have a volume of 64kb
 a larger 128kb.
-creative hard drive has a volume of 16 MB, but does not save data after re-entry and when saving
+creative hard drive has a volume of 1MB, but does not save data after re-entry and when saving
 :::
 
 :::info note

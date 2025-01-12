@@ -26,8 +26,6 @@ sidebar-label: 'gui'
 * guiinstance:draw() - draw a current scene, redrawing is optional only if necessary
 * guiinstance:drawForce() - draw a current scene, redrawing always happens
 * guiinstance:createScene(autoclearcolor:smcolor,function(sceneinstance) ):sceneinstance - create a new scene, you can transfer the color so that when you select a scene, the screen is cleared automatically(you can pass a cleaning function instead of a color, for example, to draw a picture on the background)
-* guiinstance:setGameLight(gamelight:number(0-1)) - sets the game lighting for the gui (it only applies to elements that do not transmit color manually(at the moment, only with pictures))
-* guiinstance:getGameLight():number(0-1) - gets the game lighting for the gui
 * guiinstance:needFlush():boolean - returns true if at least one element has been updated, if you make updates only when necessary, then you should turn off framecheck
 
 ### scene instance
@@ -39,6 +37,7 @@ sidebar-label: 'gui'
 * sceneOrWindow:createButton(x, y, sizeX, sizeY, toggle, text, bg:smcolor, fg:smcolor, bg_press:smcolor, fg_press:smcolor):gbutton - create a new button
 * sceneOrWindow:createLabel(x, y, sizeX, sizeY, text, bg:smcolor, fg:smcolor):glabel - create a new label
 the label looks like a button
+* scaneOrWindow:createTextBox(x, y, sizeX, sizeY, text, bg:smcolor, fg:smcolor) - it looks almost like a label only the text is located at the beginning and not in the center
 * sceneOrWindow:createImage(x, y, img):gimage - creates a picture, the size is set by the size of the picture
 * sceneOrWindow:createText(x, y, text, color):gtext - creates text
 * sceneOrWindow:createCustom(x, y, sizeX, sizeY, class, ...):gobj - creates a custom element
